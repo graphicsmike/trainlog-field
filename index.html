@@ -1,0 +1,2256 @@
+<!DOCTYPE html>
+<html lang="en" class="app-shell">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <title>TRAIN LOG</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="TRAIN LOG" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="apple-touch-icon" href="icon-180.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <script src="pyodide/pyodide.js"></script>
+  <script src="boot.js?v=1.0.27"></script>
+  <script src="offline.js?v=1.0.27" defer></script>
+  <link rel="icon" href="static/icon.png" />
+  <link rel="stylesheet" href="static/styles.css?v=518" />
+  <link rel="stylesheet" href="field.css?v=1.0.27" />
+  <script src="static/debug.js?v=6"></script>
+  <script src="static/confirm.js?v=2"></script>
+  <script>
+    (function () {
+      if (location.search.indexOf("field=1") >= 0) {
+        document.documentElement.classList.add("is-field");
+        document.documentElement.classList.remove("app-shell");
+        window.trainLogField = true;
+        /* field.css is already linked after styles.css in the field app */
+}
+      var map = { light: "paper", dark: "night" };
+      var allowed = {
+        paper: 1, linen: 1, sage: 1, fog: 1, sand: 1, frost: 1,
+        night: 1, slate: 1, ember: 1, pine: 1, ink: 1, coal: 1
+      };
+      var disk = window.__TRAINLOG_APPEARANCE__ || {};
+      var saved = null;
+      try { saved = localStorage.getItem("rr-theme"); } catch (e) {}
+      if (!saved && disk.theme) saved = disk.theme;
+      var preferNight = !!disk.preferNight;
+      try {
+        var pad = JSON.parse(localStorage.getItem("rr-pad-defaults") || "{}");
+        if (pad && pad.preferNight) preferNight = true;
+      } catch (e) {}
+      var theme = map[saved] || saved;
+      if (preferNight) {
+        theme = "night";
+      } else if (!allowed[theme]) {
+        theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "night" : "paper";
+      }
+      document.documentElement.setAttribute("data-theme", theme);
+      var padTint = "1";
+      var padTintColor = "#9a3412";
+      try {
+        var savedTint = localStorage.getItem("rr-pad-card-tint");
+        if (savedTint === "0" || savedTint === "1") padTint = savedTint;
+        var savedColor = localStorage.getItem("rr-pad-card-tint-color");
+        if (savedColor === "accent" || (savedColor && /^#[0-9A-Fa-f]{6}$/.test(savedColor))) {
+          padTintColor = savedColor === "accent" ? "accent" : savedColor.toLowerCase();
+        }
+      } catch (e) {}
+      document.documentElement.classList.toggle("pad-card-tint", padTint !== "0");
+      if (padTint !== "0" && padTintColor === "accent") {
+        document.documentElement.setAttribute("data-pad-tint-mode", "accent");
+        document.documentElement.style.removeProperty("--pad-tint");
+      } else if (padTint !== "0") {
+        document.documentElement.removeAttribute("data-pad-tint-mode");
+        document.documentElement.style.setProperty("--pad-tint", padTintColor);
+      } else {
+        document.documentElement.removeAttribute("data-pad-tint-mode");
+        document.documentElement.style.removeProperty("--pad-tint");
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div class="spine" aria-hidden="true"></div>
+  <header class="masthead">
+    <div class="brand">
+      <img src="static/icon.png" alt="" width="48" height="48" />
+      <div>
+        <p class="kicker">Field Book for Railfans · 1.0.27</p>
+        <h1>Train Log</h1>
+      </div>
+    </div>
+    <p id="masthead-day-count" class="day-count masthead-day-count" aria-live="polite"></p>
+    <p id="masthead-last-ago" class="masthead-last-ago" hidden aria-live="polite"></p>
+    <div class="header-tools">
+      <nav class="tabs" aria-label="Primary">
+        <button type="button" class="tab is-active" data-view="entry">New Entry</button>
+        <button type="button" class="tab" data-view="log">Log</button>
+        <button type="button" class="tab" data-view="dashboard">
+          Dashboard <span class="pending-badge badge" hidden>0</span>
+        </button>
+      </nav>
+      <script>
+        if (document.documentElement.classList.contains("is-field") || location.search.indexOf("readunits=1") >= 0) {
+          var readNav = document.querySelector('nav.tabs[aria-label="Primary"]');
+          if (readNav) {
+            var readLink = document.createElement("a");
+            readLink.className = "tab";
+            readLink.href = "static/read-units.html";
+            readLink.setAttribute("data-read-units", "");
+            readLink.textContent = "Read Units";
+            readNav.appendChild(readLink);
+          }
+        }
+      </script>
+    </div>
+  </header>
+
+  <main>
+    <p id="banner" class="banner" hidden></p>
+    <div id="work-progress" class="work-progress" hidden aria-hidden="true">
+      <div class="work-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Work in progress">
+        <i></i>
+      </div>
+      <p id="work-progress-label" class="work-progress-label">Working…</p>
+    </div>
+
+    <section id="view-entry" class="view is-active">
+      <form id="entry-form" autocomplete="off">
+        <div class="session-bar">
+          <div class="session-meta">
+            <label class="date-field">
+              <span>Date Trackside</span>
+              <input id="session-date" type="date" required />
+            </label>
+            <button type="button" class="btn ghost session-more" id="btn-session-more" aria-expanded="false" aria-controls="session-extra">More</button>
+            <div class="session-extra" id="session-extra">
+            <label class="trip-field autocomplete">
+              <span>Trip</span>
+              <input id="session-trip" type="text" maxlength="80" autocomplete="off" />
+              <div id="trip-suggest" class="suggest"></div>
+            </label>
+            <label class="trip-field">
+              <span>From</span>
+              <input id="session-trip-from" type="date" />
+            </label>
+            <label class="trip-field">
+              <span>To</span>
+              <input id="session-trip-to" type="date" />
+            </label>
+            <div class="trip-field trip-details-field">
+              <span aria-hidden="true">&nbsp;</span>
+              <button type="button" id="btn-trip-details" class="btn ghost" title="Type a trip name first. Then add mileage, notes, and who came along.">Trip Details…</button>
+            </div>
+            </div>
+          </div>
+          <p id="edit-banner" class="edit-banner" hidden></p>
+          <div class="entry-aside">
+            <p id="day-count" class="day-count" aria-live="polite"></p>
+            <p id="last-train" class="last-train" hidden></p>
+          </div>
+          <div class="session-actions">
+            <button type="button" id="btn-gap-timer" class="gap-peek gap-chip" title="Open the 15 minute countdown." aria-label="Open the 15 minute countdown">
+              <i class="gap-peek-dot" aria-hidden="true"></i>
+              <span class="gap-peek-label">15 min</span>
+            </button>
+            <div class="quick-spots">
+              <button type="button" class="btn ghost quick-spots-btn" id="btn-quick-spots" aria-haspopup="dialog" aria-controls="quick-spots-dialog" aria-expanded="false" title="Places and pad starters for the open card">
+                <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 1.6 8.6 5.2l3.9.3-3 2.7.9 3.8L7 10.2l-3.4 1.8.9-3.8-3-2.7 3.9-.3Z"/></svg>
+                <span>Spots</span>
+              </button>
+            </div>
+            <button type="button" id="btn-clear-all" class="btn ghost">Clear</button>
+            <button type="button" id="btn-add-entry-card" class="btn ghost" title="Add another entry card for a second train">Add Card</button>
+            <button type="button" id="btn-quick-add" class="btn ghost">Quick Add</button>
+            <button type="submit" id="btn-submit" class="btn primary">Submit</button>
+            <button type="button" id="btn-cancel-edit" class="btn ghost" hidden>Cancel Edit</button>
+          </div>
+        </div>
+        <div id="rows" class="rows"></div>
+        <div class="entry-pad-tools entry-under-card">
+          <div class="entry-bottom-actions">
+            <button type="button" class="btn ghost entry-bottom-extra entry-bottom-spots" data-press="btn-quick-spots" aria-haspopup="dialog" aria-controls="quick-spots-dialog" aria-expanded="false" title="Places and pad starters for the open card"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 1.6 8.6 5.2l3.9.3-3 2.7.9 3.8L7 10.2l-3.4 1.8.9-3.8-3-2.7 3.9-.3Z"/></svg><span>Spots</span></button>
+            <button type="button" class="btn ghost entry-bottom-extra" data-press="btn-add-entry-card">Add Card</button>
+            <button type="button" class="btn ghost entry-bottom-extra" data-press="btn-quick-add">Quick Add</button>
+            <button type="submit" id="btn-submit-bottom" class="btn primary">Submit</button>
+            <button type="button" class="btn ghost entry-bottom-extra" data-press="btn-clear-all">Clear</button>
+          </div>
+        </div>
+        <div class="entry-refs entry-under-card" role="group" aria-label="Reference">
+          <button type="button" data-train-ref aria-haspopup="dialog" aria-label="Guide" title="Train Symbol Guide — how to read a symbol, and every train number and symbol on the list"><svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="4" width="14" height="10" rx="2"/><path d="M5 8h8M5 11h5"/></svg><span>Guide</span></button>
+          <button type="button" data-placards aria-haspopup="dialog" aria-label="Placards" title="What the diamonds on a tank car mean"><svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 2.2 15.2 9 9 15.8 2.8 9Z"/></svg><span>Placards</span></button>
+          <button type="button" data-aar-marks aria-haspopup="dialog" aria-label="Marks" title="Look up an AAR reporting mark"><svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="12" height="12" rx="1.5"/><path d="M6 7.2h6M6 10.8h4"/></svg><span>Marks</span></button>
+          <button type="button" data-entry-legend aria-haspopup="dialog" aria-label="Legend" title="Railroad and train type names"><svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h10M4 9h10M4 13h7"/></svg><span>Legend</span></button>
+          <button type="button" data-settings-open="subdivisions" aria-haspopup="dialog" aria-label="Subdivisions" title="Station books by subdivision — search, edit locations, and import CSVs."><svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3.5 14.5 7 4.5l3.2 6.2L12.5 7l2 7.5"/><circle cx="7" cy="4.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="10.2" cy="10.7" r="1.2" fill="currentColor" stroke="none"/><circle cx="12.5" cy="7" r="1.2" fill="currentColor" stroke="none"/></svg><span>Subdivisions</span></button>
+          <button type="button" data-open-library aria-haspopup="dialog" aria-label="Library" title="Look up any railroad: mark, class, states, time zone, and more. Add one to the Railroad menu from there."><svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 3.5h7.5A2.5 2.5 0 0 1 14 6v8.5H6.2A2.2 2.2 0 0 0 4 16.7Z"/><path d="M4 3.5v13.2"/></svg><span>Library</span></button>
+          <div class="entry-day-well" aria-live="polite">
+            <p id="under-day-count" class="day-count"></p>
+            <p id="under-last-train" class="last-train" hidden></p>
+          </div>
+          <button type="button" class="btn ghost entry-refs-action entry-refs-spots" data-press="btn-quick-spots" aria-haspopup="dialog" aria-controls="quick-spots-dialog" aria-expanded="false" title="Places and pad starters for the open card"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 1.6 8.6 5.2l3.9.3-3 2.7.9 3.8L7 10.2l-3.4 1.8.9-3.8-3-2.7 3.9-.3Z"/></svg><span>Spots</span></button>
+          <button type="button" class="btn ghost entry-refs-action" data-press="btn-clear-all">Clear</button>
+          <button type="button" class="btn ghost entry-refs-action" data-press="btn-add-entry-card">Add Card</button>
+          <button type="button" class="btn ghost entry-refs-action" data-press="btn-quick-add">Quick Add</button>
+          <button type="submit" id="btn-submit-refs" class="btn primary entry-refs-submit">Submit</button>
+        </div>
+        <div id="day-log" class="day-log"></div>
+      </form>
+    </section>
+
+    <section id="view-log" class="view">
+      <form id="filter-form" class="filters">
+        <div class="filters-primary">
+          <label class="filter-date">From <input type="date" name="date_from" /></label>
+          <label class="filter-date">To <input type="date" name="date_to" /></label>
+          <label>Trip
+            <select name="trip_name" id="filter-trip">
+              <option value="">Any</option>
+            </select>
+          </label>
+          <label>Railroad
+            <select name="railroad">
+              <option value="">Any</option>
+            </select>
+          </label>
+          <label>Lead <input type="search" name="lead_locomotive" placeholder="Unit #" autocomplete="off" /></label>
+          <label>Symbol <input type="search" name="train_symbol" placeholder="Symbol" autocomplete="off" /></label>
+          <label class="filter-grow">Location <input type="search" name="location_spot" placeholder="Spot / town" autocomplete="off" /></label>
+          <div class="filter-actions">
+            <button type="button" id="btn-filter-more" class="btn ghost" aria-expanded="false" aria-controls="filters-more" title="Direction, consist, type, state, subdivision, zone, media">More</button>
+            <button type="submit" class="btn primary">Filter</button>
+            <button type="button" id="btn-filter-reset" class="btn ghost">Reset</button>
+          </div>
+        </div>
+        <div id="filters-more" class="filters-more" hidden>
+          <label>Direction
+            <select name="direction">
+              <option value="">Any</option>
+              <option value="North">North</option>
+              <option value="South">South</option>
+              <option value="East">East</option>
+              <option value="West">West</option>
+              <option value="Stopped">Stopped</option>
+              <option value="In Siding">In Siding</option>
+              <option value="Crew Change">Crew Change</option>
+              <option value="No Crew Onboard">No Crew</option>
+            </select>
+          </label>
+          <label>Consist <input type="search" name="power_consist" placeholder="Consist" autocomplete="off" /></label>
+          <label class="filter-type">Train Type <input type="search" name="train_types" placeholder="Type" autocomplete="off" /></label>
+          <label>State
+            <select name="location_state" id="filter-state">
+              <option value="">Any</option>
+            </select>
+          </label>
+          <label>Subdivision <input type="search" name="location_subdivision" placeholder="Subdivision" autocomplete="off" /></label>
+          <label>Zone
+            <select name="time_zone" id="filter-zone">
+              <option value="">Any</option>
+            </select>
+          </label>
+          <label>Media
+            <select name="media">
+              <option value="">Any</option>
+              <option value="photo">Photo</option>
+              <option value="video">Video</option>
+              <option value="any">Photo or Video</option>
+              <option value="none">None</option>
+              <option value="night">Night</option>
+            </select>
+          </label>
+        </div>
+      </form>
+      <div id="log-ids-note" class="log-ids-note" hidden>
+        <span id="log-ids-text"></span>
+        <button type="button" id="log-ids-clear" class="btn ghost">Show All Trains</button>
+      </div>
+      <div class="log-toolbar">
+        <p id="log-count" class="muted"></p>
+        <div class="log-toolbar-actions">
+          <div class="log-tool-group" role="group" aria-label="Group">
+            <label class="log-group-by"><span class="log-tool-label">Group By</span>
+              <select id="log-group-by" title="Fold the Log into folders. Option-click a folder bar to open or close every folder at that level.">
+                <option value="trip-day">Trip Then Day</option>
+                <option value="trip">Trip</option>
+                <option value="day">Day</option>
+                <option value="month">Month</option>
+                <option value="location">Location</option>
+                <option value="none">None</option>
+              </select>
+            </label>
+            <button type="button" id="log-expand-all" class="btn ghost" hidden>Expand All</button>
+          </div>
+          <div class="log-tool-group" role="group" aria-label="View">
+          <div class="log-col-picker">
+            <button type="button" id="btn-log-cols" class="btn ghost has-menu" aria-expanded="false" aria-controls="log-col-menu">View</button>
+            <div id="log-col-menu" class="log-col-menu" hidden>
+              <label class="log-col-mode log-view-first" title="Auto shows the table and switches to train cards when the window is too narrow for it.">Layout
+                <select id="log-layout">
+                  <option value="auto">Auto</option>
+                  <option value="table">Table</option>
+                  <option value="cards">Cards</option>
+                </select>
+              </label>
+              <label class="log-col-mode" title="The table still shrinks its text when the window is too narrow.">Table text
+                <select id="log-text-size">
+                  <option value="small">Small</option>
+                  <option value="medium">Medium</option>
+                  <option value="large">Large</option>
+                  <option value="fit">Fit Width</option>
+                </select>
+              </label>
+              <span class="log-col-mode log-menu-head">Columns</span>
+              <label><input type="checkbox" data-col="date" checked> Date</label>
+              <label><input type="checkbox" data-col="time" checked> Time</label>
+              <label><input type="checkbox" data-col="time_zone" checked> Zone</label>
+              <label><input type="checkbox" data-col="railroad" checked> RR</label>
+              <label><input type="checkbox" data-col="lead_locomotive" checked> Lead</label>
+              <label><input type="checkbox" data-col="train_symbol" checked> Symbol</label>
+              <label><input type="checkbox" data-col="direction" checked> Dir</label>
+              <label><input type="checkbox" data-col="power_consist" checked> Consist</label>
+              <label><input type="checkbox" data-col="train_types" checked> Type</label>
+              <label><input type="checkbox" data-col="load_status" checked> Loads/Empties</label>
+              <label><input type="checkbox" data-col="cars" checked> Cars</label>
+              <label><input type="checkbox" data-col="location" checked> Location</label>
+              <label><input type="checkbox" data-col="location_state" checked> State</label>
+              <label><input type="checkbox" data-col="location_subdivision" checked> Sub</label>
+              <label><input type="checkbox" data-col="notes" checked> Notes</label>
+              <label><input type="checkbox" data-col="media" checked> Media</label>
+              <label class="log-col-mode" title="Short Line and Icon open the whole note when you click it.">Notes
+                <select id="log-notes-mode">
+                  <option value="short">Short Line</option>
+                  <option value="icon">Icon</option>
+                  <option value="full">Full Line</option>
+                </select>
+              </label>
+            </div>
+          </div>
+            <button type="button" id="btn-log-tz" class="btn ghost" disabled title="Tick sightings in the first column, then set their trip, subdivision, state, or time zone together.">Change Selected…</button>
+            <button type="button" id="btn-log-delete" class="btn ghost is-danger" disabled title="Tick sightings in the first column, or a whole day or trip, then delete just those.">Delete Selected…</button>
+          </div>
+          <div class="log-tool-group" role="group" aria-label="Import">
+            <div class="log-col-picker">
+              <button type="button" id="btn-log-import" class="btn ghost has-menu" aria-expanded="false" aria-controls="log-import-menu">Import</button>
+              <div id="log-import-menu" class="log-col-menu" hidden>
+                <button type="button" id="btn-import">Import File</button>
+                <button type="button" id="btn-log-type-filters" data-mac-only>Import Filters</button>
+              </div>
+            </div>
+          </div>
+          <div class="log-tool-group" role="group" aria-label="Export">
+            <div class="log-col-picker">
+              <button type="button" id="btn-log-export" class="btn ghost has-menu" aria-expanded="false" aria-controls="log-export-menu">Export</button>
+              <div id="log-export-menu" class="log-col-menu" hidden>
+                <button type="button" id="btn-export-csv">CSV File</button>
+                <button type="button" id="btn-export-json">JSON File</button>
+                <button type="button" id="btn-copy-sheet">Copy for Spreadsheet</button>
+                <button type="button" id="btn-backup" data-mac-only>Backup Database</button>
+                <button type="button" id="btn-backup-airdrop" data-mac-only title="Send a .db copy through the Mac AirDrop sheet">AirDrop Backup…</button>
+                <button type="button" id="btn-recovery-pack" title="Zip with trains.db + JSON export for wipe recovery">Recovery Pack…</button>
+                <button type="button" id="btn-recovery-airdrop" data-mac-only title="AirDrop a recovery zip (database + JSON)">AirDrop Recovery Pack…</button>
+                <button type="button" id="btn-day-sheet" title="Printable day sheet for the Log date filter (or today)">Day Sheet…</button>
+              </div>
+            </div>
+          </div>
+          <div class="log-tool-group" role="group" aria-label="Phone" data-mac-only>
+            <button type="button" id="btn-phone-sync" class="btn ghost" hidden title="Retired — field devices update from the public site; move sightings with Import / Export"><svg class="btn-icon" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 21v-5h5"/><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5"/></svg>Field Sync</button>
+          </div>
+          <div class="log-tool-group log-tool-danger">
+            <button type="button" id="btn-wipe" class="btn danger" aria-label="Delete All Data" title="Delete All Data">Delete All Data</button>
+          </div>
+        </div>
+      </div>
+      <div id="log-stats" class="log-stats dash-log-top" hidden>
+        <div id="log-kpis" class="dash-kpis"></div>
+      </div>
+      <input id="import-file" type="file" accept=".csv,.json,.tsv" hidden />
+      <div class="table-wrap">
+        <table class="log-table">
+          <thead>
+            <tr>
+              <th class="log-select"><input type="checkbox" id="log-select-all" aria-label="Select all shown sightings" /></th>
+              <th data-col="date" data-sort="date">Date</th>
+              <th data-col="time" data-sort="time">Time</th>
+              <th data-col="time_zone" data-sort="time_zone">Zone</th>
+              <th data-col="railroad" data-sort="railroad">RR</th>
+              <th data-col="lead_locomotive" data-sort="lead_locomotive">Lead</th>
+              <th data-col="train_symbol" data-sort="train_symbol">Symbol</th>
+              <th data-col="direction" data-sort="direction">Dir</th>
+              <th data-col="power_consist" data-sort="power_consist">Consist</th>
+              <th data-col="train_types" data-sort="train_types">Type</th>
+              <th data-col="load_status" data-sort="load_status"><span class="le-short">L/E</span><span class="le-long">Loads/Empties</span></th>
+              <th data-col="cars" data-sort="cars">Cars</th>
+              <th data-col="location" data-sort="location">Location</th>
+              <th data-col="location_state" data-sort="location_state">State</th>
+              <th data-col="location_subdivision" data-sort="location_subdivision">Sub</th>
+              <th data-col="notes" data-sort="notes">Notes</th>
+              <th data-col="media" data-sort="media">Media</th>
+              <th data-col="actions"></th>
+            </tr>
+          </thead>
+          <tbody id="log-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="view-dashboard" class="view">
+      <div class="dash-head">
+        <div>
+          <p class="dash-kicker">Field book</p>
+          <h2>Dashboard</h2>
+        </div>
+        <button type="button" class="btn ghost dash-settings-reset" id="dash-settings-reset" data-mac-only hidden title="Put the Settings cards back in their first order and widths.">Reset Layout</button>
+        <nav class="tabs dash-tabs" aria-label="Dashboard pages">
+          <button type="button" class="tab is-active" data-view="dashboard" data-dash-pane="log">Log Stats</button>
+          <button type="button" class="tab" data-view="activity" data-dash-pane="activity">Activity</button>
+          <button type="button" class="tab" data-view="review" data-dash-pane="review" data-mac-only>
+            Review <span class="pending-badge badge" hidden>0</span>
+          </button>
+          <button type="button" class="tab" data-view="settings" data-dash-pane="stations">Settings</button>
+        </nav>
+      </div>
+      <div id="dash-pane-log" class="dash-pane is-active">
+        <p id="dash-log-empty" class="muted dash-empty" hidden>No trains logged yet. Sightings on the pad will show up here.</p>
+        <div id="dash-log-glance" class="dash-log-glance" hidden></div>
+        <div class="dash-log-top">
+          <div id="dash-log-kpis" class="dash-kpis"></div>
+        </div>
+        <div id="dash-log-tools" class="dash-log-tools" hidden>
+          <label>From
+            <input id="dash-log-from" type="date" />
+          </label>
+          <label>To
+            <input id="dash-log-to" type="date" />
+          </label>
+          <button type="button" class="btn ghost" id="dash-log-dates-reset">All Dates</button>
+          <label class="dash-log-trip-label">Trip
+            <span class="dash-trip-controls">
+              <select id="dash-log-trip">
+                <option value="">All Trips</option>
+              </select>
+              <select id="dash-log-trip-sort" aria-label="Sort trips">
+                <option value="name">A–Z</option>
+                <option value="date">Newest</option>
+              </select>
+            </span>
+          </label>
+          <label class="dash-log-nowrap">Sort railroads
+            <select id="dash-log-rr-sort">
+              <option value="count">Most Trains</option>
+              <option value="name">A–Z</option>
+            </select>
+          </label>
+          <label>Train types
+            <select id="dash-log-type-rr">
+              <option value="">All Railroads</option>
+            </select>
+          </label>
+          <label class="dash-log-nowrap">Sort lists
+            <select id="dash-log-list-sort">
+              <option value="count">Most Trains</option>
+              <option value="name">A–Z</option>
+            </select>
+          </label>
+          <label>Top
+            <select id="dash-log-list-top" aria-label="How many locations, subdivisions, lead locos, and consist to show">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+              <option value="13">13</option>
+              <option value="14">14</option>
+              <option value="15">15</option>
+              <option value="16">16</option>
+              <option value="17">17</option>
+              <option value="18">18</option>
+              <option value="19">19</option>
+              <option value="20">20</option>
+              <option value="21">21</option>
+              <option value="22">22</option>
+              <option value="23">23</option>
+              <option value="24">24</option>
+              <option value="25">25</option>
+            </select>
+          </label>
+          <div class="dash-log-more dash-log-add">
+            <button type="button" class="btn ghost has-menu" id="dash-log-add" aria-expanded="false" aria-controls="dash-log-add-menu">Add Chart</button>
+            <div id="dash-log-add-menu" class="log-col-menu" hidden></div>
+          </div>
+          <button type="button" class="btn ghost" id="dash-log-legend" hidden>Legend</button>
+          <div class="dash-log-more">
+            <button type="button" class="btn ghost has-menu" id="dash-log-more" aria-expanded="false" aria-controls="dash-log-more-menu">More</button>
+            <div id="dash-log-more-menu" class="log-col-menu" hidden>
+              <button type="button" id="dash-log-more-stats">More Stats</button>
+              <button type="button" id="dash-log-compare">Compare</button>
+              <button type="button" id="dash-log-periods">Trips / Periods</button>
+              <button type="button" id="dash-log-chart-export" aria-label="Export Log Stats" data-mac-only>Export Graph</button>
+            </div>
+          </div>
+        </div>
+        <div class="dash-log-board">
+          <div id="dash-log-types" class="dash-board-group"></div>
+          <section id="dash-log-mid" class="dash-panel dash-board-card dash-roads-panel" data-card="roads" data-group="Trains">
+            <div class="dash-list-head">
+              <div><h3>Railroads with Train Types</h3><p class="muted dash-list-caption" id="dash-log-roads-caption"></p></div>
+            </div>
+            <div id="dash-log-roads" class="dash-log-roads"></div>
+          </section>
+          <div id="dash-log-lists" class="dash-board-group"></div>
+        </div>
+      </div>
+      <div id="dash-pane-stations" class="dash-pane">
+        <div class="dash-settings-board" id="dash-settings-board">
+          <section class="dash-panel dash-panel-wide dash-board-card dash-sub-card" data-set-card="subdivisions">
+            <div class="set-tile">
+              <div class="set-tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16"/><path d="M6 9.5v5M10 9.5v5M14 9.5v5M18 9.5v5"/><path d="M12 5.5v3.2"/><rect x="9.2" y="3.2" width="5.6" height="2.6" rx=".5"/></svg></div>
+              <div class="set-tile-glow" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16"/><path d="M6 9.5v5M10 9.5v5M14 9.5v5M18 9.5v5"/><path d="M12 5.5v3.2"/><rect x="9.2" y="3.2" width="5.6" height="2.6" rx=".5"/></svg></div>
+              <h3>Subdivisions</h3>
+              <p class="muted dash-ref-note">Station books by subdivision — search, edit locations, and import CSVs.</p>
+              <div class="set-tile-action">
+                <button type="button" class="btn primary" data-settings-open="subdivisions">Manage</button>
+              </div>
+            </div>
+            <div class="set-manage">
+              <div class="dash-panel-head">
+                <div class="dash-panel-title-row">
+                  <h3>Subdivisions</h3>
+                  <div class="dash-title-actions">
+                    <button type="button" class="btn ghost" id="dash-sub-refresh" title="Refresh the subdivision list and the station lists on the entry page.">↻ Refresh</button>
+                    <div class="dash-sub-files">
+                      <button type="button" class="btn ghost has-menu" id="dash-sub-files" aria-haspopup="menu" aria-expanded="false">Files</button>
+                      <div id="dash-sub-files-menu" class="log-col-menu" role="menu" hidden>
+                        <button type="button" role="menuitem" id="dash-sub-inbound" title="Add extra subdivision CSVs in bulk: drop files in this folder and TRAIN LOG imports them on its own.">Watch Folder…</button>
+                        <button type="button" role="menuitem" id="dash-sub-reload" title="Re-read the subdivision files. Keeps your edits, hidden subdivisions, and files you added.">Reload CSVs</button>
+                        <button type="button" role="menuitem" id="dash-sub-restore" title="Put the shipped subdivision list back: undo edits to shipped files and show hidden ones again. Files you added stay.">Restore Shipped…</button>
+                      </div>
+                    </div>
+                    <button type="button" class="btn ghost" id="dash-station-stats">Station Stats</button>
+                  </div>
+                </div>
+                <div class="dash-tools">
+                  <input id="dash-sub-search" type="search" placeholder="Search" />
+                  <select id="dash-sub-rr"></select>
+                  <button type="button" class="btn primary" id="dash-sub-add">Add Subdivision</button>
+                </div>
+                <p class="dash-sub-note">Reload CSVs re-reads the files and keeps your changes. Restore shipped puts back the list as issued: edits to shipped files are undone and hidden subdivisions return. Files you added stay.</p>
+              </div>
+              <div class="table-wrap dash-table-wrap">
+                <table class="log-table dash-table">
+                  <thead>
+                    <tr>
+                      <th data-sub-sort="subdivision" data-sort>Subdivision</th>
+                      <th data-sub-sort="railroads" data-sort class="is-sort-asc">Railroads</th>
+                      <th data-sub-sort="locations" data-sort>Locs</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="dash-sub-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <section class="dash-panel dash-ref-panel dash-board-card" data-set-card="heritage">
+            <div class="set-tile">
+              <div class="set-tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 8.2v7.6M15 8.2v7.6M9 12h6"/></svg></div>
+              <div class="set-tile-glow" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 8.2v7.6M15 8.2v7.6M9 12h6"/></svg></div>
+              <h3>Heritage Units</h3>
+              <p class="muted dash-ref-note">Painted heritage diesels the pad fills in from Special power.</p>
+              <p class="dash-ref-counts" id="dash-sp-counts-heritage"></p>
+              <div class="set-tile-action">
+                <button type="button" class="btn primary" data-sp-editor="heritage" title="Add or edit heritage units the pad fills in.">Open</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="dash-panel dash-ref-panel dash-board-card" data-set-card="a250">
+            <div class="set-tile">
+              <div class="set-tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 14.2 9.2l6 .5-4.6 3.9 1.5 5.7L12 16.4l-5.1 2.9 1.5-5.7-4.6-3.9 6-.5Z"/></svg></div>
+              <div class="set-tile-glow" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 14.2 9.2l6 .5-4.6 3.9 1.5 5.7L12 16.4l-5.1 2.9 1.5-5.7-4.6-3.9 6-.5Z"/></svg></div>
+              <h3>America 250</h3>
+              <p class="muted dash-ref-note">America 250 units the pad fills in from Special power.</p>
+              <p class="dash-ref-counts" id="dash-sp-counts-a250"></p>
+              <div class="set-tile-action">
+                <button type="button" class="btn primary" data-sp-editor="a250" title="Add or edit America 250 units the pad fills in.">Open</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="dash-panel dash-ref-panel dash-board-card" data-set-card="steam">
+            <div class="set-tile">
+              <div class="set-tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.5" cy="15" r="3.4"/><circle cx="12" cy="15" r="3.4"/><circle cx="17.5" cy="15" r="3.4"/><path d="M6.5 15 12 12.2 17.5 15"/><path d="M4 8.5h16"/><path d="M8 8.5V11"/></svg></div>
+              <div class="set-tile-glow" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.5" cy="15" r="3.4"/><circle cx="12" cy="15" r="3.4"/><circle cx="17.5" cy="15" r="3.4"/><path d="M6.5 15 12 12.2 17.5 15"/><path d="M4 8.5h16"/><path d="M8 8.5V11"/></svg></div>
+              <h3>Steam Engines</h3>
+              <p class="muted dash-ref-note">Steam engines the pad fills in from Special power.</p>
+              <p class="dash-ref-counts" id="dash-sp-counts-steam"></p>
+              <div class="set-tile-action">
+                <button type="button" class="btn primary" data-sp-editor="steam" title="Add or edit steam engines the pad fills in.">Open</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="dash-panel dash-ref-panel dash-board-card" data-set-card="symbolguide">
+            <div class="set-tile">
+              <div class="set-tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 5h8.5v14H4.5Z"/><path d="M7 8.5h3.5M7 11.5h3.5M7 14.5h2"/><circle cx="16.2" cy="13" r="3.4"/><path d="m18.6 15.4 2.2 2.2"/></svg></div>
+              <div class="set-tile-glow" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 5h8.5v14H4.5Z"/><path d="M7 8.5h3.5M7 11.5h3.5M7 14.5h2"/><circle cx="16.2" cy="13" r="3.4"/><path d="m18.6 15.4 2.2 2.2"/></svg></div>
+              <h3>Train Symbol Guide</h3>
+              <p class="muted dash-ref-note">How to read a symbol, plus the passenger and freight lists the pad reads back.</p>
+              <div class="set-tile-action">
+                <button type="button" class="btn primary" id="dash-train-ref" title="How to read a symbol, and every train number and symbol the pad reads back.">Open</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="dash-panel dash-ref-panel dash-board-card" data-set-card="placards">
+            <div class="set-tile">
+              <div class="set-tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 20.2 12 12 20.8 3.8 12Z"/><path d="M12 8.2v5.2M12 15.8h.01"/></svg></div>
+              <div class="set-tile-glow" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 20.2 12 12 20.8 3.8 12Z"/><path d="M12 8.2v5.2M12 15.8h.01"/></svg></div>
+              <h3>Placards</h3>
+              <p class="muted dash-ref-note">What the diamonds on a tank car mean, and the four-digit ID numbers.</p>
+              <div class="set-tile-action">
+                <button type="button" class="btn primary" data-placards title="What the diamonds on a tank car mean.">Open</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="dash-panel dash-ref-panel dash-board-card" data-set-card="marks">
+            <div class="set-tile">
+              <div class="set-tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="6.5" width="17" height="11" rx="1.5"/><path d="M7 10.5h10M7 13.5h7" stroke-dasharray="2 1.5"/></svg></div>
+              <div class="set-tile-glow" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="6.5" width="17" height="11" rx="1.5"/><path d="M7 10.5h10M7 13.5h7" stroke-dasharray="2 1.5"/></svg></div>
+              <h3>Reporting Marks</h3>
+              <p class="muted dash-ref-note">Look up an AAR reporting mark. Edits stay on this Mac.</p>
+              <p class="set-attn" data-attn="marks" hidden></p>
+              <div class="set-tile-action">
+                <button type="button" class="btn primary" data-aar-marks title="Look up an AAR reporting mark.">Open</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="dash-panel dash-acro-panel dash-board-card" data-set-card="railroads">
+            <div class="set-tile">
+              <div class="set-tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.2 5.8 17.8 18.2"/><path d="M17.8 5.8 6.2 18.2"/><path d="M12 17.5v3"/><circle cx="12" cy="21.2" r=".65" fill="currentColor" stroke="none"/><path d="M7.4 7.5v2.4M7.4 8.7h1.5M7.4 7.5h1.35"/><path d="M15.1 7.5v2.4M15.1 8.7h1.5M15.1 7.5h1.35"/></svg></div>
+              <div class="set-tile-glow" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.2 5.8 17.8 18.2"/><path d="M17.8 5.8 6.2 18.2"/><path d="M12 17.5v3"/><circle cx="12" cy="21.2" r=".65" fill="currentColor" stroke="none"/><path d="M7.4 7.5v2.4M7.4 8.7h1.5M7.4 7.5h1.35"/><path d="M15.1 7.5v2.4M15.1 8.7h1.5M15.1 7.5h1.35"/></svg></div>
+              <h3>Railroads</h3>
+              <p class="muted dash-ref-note">Which railroads appear on the pad, and in what order.</p>
+              <div class="set-tile-action">
+                <button type="button" class="btn primary" data-settings-open="railroads">Manage</button>
+              </div>
+            </div>
+            <div class="set-manage">
+              <div class="dash-panel-head">
+                <h3>Railroads</h3>
+                <div class="dash-tools">
+                  <button type="button" class="btn ghost" id="dash-rr-reset">Restore Defaults</button>
+                  <button type="button" class="btn primary" id="dash-rr-add-open">Add</button>
+                </div>
+              </div>
+              <div id="dash-rr-groups" class="dash-rr-groups"></div>
+            </div>
+          </section>
+
+          <section class="dash-panel dash-acro-panel dash-board-card" data-set-card="types">
+            <div class="set-tile">
+              <div class="set-tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="8" height="5.5" rx="2"/><rect x="12.5" y="5" width="8" height="5.5" rx="2"/><rect x="7.5" y="13.5" width="9" height="5.5" rx="2"/></svg></div>
+              <div class="set-tile-glow" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="8" height="5.5" rx="2"/><rect x="12.5" y="5" width="8" height="5.5" rx="2"/><rect x="7.5" y="13.5" width="9" height="5.5" rx="2"/></svg></div>
+              <h3>Train Types</h3>
+              <p class="muted dash-ref-note">Train type chips on the pad — labels, order, and which ones show.</p>
+              <div class="set-tile-action">
+                <button type="button" class="btn primary" data-settings-open="types">Manage</button>
+              </div>
+            </div>
+            <div class="set-manage">
+              <div class="dash-panel-head">
+                <h3>Train Types</h3>
+                <div class="dash-tools">
+                  <button type="button" class="btn ghost" id="dash-type-reset">Restore Defaults</button>
+                  <button type="button" class="btn primary" id="dash-type-add-open">Add</button>
+                </div>
+              </div>
+              <div id="dash-types" class="dash-types"></div>
+            </div>
+          </section>
+
+
+          <section class="dash-panel dash-panel-wide dash-lib-panel dash-board-card" data-set-card="library" id="dash-lib-panel">
+            <div class="set-tile">
+              <div class="set-tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6v13"/><path d="M12 6C9.5 4.8 6.2 4.8 4 5.6v13C6.2 17.8 9.5 17.8 12 19"/><path d="M12 6c2.5-1.2 5.8-1.2 8-.4v13c-2.2-.8-5.5-.8-8 .4"/></svg></div>
+              <div class="set-tile-glow" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6v13"/><path d="M12 6C9.5 4.8 6.2 4.8 4 5.6v13C6.2 17.8 9.5 17.8 12 19"/><path d="M12 6c2.5-1.2 5.8-1.2 8-.4v13c-2.2-.8-5.5-.8-8 .4"/></svg></div>
+              <h3>Railroad Library</h3>
+              <p class="muted dash-ref-note">Mark, class, states, time zone, and track miles. Add one to the Railroad menu from here.</p>
+              <p class="set-attn" data-attn="library" hidden></p>
+              <div class="set-tile-action">
+                <button type="button" class="btn primary" data-settings-open="library">Manage</button>
+              </div>
+            </div>
+            <div class="set-manage">
+              <div class="dash-panel-head">
+                <div class="dash-panel-title-row">
+                  <h3>Railroad Library</h3>
+                  <div class="dash-title-actions">
+                    <button type="button" class="btn ghost lib-extra" id="dash-lib-extra" title="Add short lines from Genesee &amp; Wyoming, Watco, Patriot Rail, OmniTRAX, and R.J. Corman that are not already in the shipped list.">Add More Railroads</button>
+                    <button type="button" class="btn ghost lib-restore" id="dash-lib-restore" title="Put back the shipped library. Railroads you added or edited here are removed, and More Railroads turns off.">Restore Shipped</button>
+                    <button type="button" class="btn ghost lib-import-open" id="dash-lib-import-open" title="Add a list: a CSV with a header row, or lines of Name | State | Type under region headings.">Import List…</button>
+                    <button type="button" class="btn primary lib-add" id="dash-lib-add">Add</button>
+                  </div>
+                </div>
+                <p class="muted dash-ref-note">Railroads you might see, with mark, class, states, time zone, and track miles. Pick one to see it. Add to Railroad Menu puts it on the pad with its group, class, and full name. Marks flagged Check still need confirming. Add More Railroads brings in the rest of the Genesee &amp; Wyoming, Watco, Patriot Rail, OmniTRAX, and R.J. Corman roads that are not already here.</p>
+              </div>
+              <div class="dash-lib">
+              <div class="dash-lib-left">
+                <div class="dash-tools dash-lib-tools">
+                  <input id="dash-lib-search" class="lib-search" type="search" placeholder="Search" aria-label="Search the library" />
+                  <select id="dash-lib-group" class="lib-group" aria-label="Group"></select>
+                  <select id="dash-lib-region" class="lib-region" aria-label="Region"></select>
+                  <select id="dash-lib-state" class="lib-state" aria-label="State"></select>
+                  <label class="dash-lib-tt-filter-label" title="Show only railroads you have timetables for"><input type="checkbox" class="lib-tt-filter" /> Has Timetables</label>
+                </div>
+                <p class="dash-lib-count muted" id="dash-lib-count"></p>
+                <div id="dash-lib-list" class="dash-lib-list" role="listbox" aria-label="Railroad library"></div>
+              </div>
+              <div id="dash-lib-detail" class="dash-lib-detail" aria-live="polite"></div>
+            </div>
+            </div>
+          </section>
+
+          <section class="dash-panel dash-ref-panel dash-board-card" data-set-card="backup">
+            <div class="set-tile">
+              <div class="set-tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v10"/><path d="m8.5 10.5 3.5 3.5 3.5-3.5"/><path d="M5 16.5v2A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5v-2"/></svg></div>
+              <div class="set-tile-glow" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v10"/><path d="m8.5 10.5 3.5 3.5 3.5-3.5"/><path d="M5 16.5v2A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5v-2"/></svg></div>
+              <h3>Backup</h3>
+              <p class="muted dash-ref-note">Save a .db copy, AirDrop it, or build a recovery zip that survives a wipe.</p>
+              <div class="set-tile-action">
+                <button type="button" class="btn primary" id="dash-settings-backup">Backup Now</button>
+                <button type="button" class="btn ghost" id="dash-settings-airdrop" title="Send a .db copy through AirDrop">AirDrop…</button>
+                <button type="button" class="btn ghost" id="dash-settings-recovery" title="Zip with trains.db + JSON">Recovery Pack…</button>
+              </div>
+            </div>
+            <div class="set-manage">
+              <div class="dash-panel-head">
+                <h3>Local Snapshots</h3>
+                <p class="muted dash-ref-note">JSON copies kept on this Mac (last N). Auto takes one when the newest is older than a day.</p>
+              </div>
+              <p id="backup-snapshot-nag" class="backup-snapshot-nag" hidden></p>
+              <div class="backup-snap-tools">
+                <button type="button" class="btn primary" id="backup-snapshot-now">Snapshot Now</button>
+                <label class="backup-snap-keep">Keep
+                  <select id="backup-snapshot-keep" aria-label="How many local snapshots to keep">
+                    <option value="3">3</option>
+                    <option value="5" selected>5</option>
+                    <option value="8">8</option>
+                    <option value="12">12</option>
+                  </select>
+                </label>
+                <label class="backup-snap-auto"><input type="checkbox" id="backup-snapshot-auto" checked /> Auto daily</label>
+              </div>
+              <div id="backup-snapshot-list" class="backup-snapshot-list"></div>
+            </div>
+          </section>
+
+          <section class="dash-panel dash-ref-panel dash-board-card" data-set-card="paddefaults">
+            <div class="set-tile">
+              <div class="set-tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5.5" width="16" height="4.2" rx="2.1"/><circle cx="16.2" cy="7.6" r="1.4" fill="currentColor" stroke="none"/><rect x="4" y="14.2" width="16" height="4.2" rx="2.1"/><circle cx="7.8" cy="16.3" r="1.4" fill="currentColor" stroke="none"/></svg></div>
+              <div class="set-tile-glow" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5.5" width="16" height="4.2" rx="2.1"/><circle cx="16.2" cy="7.6" r="1.4" fill="currentColor" stroke="none"/><rect x="4" y="14.2" width="16" height="4.2" rx="2.1"/><circle cx="7.8" cy="16.3" r="1.4" fill="currentColor" stroke="none"/></svg></div>
+              <h3>Pad Defaults</h3>
+              <p class="muted dash-ref-note">How blank entry cards start on this Mac — railroad, time, train type, and home place.</p>
+              <div class="set-tile-action">
+                <button type="button" class="btn primary" data-settings-open="paddefaults">Manage</button>
+              </div>
+            </div>
+            <div class="set-manage">
+              <div class="dash-panel-head">
+                <h3>Pad Defaults</h3>
+              </div>
+              <p class="muted dash-ref-note dash-pad-lede">Blank-card starters on this Mac. Trip Logging Defaults still win when a trip sets railroad or place.</p>
+              <div class="dash-pad-defaults">
+                <section class="dash-pad-section" aria-labelledby="dash-pad-sec-start">
+                  <h4 id="dash-pad-sec-start" class="dash-pad-kicker">New card</h4>
+                  <div class="dash-pad-row is-modes" id="dash-pad-modes-row">
+                    <label>Railroad
+                      <select id="dash-pad-rr-mode" aria-label="Railroad default">
+                        <option value="none">None</option>
+                        <option value="fixed">Fixed</option>
+                        <option value="last">Last submitted</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div class="dash-pad-row is-fixed-values" id="dash-pad-fixed-row" hidden>
+                    <label id="dash-pad-rr-wrap">Which railroad
+                      <select id="dash-pad-default-rr" aria-label="Fixed railroad">
+                        <option value="">Choose…</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div class="dash-pad-row is-card-opts">
+                    <label>Time
+                      <select id="dash-pad-time-mode">
+                        <option value="blank">Leave blank</option>
+                        <option value="now">Stamp now</option>
+                      </select>
+                    </label>
+                    <label>Train type
+                      <select id="dash-pad-train-type">
+                        <option value="">None</option>
+                      </select>
+                    </label>
+                    <label class="dash-pad-blanks">Blanks
+                      <select id="dash-pad-blank-cards" aria-label="Blank cards waiting">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                      </select>
+                    </label>
+                    <label class="dash-pad-after">After Submit
+                      <select id="dash-pad-after-submit">
+                        <option value="clear">Clear all</option>
+                        <option value="keep-railroad">Keep railroad</option>
+                        <option value="keep-place">Keep railroad &amp; place</option>
+                      </select>
+                    </label>
+                  </div>
+                </section>
+
+                <section class="dash-pad-section" aria-labelledby="dash-pad-sec-home">
+                  <h4 id="dash-pad-sec-home" class="dash-pad-kicker">Home place <span class="dash-pad-kicker-note">if the trip has no hotspot</span></h4>
+                  <div class="dash-pad-row is-home-place">
+                    <label class="dash-pad-sub">Subdivision
+                      <select id="dash-pad-home-sub">
+                        <option value="">None</option>
+                      </select>
+                    </label>
+                    <label class="dash-pad-station">Station
+                      <select id="dash-pad-home-station" aria-label="Station on that subdivision">
+                        <option value="">None</option>
+                      </select>
+                    </label>
+                    <label class="dash-pad-state">State
+                      <select id="dash-pad-home-state" aria-label="State for home place">
+                        <option value="">—</option>
+                      </select>
+                    </label>
+                    <label class="dash-pad-other">Other <span class="dash-pad-optional">optional</span>
+                      <input id="dash-pad-home-loc-other" type="text" maxlength="120" autocomplete="off" placeholder="Not in the list" />
+                    </label>
+                  </div>
+                </section>
+
+                <div class="dash-pad-actions">
+                  <button type="button" class="btn primary" id="dash-pad-defaults-save">Save Defaults</button>
+                  <p id="dash-pad-defaults-status" class="muted" hidden></p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+      <div id="dash-pane-activity" class="dash-pane">
+        <div class="log-toolbar">
+          <p class="muted">Every change to this book is listed here, newest first. Deleted trains and subdivisions keep a full copy of what was removed. Clearing the log does not erase this history.</p>
+          <div>
+            <button type="button" class="btn ghost" id="btn-activity-clear">Clear Activity</button>
+          </div>
+        </div>
+        <div id="activity-empty" class="empty" hidden>No activity yet.</div>
+        <div class="table-wrap">
+          <table class="log-table">
+            <thead>
+              <tr>
+                <th>When</th>
+                <th>Action</th>
+                <th>Detail</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="activity-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div id="dash-pane-review" class="dash-pane" data-mac-only>
+        <div class="log-toolbar">
+          <p class="muted">Held imports, guessed places/zones, and log cleanup — tools you only need now and then. Nothing is dropped silently.</p>
+          <div>
+            <button type="button" id="btn-import-2" class="btn ghost">Import File</button>
+            <button type="button" id="btn-import-filters" class="btn ghost" aria-expanded="false" aria-controls="import-filters-stage">Import Filters</button>
+            <button type="button" class="btn ghost" id="btn-check-again">Check Again</button>
+          </div>
+        </div>
+        <div class="review-import-block">
+          <h3 class="review-block-title">Import</h3>
+          <p class="muted review-block-lede">Duplicates wait here until you add or discard them. Guesses for missing subdivisions and time zones wait for a check.</p>
+        <div id="import-filters-stage" class="import-filters-stage" hidden>
+          <section class="dash-panel dash-acro-panel type-filters-panel">
+            <div class="dash-panel-head">
+              <h3>Import Filters</h3>
+              <button type="button" class="btn ghost type-filter-reset">Restore Defaults</button>
+            </div>
+            <p class="muted dash-filter-note">Imported types are saved as the chips on New Entry. Mixed spelling and order are fixed automatically: Con becomes CON, and Pig/Con becomes CON/PIG. Add a row here only when a file uses a different word, then choose which chip that word should become.</p>
+            <div class="type-filters-list dash-type-filters"></div>
+            <div class="dash-add-row dash-add-type-filter">
+              <input class="type-filter-from" type="text" maxlength="32" aria-label="Incoming" />
+              <select class="type-filter-to" aria-label="Store as"></select>
+              <button type="button" class="btn primary type-filter-add">Add</button>
+            </div>
+          </section>
+          <section id="import-key" class="acro-key" hidden aria-label="Railroad and train type legend"></section>
+        </div>
+        <section id="guess-review" class="dash-panel guess-review" hidden aria-label="Check subdivisions and time zones">
+          <div class="dash-panel-head">
+            <h3>Check Subdivisions and Time Zones</h3>
+            <span id="guess-count" class="muted"></span>
+          </div>
+          <p class="muted guess-note">These imported sightings had no subdivision or time zone in the file. Guesses are in italics; point at one to see why it was picked. Tick rows (Shift-click picks a range), choose a value, and set it on all of them at once. Looks right clears the ticked rows from this list as they are.</p>
+          <div class="guess-tools">
+            <label>
+              <span>Show</span>
+              <select id="guess-filter">
+                <option value="all">Everything to Check</option>
+                <option value="sub-missing">No Subdivision</option>
+                <option value="sub-guessed">Guessed Subdivision</option>
+                <option value="zone-missing">No Time Zone</option>
+                <option value="zone-guessed">Guessed Time Zone</option>
+              </select>
+            </label>
+            <label>
+              <span>Railroad</span>
+              <select id="guess-rr"><option value="">All</option></select>
+            </label>
+            <label>
+              <span>Subdivision</span>
+              <select id="guess-sub"></select>
+            </label>
+            <button type="button" class="btn ghost" id="guess-set-sub" disabled>Set Subdivision</button>
+            <label>
+              <span>Time zone</span>
+              <select id="guess-zone"></select>
+            </label>
+            <button type="button" class="btn ghost" id="guess-set-zone" disabled>Set Time Zone</button>
+            <button type="button" class="btn primary" id="guess-keep" disabled title="Clear the ticked rows from this list and keep what they have">Looks Right</button>
+            <span id="guess-picked" class="muted guess-picked">None ticked</span>
+          </div>
+          <div class="table-wrap guess-wrap">
+            <table class="log-table guess-table">
+              <thead>
+                <tr>
+                  <th class="guess-check"><input type="checkbox" id="guess-all" aria-label="Tick every row shown" /></th>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>RR</th>
+                  <th>Lead</th>
+                  <th>Location</th>
+                  <th>State</th>
+                  <th>Subdivision</th>
+                  <th>Zone</th>
+                  <th class="col-actions" aria-label="Edit"></th>
+                </tr>
+              </thead>
+              <tbody id="guess-body"></tbody>
+            </table>
+          </div>
+        </section>
+        <div id="integrity-notes" class="integrity-notes" hidden></div>
+        <div id="pending-empty" class="empty" hidden>No held duplicates or edit conflicts.</div>
+        <div class="table-wrap">
+          <table class="log-table">
+            <thead>
+              <tr>
+                <th>Source</th>
+                <th>Why Held</th>
+                <th>Incoming</th>
+                <th>Existing</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="pending-body"></tbody>
+          </table>
+        </div>
+        </div>
+        <div class="review-datacheck-block">
+          <h3 class="review-block-title">Data Check</h3>
+          <p class="muted review-block-lede">Sightings that look wrong across the whole log. Pick a check to see its trains and fix them. Find/replace and trip rename are here too.</p>
+        <div class="fix-grid">
+          <section class="dash-panel fix-checks">
+            <h3>Data Check</h3>
+            <p class="muted" id="fix-check-sum"></p>
+            <ul id="fix-check-list" class="fix-check-list"></ul>
+          </section>
+          <div class="fix-side">
+          <section class="dash-panel fix-replace">
+            <h3>Find and Replace</h3>
+            <p class="muted">Change one exact value in one field on every sighting that has it. Notes are never changed.</p>
+            <label class="fix-row">Field <select id="fix-field"></select></label>
+            <label class="fix-row">Find <input type="search" id="fix-search" autocomplete="off" aria-controls="fix-values" /></label>
+            <div id="fix-values" class="fix-values" role="listbox" aria-label="Values in this field"></div>
+            <label class="fix-row">Replace with <input type="text" id="fix-to" maxlength="120" autocomplete="off" /></label>
+            <p class="muted fix-pick" id="fix-pick">Pick a value above.</p>
+            <div class="fix-actions">
+              <button type="button" class="btn ghost" id="fix-show" disabled>See These Trains</button>
+              <button type="button" class="btn primary" id="fix-apply" disabled>Replace</button>
+            </div>
+          </section>
+          <section class="dash-panel fix-trips">
+            <h3>Trips</h3>
+            <p class="muted">Rename a trip on every train in it. A name another trip already has joins the two trips into one; both trips' details are kept.</p>
+            <label class="fix-row">Trip <select id="fix-trip"></select></label>
+            <label class="fix-row">New name <input type="text" id="fix-trip-to" maxlength="120" autocomplete="off" /></label>
+            <p class="muted fix-pick" id="fix-trip-note">Pick a trip above.</p>
+            <div class="fix-actions">
+              <button type="button" class="btn ghost" id="fix-trip-show" disabled>See These Trains</button>
+              <button type="button" class="btn primary" id="fix-trip-rename" disabled>Rename</button>
+            </div>
+          </section>
+          </div>
+        </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-debug" class="view">
+      <div class="dash-head">
+        <div>
+          <p class="dash-kicker">Field book</p>
+          <h2>Debug</h2>
+        </div>
+      </div>
+      <div id="dash-pane-debug" class="dash-pane is-active">
+        <div class="debug-grid">
+          <section class="dash-panel debug-report">
+            <h3>Debug Report</h3>
+            <p class="muted">If something breaks or looks wrong, describe it below and export a report. The file lists errors, recent actions, app and Mac details, and the state of the station book, but not your full log. Send it along with the next set of changes.</p>
+            <label class="debug-notes-label">
+              <span>What happened?</span>
+              <textarea id="debug-notes" rows="5"></textarea>
+            </label>
+            <div class="debug-actions">
+              <button type="button" class="btn primary" id="debug-export">Export Debug Report</button>
+              <button type="button" class="btn ghost" id="debug-copy">Copy Report</button>
+              <button type="button" class="btn ghost" id="debug-clear">Clear Error Log</button>
+            </div>
+            <dl id="debug-summary" class="debug-summary"></dl>
+          </section>
+          <section class="dash-panel debug-errors">
+            <div class="dash-panel-head">
+              <h3>Recent Errors</h3>
+              <button type="button" class="btn ghost" id="debug-refresh">Refresh</button>
+            </div>
+            <div id="debug-errors-empty" class="empty" hidden>No errors recorded.</div>
+            <div class="table-wrap">
+              <table class="log-table debug-table">
+                <thead>
+                  <tr>
+                    <th>When</th>
+                    <th>Where</th>
+                    <th>Message</th>
+                  </tr>
+                </thead>
+                <tbody id="debug-errors-body"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+  </main>
+  <button type="button" class="foot-scrim" id="foot-scrim" tabindex="-1" aria-label="Close tools" hidden></button>
+  <footer class="page-foot" data-foot>
+    <div class="foot-drawer" id="foot-drawer">
+      <div class="foot-drawer-inner">
+        <div class="page-foot-links">
+          <section class="foot-group foot-group-trackside" aria-labelledby="foot-label-trackside">
+            <h3 class="foot-group-label" id="foot-label-trackside">Trackside</h3>
+            <div class="foot-group-actions">
+              <button type="button" class="btn ghost gap-peek foot-gap" data-press="btn-gap-timer" title="Open the countdown timer"><span class="gap-peek-label">Timer</span></button>
+              <button type="button" class="ticker-toggle" id="btn-foot-ticker" aria-pressed="true" title="Show or hide the last-train line">Ticker</button>
+            </div>
+          </section>
+          <section class="foot-group foot-group-device" aria-labelledby="foot-label-device">
+            <h3 class="foot-group-label" id="foot-label-device">This device</h3>
+            <div class="foot-group-actions">
+              <button type="button" id="btn-sync-mac" class="btn ghost field-only" hidden>This device</button>
+              <button type="button" id="btn-add-home" class="btn ghost field-only" hidden title="Show how to pin TRAIN LOG on this field device">Add to Home Screen</button>
+              <button type="button" class="btn ghost" id="btn-foot-airdrop" title="AirDrop a JSON or CSV copy — not the Mac database">AirDrop</button>
+              <button type="button" class="btn ghost" id="btn-foot-recovery" title="Zip with trains.db + JSON for wipe recovery">Recovery Kit</button>
+            </div>
+          </section>
+          <section class="foot-group foot-group-app" aria-labelledby="foot-label-app">
+            <h3 class="foot-group-label" id="foot-label-app">App</h3>
+            <div class="foot-group-actions">
+              <button type="button" class="btn ghost" id="btn-foot-settings" title="Open Dashboard Settings cards">Settings</button>
+              <button type="button" class="btn ghost" id="btn-appearance" aria-haspopup="dialog" aria-controls="appearance-dialog" title="Color scheme, text size, and Night preference">Appearance</button>
+              <a class="btn ghost foot-docs" href="docs.html">How to Use</a>
+              <a class="btn ghost foot-debug" href="#debug" title="Debug report and recent errors">Debug <span id="debug-badge" class="badge" hidden>0</span></a>
+              <button type="button" id="btn-updates" class="btn ghost" title="Get the newest TRAIN LOG">Updates <span id="updates-badge" class="badge" hidden>1</span></button>
+            </div>
+          </section>
+        </div>
+        <div class="credit">
+          <p class="foot-hint foot-hint-mac">Sightings stay on this Mac. Backup from Settings or the Log tab.</p>
+          <p class="foot-hint foot-hint-field">Sightings stay on this device.</p>
+          <p class="credit-line">Created by Michael Amrine
+            <span class="credit-note">
+              <button type="button" class="credit-note-btn" aria-label="Dedicated to Lowell Amrine" aria-expanded="false" aria-controls="credit-note-pop"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="M8 7.15V11.4M8 4.7v.4"/></svg></button>
+              <span class="credit-note-pop" id="credit-note-pop" role="note">
+                <span class="credit-note-card">
+                  <span class="credit-note-head">Dedicated to Lowell Amrine</span>
+                  <span class="credit-note-text">Thank you for being so much more than my father—you’re my railfan companion, my fellow land shark, and, most of all, my best friend. I’m grateful for every mile we’ve traveled, every train we’ve chased, every laugh we’ve shared, and all the little adventures that have become some of my favorite memories.</span>
+                  <span class="credit-note-text">You’ve always been someone I can count on, have fun with, and be completely myself around. I feel lucky to have you in my corner and even luckier to call you Dad. Thanks for making life a little more adventurous and a whole lot better. I dedicate this to you—with all my love and gratitude.</span>
+                </span>
+              </span>
+            </span>
+          </p>
+          <p id="foot-screen" class="foot-screen"></p>
+        </div>
+      </div>
+    </div>
+    <div class="foot-rail">
+      <p class="foot-rail-status" id="foot-rail-status" hidden></p>
+      <button type="button" class="btn ghost gap-peek foot-rail-timer" data-press="btn-gap-timer" title="Open the countdown timer" aria-label="Open the countdown timer">
+        <i class="gap-peek-dot" aria-hidden="true"></i>
+        <span class="gap-peek-label">15 min</span>
+      </button>
+      <button type="button" class="foot-drawer-handle" aria-expanded="false" aria-controls="foot-drawer">
+        <span class="foot-drawer-label">Tools</span>
+        <span class="foot-drawer-chevron" aria-hidden="true">▴</span>
+      </button>
+    </div>
+  </footer>
+
+  <dialog id="phone-sync-dialog" hidden>
+    <form method="dialog" class="dialog-card phone-sync-card">
+      <h2>Field Sync</h2>
+      <p class="muted">Log trackside on a field device, then send those sightings to this Mac over Wi‑Fi. Sync adds new trains; look-alikes wait under Dashboard → Review. If the same sighting was edited on both sides, Review offers Keep both, Prefer Mac, or Prefer field device — nothing is overwritten unless you choose.</p>
+      <label class="phone-sync-switch"><input type="checkbox" id="phone-sync-on" /> Let my field device send sightings to this Mac</label>
+      <p id="phone-sync-status" class="phone-sync-status" role="status"></p>
+      <div id="phone-sync-firewall" class="phone-sync-firewall" role="alert" hidden>
+        <p id="phone-sync-firewall-text"></p>
+        <button type="button" id="phone-sync-firewall-fix" class="btn primary">Let Field Devices Through Firewall</button>
+      </div>
+      <p id="phone-sync-reached" class="muted phone-sync-reached" hidden></p>
+      <div id="phone-sync-setup" class="phone-sync-setup" hidden>
+        <div class="phone-sync-code-box">
+          <span class="phone-sync-code-label">Pairing code</span>
+          <span id="phone-sync-code" class="phone-sync-code"></span>
+          <button type="button" id="phone-sync-new-code" class="btn tiny ghost">New Code</button>
+        </div>
+        <p id="phone-sync-easy" class="phone-sync-status" role="status">Starting easy link…</p>
+        <p class="muted">Prefer <strong>Scan</strong> — do not retype links. Easy link uses a real HTTPS address so the field device does not need a Mac certificate. Certificate mark <strong id="phone-sync-cert"></strong> · host <span id="phone-sync-host">…</span>.</p>
+        <div class="phone-sync-qr-grid">
+          <figure class="phone-sync-qr-card">
+            <div id="phone-sync-install-qr" class="phone-sync-qr" hidden></div>
+            <figcaption><strong>1. Install</strong> — scan, then Share → Add to Home Screen. <a id="phone-sync-install-url" href="#" target="_blank" rel="noopener"></a></figcaption>
+          </figure>
+          <figure class="phone-sync-qr-card">
+            <div id="phone-sync-qr" class="phone-sync-qr" hidden></div>
+            <figcaption><strong>2. Link / Pair</strong> — after Add to Home Screen, open the Home Screen icon → Sync with Mac → <strong>Scan Mac QR</strong> and point at this code (do not scan it with the Camera app). No certificate when easy link is ready.</figcaption>
+          </figure>
+          <figure class="phone-sync-qr-card" id="phone-sync-trust-card" hidden>
+            <div id="phone-sync-setup-qr" class="phone-sync-qr" hidden></div>
+            <figcaption><strong>Fallback · Trust once</strong> — only if easy link is unavailable. Scan, or <button type="button" class="btn tiny ghost" id="phone-sync-reveal-cert">Show Certificate in Finder</button> and AirDrop it. <a id="phone-sync-setup-url" href="#" target="_blank" rel="noopener"></a></figcaption>
+          </figure>
+          <figure class="phone-sync-qr-card">
+            <div id="phone-sync-app-qr" class="phone-sync-qr" hidden></div>
+            <figcaption><strong>Direct link</strong> — easy link when ready. <a id="phone-sync-app-url" href="#" target="_blank" rel="noopener"></a></figcaption>
+          </figure>
+        </div>
+        <ol class="phone-sync-steps">
+          <li>Scan <strong>Install</strong> → Add to Home Screen → open the icon until <strong>Offline ready</strong>.</li>
+          <li>Wait until easy link says ready. In the Home Screen app: Sync with Mac → <strong>Scan Mac QR</strong> → point at <strong>Link / Pair</strong> (not the Camera app).</li>
+          <li>Later: Sync Now is one handoff. Use <strong>Updates</strong> for new TRAIN LOG versions.</li>
+        </ol>
+        <p class="muted phone-sync-note"><strong>Do not delete the Home Screen icon to update.</strong> Use <strong>Updates</strong>, or <a id="phone-sync-repair-url" href="#" target="_blank" rel="noopener">Repair Install</a>. After a Mac update, tap Let Field Devices Through Firewall if asked.</p>
+      </div>
+      <h3 class="phone-sync-devices-head">Paired Field Devices</h3>
+      <table class="dash-table phone-sync-devices">
+        <thead><tr><th>Device</th><th>Paired</th><th>Last Sync</th><th>Trains Received</th><th></th></tr></thead>
+        <tbody id="phone-sync-devices"></tbody>
+      </table>
+      <menu>
+        <button value="close" class="btn primary">Close</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="sync-mac-dialog">
+    <form method="dialog" class="dialog-card sync-mac-card">
+      <h2>This device</h2>
+      <div id="sync-mac-pair" hidden></div>
+      <div id="sync-mac-ready">
+        <p class="muted">This field install stands alone. <strong>Updates</strong> come from the public field site — no Mac pairing. Sightings stay here until you <strong>Save a copy</strong> (or AirDrop) and <strong>Import</strong> that file on the Mac.</p>
+        <p id="sync-mac-versions" class="muted">Checking versions…</p>
+        <button type="button" id="sync-mac-update" class="btn primary">Get Update</button>
+        <button type="button" id="sync-mac-repair" class="btn ghost">Repair Install</button>
+        <button type="button" id="sync-mac-reload" class="btn primary" hidden>Reload New Version</button>
+        <button type="button" id="sync-mac-add-home" class="btn ghost">Add to Home Screen</button>
+        <button type="button" id="sync-mac-save-ready" class="btn ghost">Save a copy</button>
+        <button type="button" id="sync-mac-import" class="btn ghost">Import a log copy</button>
+        <div id="sync-mac-snapshots" hidden>
+          <p class="muted">Copies kept on this device</p>
+          <div id="sync-mac-snapshot-list"></div>
+        </div>
+      </div>
+      <p id="sync-mac-result" class="sync-mac-result" role="status"></p>
+      <menu>
+        <button value="close" class="btn ghost">Close</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="sync-mac-scan-dialog" class="sync-mac-scan-dialog">
+    <form method="dialog" class="dialog-card sync-mac-scan-card">
+      <h2>Scan Mac QR</h2>
+      <p class="muted">Point at the <strong>Link / Pair</strong> code on the Mac. Stay in this Home Screen app — the code and Mac address stay with this install.</p>
+      <div class="sync-mac-scan-stage">
+        <video id="sync-mac-scan-video" playsinline muted autoplay></video>
+        <canvas id="sync-mac-scan-canvas" hidden></canvas>
+        <p id="sync-mac-scan-hint" class="sync-mac-scan-hint" role="status">Starting camera…</p>
+      </div>
+      <menu>
+        <button type="button" id="sync-mac-scan-cancel" class="btn ghost" value="cancel">Cancel</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="add-home-dialog">
+    <form method="dialog" class="dialog-card sync-mac-card">
+      <h2>Add to Home Screen</h2>
+      <p id="add-home-already" class="muted" hidden>This copy is already opening from your Home Screen icon. Keep using that icon — do not delete it to update. Use <strong>Updates → Get Update</strong> (or Repair Install) instead.</p>
+      <div id="add-home-steps">
+        <p class="muted">Safari cannot pin TRAIN LOG by itself. These taps put the real app on your Home Screen so it works offline.</p>
+        <ol class="phone-sync-steps">
+          <li>Stay in <strong>Safari</strong> (not Chrome) on <a href="https://graphicsmike.github.io/trainlog-field/">the field site</a>.</li>
+          <li>Tap the <strong>Share</strong> button (square with an arrow up).</li>
+          <li>Scroll and tap <strong>Add to Home Screen</strong>, then <strong>Add</strong>.</li>
+          <li>Open TRAIN LOG from the new icon and leave it open until the badge says <strong>Offline ready</strong>.</li>
+          <li>For new versions later: open the same icon → <strong>Updates → Get Update</strong>. To move sightings to the Mac: <strong>Save a copy</strong>, then Import on the Mac.</li>
+        </ol>
+        <p class="muted"><strong>Never delete the Home Screen icon just to update.</strong> Deleting it can wipe the field log.</p>
+        <p class="muted">This page's address: <code id="add-home-url"></code></p>
+        <button type="button" id="add-home-copy" class="btn ghost">Copy Address</button>
+      </div>
+      <menu>
+        <button value="close" class="btn primary">Close</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="entry-legend-dialog">
+    <form method="dialog" class="dialog-card dash-legend-card">
+      <h2>Legend</h2>
+      <section id="entry-key" class="acro-key" hidden aria-label="Railroad and train type legend"></section>
+      <menu>
+        <button value="close" class="btn primary">Close</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="dash-log-legend-dialog">
+    <form method="dialog" class="dialog-card dash-legend-card">
+      <h2>Legend</h2>
+      <section id="dash-log-key" class="acro-key" aria-label="Railroad and train type legend"></section>
+      <menu>
+        <button value="close" class="btn primary">Close</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="dash-more-stats">
+    <form method="dialog" class="dialog-card dash-more-stats-card">
+      <h2>More Stats</h2>
+      <p class="muted">When, where, and what you saw for the dates and trip on screen.</p>
+      <div id="dash-more-stats-pick" class="more-pick" aria-label="Choose charts"></div>
+      <div id="dash-more-stats-body" class="dash-more-stats-grid"></div>
+      <menu>
+        <button value="close" class="btn primary">Close</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="drill-dialog">
+    <form method="dialog" class="dialog-card drill-card">
+      <h2 id="drill-title"></h2>
+      <p class="muted" id="drill-sub"></p>
+      <div id="drill-fix" class="drill-fix" hidden></div>
+      <div class="table-wrap drill-wrap">
+        <table class="log-table drill-table">
+          <thead>
+            <tr><th>Date</th><th>Time</th><th>RR</th><th>Lead</th><th>Consist</th><th>Cars</th><th>Dir</th><th>Type</th><th>Location</th><th></th></tr>
+          </thead>
+          <tbody id="drill-body"></tbody>
+        </table>
+      </div>
+      <menu>
+        <button type="button" class="btn ghost" id="drill-replace" data-mac-only hidden>Replace This Value</button>
+        <button type="button" class="btn ghost" id="drill-log">Show These in the Log</button>
+        <button value="close" class="btn primary">Close</button>
+      </menu>
+    </form>
+  </dialog>
+  <dialog id="dash-periods">
+    <form method="dialog" class="dialog-card periods-card">
+      <h2>Side by Side</h2>
+      <p class="muted">Compare two trips (or years/months) side by side. Trips are listed first when you have them.</p>
+      <div class="compare-controls">
+        <label><span>First</span><select id="periods-a" aria-label="First"></select></label>
+        <button type="button" class="btn ghost" id="periods-swap" title="Swap the two" aria-label="Swap the two">⇄</button>
+        <label><span>Second</span><select id="periods-b" aria-label="Second"></select></label>
+      </div>
+      <div id="periods-body" class="periods-body"></div>
+      <menu>
+        <button value="close" class="btn primary">Close</button>
+      </menu>
+    </form>
+  </dialog>
+
+    <dialog id="dash-compare">
+    <form method="dialog" class="dialog-card dash-compare-card">
+      <h2>Compare</h2>
+      <p class="muted">Count trains by two things at once, such as hour of day by railroad. Uses the dates and trip on screen. Click a number to see those trains.</p>
+      <div class="compare-controls">
+        <label><span>Rows</span><select id="compare-rows" aria-label="Rows"></select></label>
+        <button type="button" class="btn ghost" id="compare-swap" title="Swap rows and columns" aria-label="Swap rows and columns">⇄</button>
+        <label><span>Columns</span><select id="compare-cols" aria-label="Columns"></select></label>
+        <label><span>Show</span><select id="compare-show">
+          <option value="count">Number of Trains</option>
+          <option value="row">% of Each Row</option>
+          <option value="col">% of Each Column</option>
+        </select></label>
+        <label><span>Top</span><select id="compare-limit">
+          <option value="5">5</option>
+          <option value="8">8</option>
+          <option value="12">12</option>
+          <option value="20">20</option>
+          <option value="30">30</option>
+        </select></label>
+      </div>
+      <div id="compare-grid" class="compare-grid"></div>
+      <p id="compare-note" class="muted compare-note"></p>
+      <div id="compare-trains" class="compare-trains" hidden></div>
+      <menu>
+        <button value="close" class="btn primary">Close</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="dash-export-graph">
+    <form method="dialog" class="dialog-card dash-export-card">
+      <h2>Export Graph</h2>
+      <p class="muted">Pick what goes in the graph and check the preview, then download SVG or PDF. Both are vector files, so they stay sharp at any size. Charts use the dates, trip, chart types, and Top setting on screen.</p>
+      <div class="export-layout">
+        <div class="export-side">
+          <div class="export-picks-actions">
+            <button type="button" class="btn ghost" data-export-set="stats">Log Stats Only</button>
+            <button type="button" class="btn ghost" data-export-set="all">All</button>
+            <button type="button" class="btn ghost" data-export-set="none">None</button>
+          </div>
+          <label class="export-theme">Export colors
+            <select id="dash-export-theme">
+              <option value="">Same as Screen</option>
+            </select>
+          </label>
+          <div class="export-presets"><button type="button" class="btn ghost" id="dash-export-year" title="Select a one-pager set: totals, types, railroads, where, when, power, heritage, media.">Year in Trains</button></div>
+      <div id="dash-export-picks" class="export-picks"></div>
+        </div>
+        <div id="dash-export-preview" class="export-preview" aria-label="Preview"></div>
+      </div>
+      <p id="dash-export-status" class="muted">Assembling…</p>
+      <menu>
+        <button type="button" class="btn primary" id="dash-export-svg" disabled>Download SVG</button>
+        <button type="button" class="btn primary" id="dash-export-pdf" disabled>Download PDF</button>
+        <button value="close" class="btn ghost">Close</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="station-stats">
+    <form method="dialog" class="dialog-card station-stats-card">
+      <h2>Station Book</h2>
+      <p class="muted">Counts for the station book used on the pad.</p>
+      <div id="dash-kpis" class="dash-kpis"></div>
+      <div class="dash-section-head">
+        <h3 class="dash-section-title">By Railroad</h3>
+        <div id="dash-roads-tools"></div>
+      </div>
+      <div id="dash-roads" class="dash-roads"></div>
+      <menu>
+        <button value="close" class="btn primary">Close</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="train-ref">
+    <form method="dialog" class="dialog-card train-ref-card">
+      <div class="guide-title">
+        <h2>Train Symbol Guide</h2>
+      </div>
+      <p class="muted">How to read a train symbol, then every train number and symbol the pad reads back.</p>
+      <section class="guide-section" data-guide-section="key">
+        <h3><button type="button" class="guide-fold" aria-expanded="true"><span class="doc-fold-caret" aria-hidden="true">▸</span>How to Read a Symbol</button></h3>
+        <div class="guide-fold-body">
+        <div class="symbol-key-inline guide-key" data-symbol-inline><div data-symbol-inline-body></div></div>
+        </div>
+      </section>
+      <section class="guide-section guide-lookup" data-guide-section="lookup">
+      <h3><button type="button" class="guide-fold" aria-expanded="true"><span class="doc-fold-caret" aria-hidden="true">▸</span>Look Up a Train or Symbol</button></h3>
+      <div class="guide-fold-body">
+      <p class="muted guide-lookup-note">Pick a list and a railroad, then search any column.</p>
+      <div class="train-ref-tools">
+        <label>List
+          <select id="train-ref-kind">
+            <option value="passenger">Passenger Train Numbers</option>
+            <option value="freight">Freight Symbols</option>
+            <option value="series">Freight Series Letters</option>
+            <option value="codes">Station Codes</option>
+          </select>
+        </label>
+        <label>Railroad
+          <select id="train-ref-rr"></select>
+        </label>
+        <label class="train-ref-search">Search
+          <input id="train-ref-q" type="search" autocomplete="off" spellcheck="false" />
+        </label>
+      </div>
+      <p class="muted train-ref-meta" id="train-ref-meta"></p>
+      <div class="train-ref-wrap">
+        <table class="dash-table train-ref-table">
+          <thead id="train-ref-head"></thead>
+          <tbody id="train-ref-body"></tbody>
+        </table>
+      </div>
+      </div>
+      </section>
+      <menu>
+        <button type="button" class="btn ghost" data-placards title="What the diamonds on a tank car mean">Placards</button>
+        <button value="close" class="btn primary">Close</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="placards">
+    <form method="dialog" class="dialog-card placard-card">
+      <h2>Placards</h2>
+      <p class="muted">The diamond on a U.S. tank car. Pick the one you see, then enter the four-digit number if there is one. That number is the commodity, not another class.</p>
+      <div id="placard-grid" class="placard-grid"></div>
+      <p id="placard-picked" class="placard-picked"></p>
+      <div class="placard-lookup">
+        <label class="placard-number">ID #
+          <input id="placard-no" type="text" inputmode="numeric" maxlength="4" autocomplete="off" spellcheck="false" aria-label="Four-digit identification number" />
+        </label>
+        <label class="placard-common-bar">
+          <span class="placard-search-line">
+            <span>Search</span>
+            <span id="placard-common-title" class="placard-search-status" aria-live="polite"></span>
+          </span>
+          <input id="placard-common-q" type="search" placeholder="Name or number" autocomplete="off" spellcheck="false" aria-label="Search identification numbers by name or number" />
+        </label>
+      </div>
+      <div id="placard-hit" class="placard-hit" role="status"></div>
+      <section id="placard-common" class="placard-common" aria-label="Identification numbers">
+        <div id="placard-common-list" class="placard-common-list"></div>
+      </section>
+      <p class="muted placard-foot">Enter the four-digit number for the hazards and the first actions.</p>
+      <menu>
+        <button value="close" class="btn primary">Close</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="sp-list-dialog">
+    <form method="dialog" class="dialog-card train-ref-card sp-list-card">
+      <h2>Heritage &amp; Steam List</h2>
+      <p class="muted">The units the pad fills in when you type a heritage unit or steam engine. Click a row to fix it, add your own, or remove one. Changes are saved on this Mac; Restore shipped puts the list back as issued.</p>
+      <div class="train-ref-tools">
+        <div class="sp-list-kinds" role="group" aria-label="List">
+          <button type="button" class="chip is-on" data-sp-list-kind="heritage">Heritage Units</button>
+          <button type="button" class="chip" data-sp-list-kind="a250">America 250</button>
+          <button type="button" class="chip" data-sp-list-kind="steam">Steam Engines</button>
+          <span class="media-sep" aria-hidden="true"></span>
+          <button type="button" class="chip" id="sp-list-changed" aria-pressed="false" title="Show only units you added or edited on this Mac">Changed on This Mac</button>
+        </div>
+        <label class="train-ref-search">Search
+          <input id="sp-list-q" type="search" autocomplete="off" spellcheck="false" />
+        </label>
+        <button type="button" class="btn primary" id="sp-list-add">Add Heritage Unit</button>
+        <button type="button" class="btn ghost" id="sp-list-restore">Restore Shipped</button>
+      </div>
+      <div id="sp-list-form" class="sp-list-form" hidden></div>
+      <p class="muted train-ref-meta" id="sp-list-meta"></p>
+      <div class="train-ref-wrap">
+        <table class="dash-table train-ref-table sp-list-table">
+          <thead id="sp-list-head"></thead>
+          <tbody id="sp-list-body"></tbody>
+        </table>
+      </div>
+      <menu>
+        <button value="close" class="btn primary">Close</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="type-filters-dialog">
+    <section class="dash-panel dash-acro-panel type-filters-panel type-filters-window">
+      <div class="dash-panel-head">
+        <h2>Import Filters</h2>
+        <div class="type-filters-dialog-tools">
+          <button type="button" class="btn ghost type-filter-reset">Restore Defaults</button>
+          <button type="button" class="btn ghost type-filters-dialog-close">Close</button>
+        </div>
+      </div>
+      <p class="muted dash-filter-note">Imported types are saved as the chips on New Entry. Mixed spelling and order are fixed automatically: Con becomes CON, and Pig/Con becomes CON/PIG. Add a row here only when a file uses a different word, then choose which chip that word should become.</p>
+      <div class="type-filters-list dash-type-filters"></div>
+      <div class="dash-add-row dash-add-type-filter">
+        <input class="type-filter-from" type="text" maxlength="32" aria-label="Incoming" />
+        <select class="type-filter-to" aria-label="Store as"></select>
+        <button type="button" class="btn primary type-filter-add">Add</button>
+      </div>
+    </section>
+  </dialog>
+
+  <dialog id="edit-dialog" class="edit-dialog" aria-labelledby="edit-dialog-title">
+    <div class="edit-dialog-head">
+      <h2 id="edit-dialog-title">Edit Train</h2>
+      <p id="edit-dialog-msg" class="edit-dialog-msg" hidden></p>
+      <div class="edit-dialog-actions">
+        <button type="button" id="edit-dialog-cancel" class="btn ghost">Cancel</button>
+        <button type="button" id="edit-dialog-save" class="btn primary">Save Changes</button>
+      </div>
+    </div>
+    <div id="edit-dialog-session" class="edit-dialog-session"></div>
+    <div id="edit-dialog-card" class="edit-dialog-card"></div>
+  </dialog>
+  <dialog id="gap-timer" aria-labelledby="gap-timer-title">
+    <div class="gap-board" id="gap-board">
+      <div class="dialog-x-bar"><button type="button" class="dialog-x" id="gap-timer-close" aria-label="Close">×</button></div>
+      <p class="gap-kicker"><i class="gap-lamp" aria-hidden="true"></i><span id="gap-timer-title">15 Minute Rule</span></p>
+      <div class="gap-ticker" aria-hidden="true">
+        <span class="gap-flap" id="gap-d0">1</span>
+        <span class="gap-flap" id="gap-d1">5</span>
+        <span class="gap-colon" aria-hidden="true">:</span>
+        <span class="gap-flap" id="gap-d2">0</span>
+        <span class="gap-flap" id="gap-d3">0</span>
+      </div>
+      <p class="gap-status" id="gap-status" hidden></p>
+      <div class="gap-edit" id="gap-edit-row" hidden>
+        <label>Min <input id="gap-edit-min" type="number" min="0" max="99" inputmode="numeric" aria-label="Minutes"></label>
+        <label>Sec <input id="gap-edit-sec" type="number" min="0" max="59" inputmode="numeric" aria-label="Seconds"></label>
+        <button type="button" id="gap-edit-set" class="gap-act is-go">Set</button>
+      </div>
+      <div class="gap-actions">
+        <button type="button" id="gap-edit" class="gap-act">Edit time</button>
+        <button type="button" id="gap-stop" class="gap-act" hidden>Stop</button>
+        <button type="button" id="gap-start" class="gap-act is-go">Start</button>
+      </div>
+    </div>
+  </dialog>
+  <dialog id="confirm-dialog">
+    <form method="dialog" class="dialog-card">
+      <h2>Possible Duplicate</h2>
+      <p id="confirm-message"></p>
+      <div id="confirm-details" class="confirm-details"></div>
+      <menu>
+        <button value="cancel" class="btn ghost">Cancel</button>
+        <button value="confirm" class="btn primary">Save Anyway</button>
+      </menu>
+    </form>
+  </dialog>
+
+
+  <dialog id="aar-marks">
+    <form method="dialog" class="dialog-card aar-marks-card">
+      <h2>Reporting Marks</h2>
+      <p class="muted aar-marks-lede">Look up a mark and its names. Edit a mark if the list is wrong, or add one that is missing — changes stay on this Mac. Nothing here fills New Entry.</p>
+      <div class="aar-marks-tools">
+        <div class="aar-marks-search-row">
+        <label class="aar-marks-search">Search
+          <input id="aar-marks-q" type="search" placeholder="Mark or railroad name" autocomplete="off" spellcheck="false" enterkeyhint="search" aria-label="Search reporting marks by mark or name" />
+        </label>
+        <label class="aar-marks-letter-select">Letter
+          <select id="aar-marks-letter" aria-label="Filter marks by first letter">
+            <option value="all" selected>All</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+            <option value="E">E</option>
+            <option value="F">F</option>
+            <option value="G">G</option>
+            <option value="H">H</option>
+            <option value="I">I</option>
+            <option value="J">J</option>
+            <option value="K">K</option>
+            <option value="L">L</option>
+            <option value="M">M</option>
+            <option value="N">N</option>
+            <option value="O">O</option>
+            <option value="P">P</option>
+            <option value="Q">Q</option>
+            <option value="R">R</option>
+            <option value="S">S</option>
+            <option value="T">T</option>
+            <option value="U">U</option>
+            <option value="V">V</option>
+            <option value="W">W</option>
+            <option value="X">X</option>
+            <option value="Y">Y</option>
+            <option value="Z">Z</option>
+          </select>
+        </label>
+        </div>
+        <div class="aar-marks-status-row">
+          <p id="aar-marks-title" class="aar-marks-status" aria-live="polite"></p>
+          <button type="button" class="btn ghost aar-marks-add-btn" id="aar-marks-add" title="Add a reporting mark that is missing from the list">+ Add</button>
+          <div id="aar-marks-pager" class="aar-marks-pager" hidden>
+            <button type="button" class="chip" data-aar-page="prev" aria-label="Previous page">Prev</button>
+            <button type="button" class="chip" data-aar-page="next" aria-label="Next page">Next</button>
+          </div>
+        </div>
+        <div class="aar-marks-kinds" role="group" aria-label="Kind of mark">
+          <button type="button" class="chip is-on" data-aar-kind="all" aria-label="All kinds"><span class="aar-kind-full">All kinds</span><span class="aar-kind-short" aria-hidden="true">All</span></button>
+          <button type="button" class="chip" data-aar-kind="rail" aria-label="Railroad"><span class="aar-kind-full">Railroad</span><span class="aar-kind-short" aria-hidden="true">RR</span></button>
+          <button type="button" class="chip" data-aar-kind="x" aria-label="Private X"><span class="aar-kind-full">Private X</span><span class="aar-kind-short" aria-hidden="true">X</span></button>
+          <button type="button" class="chip" data-aar-kind="z" aria-label="Trailer Z"><span class="aar-kind-full">Trailer Z</span><span class="aar-kind-short" aria-hidden="true">Z</span></button>
+          <button type="button" class="chip" data-aar-kind="u" aria-label="Container U"><span class="aar-kind-full">Container U</span><span class="aar-kind-short" aria-hidden="true">U</span></button>
+        </div>
+        <div class="aar-marks-filters" role="group" aria-label="Name filters">
+          <button type="button" class="chip is-on" data-aar-filter="all">Any names</button>
+          <button type="button" class="chip" data-aar-filter="reused">Reused * / +</button>
+          <button type="button" class="chip" data-aar-filter="multi">Multiple names</button>
+        </div>
+        <div class="aar-marks-letters" role="group" aria-label="Filter by first letter">
+          <button type="button" class="chip is-on" data-aar-letter="all">All</button>
+          <button type="button" class="chip" data-aar-letter="A">A</button>
+          <button type="button" class="chip" data-aar-letter="B">B</button>
+          <button type="button" class="chip" data-aar-letter="C">C</button>
+          <button type="button" class="chip" data-aar-letter="D">D</button>
+          <button type="button" class="chip" data-aar-letter="E">E</button>
+          <button type="button" class="chip" data-aar-letter="F">F</button>
+          <button type="button" class="chip" data-aar-letter="G">G</button>
+          <button type="button" class="chip" data-aar-letter="H">H</button>
+          <button type="button" class="chip" data-aar-letter="I">I</button>
+          <button type="button" class="chip" data-aar-letter="J">J</button>
+          <button type="button" class="chip" data-aar-letter="K">K</button>
+          <button type="button" class="chip" data-aar-letter="L">L</button>
+          <button type="button" class="chip" data-aar-letter="M">M</button>
+          <button type="button" class="chip" data-aar-letter="N">N</button>
+          <button type="button" class="chip" data-aar-letter="O">O</button>
+          <button type="button" class="chip" data-aar-letter="P">P</button>
+          <button type="button" class="chip" data-aar-letter="Q">Q</button>
+          <button type="button" class="chip" data-aar-letter="R">R</button>
+          <button type="button" class="chip" data-aar-letter="S">S</button>
+          <button type="button" class="chip" data-aar-letter="T">T</button>
+          <button type="button" class="chip" data-aar-letter="U">U</button>
+          <button type="button" class="chip" data-aar-letter="V">V</button>
+          <button type="button" class="chip" data-aar-letter="W">W</button>
+          <button type="button" class="chip" data-aar-letter="X">X</button>
+          <button type="button" class="chip" data-aar-letter="Y">Y</button>
+          <button type="button" class="chip" data-aar-letter="Z">Z</button>
+        </div>
+      </div>
+      <div class="aar-marks-add-panel" id="aar-marks-add-panel" hidden>
+        <label class="aar-marks-edit-label">Mark
+          <input id="aar-marks-add-mark" type="text" maxlength="8" autocomplete="off" spellcheck="false" autocapitalize="characters" placeholder="e.g. BNSF" aria-label="New reporting mark" />
+        </label>
+        <label class="aar-marks-edit-label">Names
+          <textarea id="aar-marks-add-names" rows="4" spellcheck="false" autocomplete="off" placeholder="One railroad name per line" aria-label="Names for the new mark, one per line"></textarea>
+        </label>
+        <p class="muted aar-marks-edit-hint">Saved on this Mac only. Start a line with * or + if that name was a reuse.</p>
+        <div class="aar-marks-edit-actions">
+          <button type="button" class="btn ghost" id="aar-marks-add-cancel">Cancel</button>
+          <button type="button" class="btn primary" id="aar-marks-add-save">Save Mark</button>
+        </div>
+      </div>
+      <div class="aar-marks-body">
+        <div class="aar-marks-list-wrap">
+          <div id="aar-marks-list" class="aar-marks-list" role="listbox" aria-label="Reporting marks"></div>
+        </div>
+        <aside id="aar-marks-fly" class="aar-marks-fly is-empty" aria-live="polite">
+          <button type="button" class="btn ghost aar-marks-back" id="aar-marks-back" hidden>Back to list</button>
+          <p class="aar-marks-kicker">Selected mark</p>
+          <p id="aar-marks-fly-mark" class="aar-marks-fly-mark">—</p>
+          <p id="aar-marks-fly-kind" class="aar-marks-fly-kind">Tap a row to read every name for that mark.</p>
+          <ul id="aar-marks-fly-names" class="aar-marks-fly-names"></ul>
+          <p class="muted aar-marks-fly-hint">A star or plus on a name means this mark was reused or reassigned.</p>
+          <div class="aar-marks-fly-actions" id="aar-marks-fly-actions" hidden>
+            <button type="button" class="btn ghost" id="aar-marks-edit">Edit Names…</button>
+            <button type="button" class="btn ghost" id="aar-marks-restore" hidden>Restore Shipped</button>
+          </div>
+          <div class="aar-marks-edit" id="aar-marks-edit-panel" hidden>
+            <label class="aar-marks-edit-label">Names
+              <textarea id="aar-marks-edit-names" rows="6" spellcheck="false" autocomplete="off" aria-label="Names for this mark, one per line"></textarea>
+            </label>
+            <p class="muted aar-marks-edit-hint">One name per line. Start a line with * or + if that name was a reuse.</p>
+            <div class="aar-marks-edit-actions">
+              <button type="button" class="btn ghost" id="aar-marks-edit-cancel">Cancel</button>
+              <button type="button" class="btn primary" id="aar-marks-edit-save">Save</button>
+            </div>
+          </div>
+        </aside>
+      </div>
+      <menu>
+        <button value="close" class="btn primary">Close</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="quick-spots-dialog" class="quick-spots-dialog" aria-labelledby="quick-spots-title">
+    <form method="dialog" class="dialog-card quick-spots-card">
+      <h2 id="quick-spots-title">Spots</h2>
+      <p class="muted quick-spots-lede">Fill the open train card from a place, or apply Pad Defaults starters.</p>
+
+      <section class="quick-spots-section quick-spots-pad" aria-labelledby="quick-spots-pad-heading">
+        <h3 id="quick-spots-pad-heading" class="quick-spots-heading">Pad starters</h3>
+        <div id="quick-spots-pad-actions" class="quick-spots-pad-actions"></div>
+        <p id="quick-spots-pad-empty" class="quick-spots-empty muted" hidden>Set Pad Defaults in Settings to use railroad, time, train type, and home place here.</p>
+      </section>
+
+      <section class="quick-spots-section" aria-labelledby="quick-spots-today-heading">
+        <h3 id="quick-spots-today-heading" class="quick-spots-heading">Today</h3>
+        <div id="quick-spots-today" class="quick-spots-list"></div>
+      </section>
+
+      <section class="quick-spots-section" aria-labelledby="quick-spots-fav-heading">
+        <h3 id="quick-spots-fav-heading" class="quick-spots-heading">Favorites</h3>
+        <div id="quick-spots-favorites" class="quick-spots-list"></div>
+      </section>
+
+      <p class="quick-spots-hint muted">Tap a place to fill the open card. Star one under Today, or from Subdivisions → Edit, to save a Favorite. Pad railroad, type, and time still fill empty fields when you pick a place.</p>
+      <menu>
+        <button value="close" class="btn primary">Close</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="appearance-dialog" aria-labelledby="appearance-title">
+    <form method="dialog" class="dialog-card appearance-card">
+      <h2 id="appearance-title">Appearance</h2>
+      <p class="muted appearance-lede">Look and feel for this Mac or device. Changes save here and apply right away.</p>
+      <label class="theme-picker appearance-field">
+        <span>Color scheme</span>
+        <select id="theme-select" aria-label="Color scheme">
+          <optgroup label="Light">
+            <option value="paper">Paper</option>
+            <option value="linen">Linen</option>
+            <option value="sage">Sage</option>
+            <option value="fog">Fog</option>
+            <option value="sand">Sand</option>
+            <option value="frost">Frost</option>
+          </optgroup>
+          <optgroup label="Dark">
+            <option value="night">Night</option>
+            <option value="slate">Slate</option>
+            <option value="ember">Ember</option>
+            <option value="pine">Pine</option>
+            <option value="ink">Ink</option>
+            <option value="coal">Coal</option>
+          </optgroup>
+        </select>
+      </label>
+      <label class="text-size-picker appearance-field">
+        <span>Text Size</span>
+        <select id="text-size-select" aria-label="Text size">
+          <option value="smaller">Smaller</option>
+          <option value="small">Small</option>
+          <option value="normal" selected>Normal</option>
+          <option value="large">Large</option>
+          <option value="larger">Larger</option>
+        </select>
+      </label>
+      <label class="appearance-check">
+        <input type="checkbox" id="appearance-prefer-night" />
+        Prefer Night theme for new sessions
+      </label>
+      <label class="appearance-check">
+        <input type="checkbox" id="appearance-pad-tint" checked />
+        Color the New Entry card
+        <span class="appearance-check-note">Soft tint wash like Settings cards — also colors the Tools wells (Trackside, This device, App). Turn off for flat cards.</span>
+      </label>
+      <div id="appearance-pad-tint-opts" class="appearance-pad-tint-opts" hidden>
+        <p class="appearance-pad-tint-label">Card tint color</p>
+        <div class="appearance-pad-swatches" role="listbox" aria-label="New Entry card tint">
+          <button type="button" class="appearance-pad-swatch is-accent" data-pad-tint="accent" title="Follow theme accent" aria-label="Theme accent">A</button>
+          <button type="button" class="appearance-pad-swatch" data-pad-tint="#9a3412" title="Rust" aria-label="Rust" style="--swatch:#9a3412"></button>
+          <button type="button" class="appearance-pad-swatch" data-pad-tint="#047857" title="Emerald" aria-label="Emerald" style="--swatch:#047857"></button>
+          <button type="button" class="appearance-pad-swatch" data-pad-tint="#1d4ed8" title="Blue" aria-label="Blue" style="--swatch:#1d4ed8"></button>
+          <button type="button" class="appearance-pad-swatch" data-pad-tint="#b45309" title="Amber" aria-label="Amber" style="--swatch:#b45309"></button>
+          <button type="button" class="appearance-pad-swatch" data-pad-tint="#0f766e" title="Teal" aria-label="Teal" style="--swatch:#0f766e"></button>
+          <button type="button" class="appearance-pad-swatch" data-pad-tint="#b91c1c" title="Crimson" aria-label="Crimson" style="--swatch:#b91c1c"></button>
+          <button type="button" class="appearance-pad-swatch" data-pad-tint="#5b4b8a" title="Plum" aria-label="Plum" style="--swatch:#5b4b8a"></button>
+          <button type="button" class="appearance-pad-swatch" data-pad-tint="#475569" title="Slate" aria-label="Slate" style="--swatch:#475569"></button>
+        </div>
+        <label class="appearance-pad-custom">
+          <span>Custom</span>
+          <input type="color" id="appearance-pad-tint-color" value="#9a3412" aria-label="Custom New Entry card tint" />
+        </label>
+      </div>
+      <label class="appearance-check">
+        <input type="checkbox" id="appearance-pad-lock" />
+        Privacy lock
+        <span class="appearance-check-note">Ask for a PIN when TRAIN LOG opens on this device.</span>
+      </label>
+      <div id="appearance-pad-lock-opts" class="appearance-pad-tint-opts" hidden>
+        <label class="appearance-pad-custom">PIN
+          <input type="password" id="appearance-pad-lock-pin" inputmode="numeric" maxlength="32" autocomplete="new-password" />
+        </label>
+        <div class="appearance-lock-actions">
+          <button type="button" class="btn tiny primary" id="appearance-pad-lock-set">Set PIN</button>
+          <button type="button" class="btn tiny ghost" id="appearance-pad-lock-clear">Remove lock</button>
+        </div>
+      </div>
+      <menu>
+        <button value="close" class="btn primary">Close</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="train-card-dialog" aria-labelledby="train-card-title">
+    <form method="dialog" class="dialog-card train-card">
+      <h2 id="train-card-title">Train</h2>
+      <dl id="train-card-body" class="train-card-list"></dl>
+      <menu>
+        <button value="delete" class="btn ghost train-card-delete">Delete</button>
+        <button value="edit" class="btn ghost">Edit</button>
+        <button value="close" class="btn primary">Close</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <div id="note-pop" class="note-pop" role="dialog" aria-labelledby="note-pop-title" hidden>
+    <div class="note-pop-head">
+      <span id="note-pop-title">Notes</span>
+      <button type="button" class="btn tiny ghost" id="note-pop-close" aria-label="Close notes">Close</button>
+    </div>
+    <p id="note-pop-text" class="note-pop-text"></p>
+  </div>
+
+  <dialog id="quick-units-dialog" aria-labelledby="quick-units-title">
+    <form method="dialog" class="dialog-card">
+      <h2 id="quick-units-title">Units ready</h2>
+      <p id="quick-units-message"></p>
+      <menu>
+        <button value="cancel" class="btn ghost">Not now</button>
+        <button type="button" id="quick-units-go" class="btn primary">Quick Add</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="airdrop-format-dialog" aria-labelledby="airdrop-format-title">
+    <form method="dialog" class="dialog-card airdrop-format-card">
+      <h2 id="airdrop-format-title">AirDrop</h2>
+      <p class="muted">Send a JSON or CSV copy. This will not overwrite the database on your Mac.</p>
+      <div class="airdrop-format-actions">
+        <button type="submit" value="json" class="btn primary">JSON</button>
+        <button type="submit" value="csv" class="btn primary">CSV</button>
+      </div>
+      <menu>
+        <button value="cancel" class="btn ghost">Cancel</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="ask-dialog" aria-labelledby="ask-title">
+    <form method="dialog" class="dialog-card">
+      <h2 id="ask-title"></h2>
+      <p id="ask-message"></p>
+      <div id="ask-details" class="ask-details" hidden></div>
+      <menu>
+        <button value="cancel" id="ask-cancel" class="btn ghost">Cancel</button>
+        <button value="ok" id="ask-ok" class="btn danger">Delete</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="wipe-dialog">
+    <form method="dialog" class="dialog-card">
+      <h2>Delete All Data?</h2>
+      <p>This permanently removes every train in this log, plus location and locomotive history used for suggestions. Export a copy first if you want to keep it. This cannot be undone.</p>
+      <menu>
+        <button value="cancel" class="btn ghost">Cancel</button>
+        <button value="wipe" class="btn danger">Delete All Data</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="trip-details-dialog" aria-labelledby="trip-details-title">
+    <form method="dialog" class="dialog-card trip-details-card">
+      <div class="trip-details-top">
+        <p class="trip-details-kicker">Trip Details</p>
+        <h2 id="trip-details-title"></h2>
+      </div>
+      <div class="trip-details-body">
+        <div class="trip-miles-hero">
+          <p id="trip-miles-total" class="trip-miles-total" aria-live="polite"></p>
+          <div id="trip-rate-board" class="trip-rate-board"></div>
+        </div>
+        <div class="trip-miles-row">
+          <label><span>Starting Mileage</span><span class="num-wrap"><input id="trip-start-miles" type="text" inputmode="decimal" maxlength="7" autocomplete="off" data-num aria-label="Starting mileage" /><span class="num-arrows" aria-hidden="true"><button type="button" tabindex="-1" data-num-step="1" title="Up one">▴</button><button type="button" tabindex="-1" data-num-step="-1" title="Down one">▾</button></span></span></label>
+          <label><span>Ending Mileage</span><span class="num-wrap"><input id="trip-end-miles" type="text" inputmode="decimal" maxlength="7" autocomplete="off" data-num aria-label="Ending mileage" /><span class="num-arrows" aria-hidden="true"><button type="button" tabindex="-1" data-num-step="1" title="Up one">▴</button><button type="button" tabindex="-1" data-num-step="-1" title="Down one">▾</button></span></span></label>
+        </div>
+        <div class="trip-pair trip-who">
+          <div class="trip-details-col">
+            <label><span>Vehicle</span><input id="trip-vehicle" type="text" maxlength="100" autocomplete="off" /></label>
+            <select id="trip-vehicle-picks" class="trip-pick-select" aria-label="Pick a vehicle" hidden></select>
+          </div>
+          <div class="trip-details-col">
+            <label><span>Attendees</span><input id="trip-attendees" type="text" maxlength="400" autocomplete="off" title="Names separated by commas" /></label>
+            <select id="trip-attendee-picks" class="trip-pick-select" aria-label="Add an attendee" hidden></select>
+          </div>
+        </div>
+        <div class="trip-picks-manage">
+          <div class="trip-picks-manage-bar">
+            <button type="button" class="btn ghost" id="btn-trip-picks-manage" aria-expanded="false" aria-controls="trip-manage-panel">Manage Lists…</button>
+            <button type="button" class="btn ghost" id="dash-picks-reset" hidden>Restore Defaults</button>
+          </div>
+          <div id="trip-manage-panel" class="trip-manage-panel" hidden>
+            <p class="muted trip-picks-note">Names in the Vehicle and Attendees dropdowns, in this order. Friends keep their own lists on their Macs.</p>
+            <div id="dash-trip-picks" class="dash-trip-picks"></div>
+            <div id="trip-packing-kit-panel" class="trip-packing-kit-panel">
+              <p class="muted trip-packing-kit-note">Your default field kit on this Mac. New trips start from this list; ticks are per trip.</p>
+              <div id="trip-packing-kit-rows" class="trip-packing-kit-rows"></div>
+              <div class="trip-packing-kit-add">
+                <input id="trip-packing-kit-new" type="text" maxlength="80" autocomplete="off" placeholder="Add gear" aria-label="New packing item" />
+                <select id="trip-packing-kit-group" aria-label="Group">
+                  <option value="">Group</option>
+                  <option value="radio">radio</option>
+                  <option value="photo">photo</option>
+                  <option value="power">power</option>
+                  <option value="kit">kit</option>
+                  <option value="safety">safety</option>
+                </select>
+                <button type="button" class="btn primary" id="trip-packing-kit-add">Add</button>
+              </div>
+              <div class="trip-packing-kit-actions">
+                <button type="button" class="btn ghost" id="trip-packing-kit-restore">Restore Shipped</button>
+                <button type="button" class="btn primary" id="trip-packing-kit-save">Save Kit</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="trip-packing" id="trip-packing">
+          <div class="trip-fuel-head trip-packing-head">
+            <span>Packing</span>
+            <div class="trip-packing-tools">
+              <button type="button" class="btn ghost" id="trip-packing-toggle" aria-expanded="false" aria-controls="trip-packing-body">Show list</button>
+              <button type="button" class="btn ghost" id="trip-packing-edit">Edit My Kit…</button>
+              <button type="button" class="btn ghost" id="trip-packing-reset-trip" title="Replace this trip's list with your default kit (clears ticks)">Use My Kit</button>
+            </div>
+          </div>
+          <div class="trip-packing-summary">
+            <p class="muted trip-packing-progress" id="trip-packing-progress" aria-live="polite"></p>
+            <div id="trip-packing-groups" class="trip-packing-groups" role="list" aria-label="Packing by group"></div>
+          </div>
+          <div id="trip-packing-body" class="trip-packing-body" hidden>
+            <div id="trip-packing-list" class="trip-packing-list" role="list"></div>
+          </div>
+        </div>
+        <div class="trip-fuel">
+          <div class="trip-fuel-head">
+            <span>Fill-ups</span>
+          </div>
+          <div id="trip-fuel-log" class="trip-fuel-log" hidden></div>
+          <div class="trip-fuel-entry" id="trip-fuel-entry">
+            <p class="trip-fuel-entry-label" id="trip-fuel-entry-label">New fill-up</p>
+            <div class="trip-fuel-card-top">
+              <label><span>Date</span><input class="trip-fuel-date" type="date" aria-label="Date" /></label>
+              <label><span>Outside °F</span><input class="trip-fuel-temp" type="text" inputmode="decimal" maxlength="6" autocomplete="off" aria-label="Outside temperature in Fahrenheit" /></label>
+            </div>
+            <div class="trip-fuel-place-row">
+              <label class="trip-fuel-place-field"><span>Place</span><input class="trip-fuel-place" type="text" maxlength="80" autocomplete="off" aria-label="Place" /></label>
+              <label class="trip-fuel-time-field"><span>Time</span>
+                <span class="trip-fuel-time-wrap">
+                  <input class="trip-fuel-time" type="time" aria-label="Fill-up time" />
+                  <button type="button" class="btn ghost trip-fuel-stamp" title="Stamp the current time">Now</button>
+                </span>
+              </label>
+            </div>
+            <div class="trip-fuel-card-nums">
+              <label><span>Gallons</span><input class="trip-fuel-gallons" type="text" inputmode="decimal" maxlength="8" autocomplete="off" aria-label="Gallons" /></label>
+              <label><span>$/gal</span><input class="trip-fuel-price" type="text" inputmode="decimal" maxlength="8" autocomplete="off" aria-label="Price per gallon" /></label>
+              <label><span>Cost</span><input class="trip-fuel-cost" type="text" inputmode="decimal" maxlength="8" autocomplete="off" aria-label="Cost" /></label>
+            </div>
+            <div class="trip-fuel-entry-actions">
+              <button type="button" class="btn ghost" id="trip-fuel-remove-draft" hidden>Remove</button>
+              <button type="button" class="btn ghost" id="trip-fuel-add">Add Fill-up</button>
+            </div>
+          </div>
+          <p id="trip-fuel-metrics" class="trip-fuel-metrics muted" aria-live="polite"></p>
+        </div>
+        <label class="trip-notes-field"><span>Trip Notes</span><textarea id="trip-notes" rows="4"></textarea></label>
+      </div>
+      <p id="trip-details-error" class="trip-details-error" role="alert" hidden></p>
+      <menu>
+        <button type="button" class="btn ghost" id="trip-details-cancel">Cancel</button>
+        <button type="button" class="btn primary" id="trip-details-save">Save</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="tz-dialog">
+    <form method="dialog" class="dialog-card">
+      <h2>Change Selected Sightings</h2>
+      <p id="tz-dialog-count"></p>
+      <p class="muted">Pick only what should change. Anything left on Leave as Is stays the same on every sighting. Each change is saved in Activity with the values from before.</p>
+      <div class="bulk-fields">
+        <label>Trip <select id="bulk-trip"></select></label>
+        <label id="bulk-trip-new-row" hidden>Trip name <input type="text" id="bulk-trip-name" maxlength="120" autocomplete="off" /></label>
+        <p class="bulk-hint" id="bulk-trip-note" hidden></p>
+        <label>Subdivision <select id="bulk-sub"></select></label>
+        <p class="bulk-hint">A new subdivision also fills in each location's milepost and state from the station book, unless you pick a state too.</p>
+        <label>State <select id="bulk-state"></select></label>
+        <label>Time zone <select id="tz-dialog-zone"></select></label>
+        <p class="bulk-hint">Times stay as typed. Match each sighting's state leaves states with two zones, like Texas or Oregon, alone.</p>
+      </div>
+      <menu>
+        <button value="cancel" class="btn ghost">Cancel</button>
+        <button value="save" class="btn primary" id="bulk-save">Apply</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="activity-wipe-dialog">
+    <form method="dialog" class="dialog-card">
+      <h2>Clear Activity?</h2>
+      <p>This permanently removes this history. Sightings in the log stay. This cannot be undone.</p>
+      <menu>
+        <button value="cancel" class="btn ghost">Cancel</button>
+        <button value="wipe" class="btn danger">Clear Activity</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="sub-editor">
+    <form method="dialog" class="dialog-card dash-editor">
+      <h2 id="sub-editor-title">Subdivision</h2>
+      <label>Name <input id="sub-editor-name" type="text" required /></label>
+      <fieldset>
+        <legend>Railroads</legend>
+        <div id="sub-editor-rrs" class="dash-rr-checks"></div>
+      </fieldset>
+      <div class="dash-editor-locs">
+        <div class="dash-panel-head">
+          <h3>Locations</h3>
+          <button type="button" class="btn tiny ghost" id="sub-editor-add-loc">Add Location</button>
+        </div>
+        <div class="table-wrap">
+          <table class="log-table">
+            <thead>
+              <tr>
+                <th>Location</th>
+                <th>Milepost</th>
+                <th>State</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="sub-editor-locs"></tbody>
+          </table>
+        </div>
+      </div>
+      <input id="sub-editor-file" type="hidden" />
+      <div class="dash-editor-csv" id="sub-editor-csv" hidden>
+        <p class="muted">Or import a subdivision CSV.</p>
+        <button type="button" class="btn ghost" id="sub-editor-add-csv">Add Subdivision CSV</button>
+      </div>
+      <menu>
+        <button type="button" class="btn ghost" id="sub-editor-cancel">Cancel</button>
+        <button type="button" class="btn primary" id="sub-editor-save">Save</button>
+      </menu>
+    </form>
+  </dialog>
+  <dialog id="rr-add-dialog">
+    <form method="dialog" class="dialog-card dash-add-dialog">
+      <h2>Add Railroad</h2>
+      <div class="dash-add-row dash-add-rr">
+        <label>
+          <span>Mark</span>
+          <input id="dash-rr-name" type="text" maxlength="12" />
+        </label>
+        <label>
+          <span>Stands for</span>
+          <input id="dash-rr-meaning" type="text" />
+        </label>
+        <label>
+          <span>Group</span>
+          <select id="dash-rr-group">
+            <option value="Freight">Freight</option>
+            <option value="Passenger / Commuter">Passenger / Commuter</option>
+            <option value="Tourist">Tourist</option>
+          </select>
+        </label>
+        <label id="dash-rr-class-field">
+          <span>Class</span>
+          <select id="dash-rr-class">
+            <option value="">Not Set</option>
+            <option value="Class I">Class I</option>
+            <option value="Regional">Regional</option>
+            <option value="Shortline">Shortline</option>
+            <option value="Tourist">Tourist</option>
+          </select>
+        </label>
+      </div>
+      <menu>
+        <button value="cancel" class="btn ghost">Cancel</button>
+        <button type="button" class="btn primary" id="dash-rr-add">Add</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="lib-dialog" class="lib-dialog" aria-labelledby="lib-dialog-title">
+    <div class="dialog-card lib-dialog-card">
+      <div class="dash-panel-title-row">
+        <h2 id="lib-dialog-title">Railroad Library</h2>
+        <div class="dash-title-actions">
+          <button type="button" class="btn ghost lib-extra" title="Add short lines from Genesee &amp; Wyoming, Watco, Patriot Rail, OmniTRAX, and R.J. Corman that are not already in the shipped list.">Add More Railroads</button>
+          <button type="button" class="btn ghost lib-import-open" title="Add a list: a CSV with a header row, or lines of Name | State | Type under region headings.">Import List…</button>
+          <button type="button" class="btn primary lib-add">Add</button>
+        </div>
+      </div>
+      <div class="dash-lib">
+        <div class="dash-lib-left">
+          <div class="dash-tools dash-lib-tools">
+            <input class="lib-search" type="search" placeholder="Search" aria-label="Search the library" />
+            <select class="lib-group" aria-label="Group"></select>
+            <select class="lib-region" aria-label="Region"></select>
+            <select class="lib-state" aria-label="State"></select>
+            <label class="dash-lib-tt-filter-label" title="Show only railroads you have timetables for"><input type="checkbox" class="lib-tt-filter" /> Has Timetables</label>
+          </div>
+          <p class="dash-lib-count muted"></p>
+          <div class="dash-lib-list" role="listbox" aria-label="Railroad library"></div>
+        </div>
+        <div class="dash-lib-detail" aria-live="polite"></div>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="lib-import-dialog">
+    <form method="dialog" class="dialog-card dash-add-dialog lib-import-card">
+      <h2>Import a List</h2>
+      <p class="muted">Paste a list or choose a file. Two layouts work: a CSV with a header row (Railroad Name, Reporting Mark, Type, States, Track Mileage, and so on), or one railroad per line as Name | State | Type of operation, with a region name on its own line above each group. Railroads already in the library only get their blank fields filled in.</p>
+      <label class="lib-import-text">
+        <span>List</span>
+        <textarea id="lib-import-text" rows="10" spellcheck="false"></textarea>
+      </label>
+      <div class="dash-add-row">
+        <label>
+          <span>File</span>
+          <input id="lib-import-file" type="file" accept=".csv,.txt,.rtf,.tsv" />
+        </label>
+        <label>
+          <span>Group for rows without one</span>
+          <select id="lib-import-group">
+            <option value="Freight">Freight</option>
+            <option value="Passenger / Commuter">Passenger / Commuter</option>
+            <option value="Tourist">Tourist</option>
+          </select>
+        </label>
+      </div>
+      <p id="lib-import-result" class="lib-import-result" hidden></p>
+      <menu>
+        <button value="cancel" class="btn ghost">Close</button>
+        <button type="button" class="btn primary" id="lib-import-go">Import</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="type-add-dialog">
+    <form method="dialog" class="dialog-card dash-add-dialog">
+      <h2>Add Train Type</h2>
+      <div class="dash-add-row dash-add-type">
+        <label>
+          <span>Type</span>
+          <input id="dash-type-name" type="text" maxlength="16" />
+        </label>
+        <label>
+          <span>Stands for</span>
+          <input id="dash-type-meaning" type="text" />
+        </label>
+      </div>
+      <menu>
+        <button value="cancel" class="btn ghost">Cancel</button>
+        <button type="button" class="btn primary" id="dash-type-add">Add</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="watch-dialog">
+    <form method="dialog" class="dialog-card watch-card">
+      <h2>Watch Folder</h2>
+      <p>Use the watch folder to add extra subdivision CSVs in bulk instead of one at a time with Add subdivision. Drop in as many files as you like. While TRAIN LOG is open it checks the folder every few seconds, imports each CSV into the station book, and moves the file into <code>imported/</code>. A file that cannot be read goes into <code>failed/</code> with a note saying why.</p>
+      <p class="muted">Each CSV holds one subdivision. Row 1 lists the railroad marks, such as BNSF or UP. Row 2 is <code>Subdivision,Location,Milepost,State</code>; State is an optional two-letter code such as AZ.</p>
+      <p class="watch-path"><code id="watch-path"></code></p>
+      <p id="watch-status" class="muted"></p>
+      <menu>
+        <button value="close" class="btn ghost">Close</button>
+        <button type="button" class="btn ghost" id="watch-check">Check Now</button>
+        <button type="button" class="btn primary" id="watch-open">Open in Finder</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="data-dialog">
+    <form method="dialog" class="dialog-card watch-card update-card">
+      <h2>Updates</h2>
+      <div id="update-key-box" hidden>
+        <p>Paste the key code you were given, then choose Save. You only need to do this once.</p>
+        <label class="sync-mac-field">Key code
+          <span class="update-key-row">
+            <input id="update-key" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" />
+            <button type="button" class="btn primary" id="update-key-save">Save</button>
+          </span>
+        </label>
+        <p id="update-key-result" class="muted" role="status"></p>
+      </div>
+      <h3 class="update-head">TRAIN LOG</h3>
+      <p id="update-app-current"></p>
+      <p id="update-app-result" class="update-result" role="status"></p>
+      <p id="update-app-notes" class="muted update-notes" hidden></p>
+      <div id="update-station-block">
+        <h3 class="update-head">Station Data</h3>
+        <p class="muted">New subdivisions, stations, train symbols, and heritage units can arrive without a new version of TRAIN LOG. Your log, subdivisions you added or edited, hidden subdivisions, and your heritage list changes are never touched.</p>
+        <p id="data-current"></p>
+        <p id="data-result" class="update-result" role="status"></p>
+        <p id="data-notes" class="muted update-notes" hidden></p>
+      </div>
+      <p id="update-field-hint" class="muted" hidden>
+        On a field device, Check for Updates looks at the public field site.
+        Get Update refreshes this Home Screen install from that site — no Mac pairing.
+        Sightings stay on this device; move them to the Mac with Save a copy / AirDrop, then Import on the Mac.
+        Do not delete the Home Screen icon to update.
+      </p>
+      <p id="update-key-line" class="muted update-key-line" hidden>Key code saved. <button type="button" class="btn tiny ghost" id="update-key-change">Change Key Code</button></p>
+      <menu>
+        <button value="close" class="btn ghost">Close</button>
+        <button type="button" class="btn ghost" id="data-built-in" hidden>Use Built-in Data</button>
+        <button type="button" class="btn primary" id="data-check">Check for Updates</button>
+        <button type="button" class="btn primary" id="data-install" hidden>Install Station Data</button>
+        <button type="button" class="btn primary" id="update-app-install" hidden>Update TRAIN LOG</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <div id="app-update-note" class="app-update-note" role="status" hidden>
+    <span id="app-update-note-text"></span>
+    <button type="button" class="btn ghost" id="app-update-later">Later</button>
+    <button type="button" class="btn primary" id="app-update-open">See Update</button>
+  </div>
+
+  <div id="dash-sub-menu" class="log-col-menu dash-sub-menu" role="menu" hidden></div>
+
+  <input id="add-csv-file" type="file" accept=".csv" hidden />
+
+  <script src="static/theme.js?v=14"></script>
+  <script src="static/form.js?v=328"></script>
+  <script src="static/catalog.js?v=195"></script>
+  <script src="static/tablesort.js?v=1"></script>
+  <script src="static/sync.js?v=23"></script>
+  <script src="static/durability.js?v=2"></script>
+  <script src="static/trackside.js?v=9"></script>
+  <script src="static/aar-marks-ui.js?v=4"></script>
+  <script src="static/library.js?v=9"></script>
+</body>
+</html>

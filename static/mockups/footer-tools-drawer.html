@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TRAIN LOG — Footer / Tools drawer mockup</title>
+  <style>
+    :root {
+      --bg: #1a1c1f;
+      --surface: #24272c;
+      --surface-2: #2c3036;
+      --border: #3a3f47;
+      --ink: #e8eaed;
+      --muted: #9aa0a8;
+      --accent: #3d8bfd;
+      --accent-text: #fff;
+      --radius: 10px;
+      --shadow: 0 8px 28px rgba(0,0,0,.35);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #0f1114;
+      color: var(--ink);
+      padding: 28px 24px 48px;
+    }
+    h1 { margin: 0 0 6px; font-size: 22px; font-weight: 700; }
+    .lede { margin: 0 0 22px; color: var(--muted); max-width: 62rem; line-height: 1.45; font-size: 14px; }
+    .lede code { color: #c5d4f0; font-size: 12px; }
+    .note {
+      margin: 0 0 22px;
+      padding: 10px 12px;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      max-width: 62rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 22px;
+      align-items: start;
+    }
+    .device {
+      background: #15171a;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px;
+      box-shadow: var(--shadow);
+    }
+    .device h2 {
+      margin: 0 0 4px;
+      font-size: 14px;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .device .sub { margin: 0 0 10px; font-size: 12px; color: #7d848e; min-height: 2.6em; }
+    .bezel {
+      margin: 0 auto;
+      background: #0b0c0e;
+      border: 2px solid #3e4450;
+      border-radius: 18px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+    .mac .bezel { width: 100%; height: 420px; border-radius: 10px; }
+    .ipad .bezel { width: min(100%, 360px); height: 480px; }
+    .iphone .bezel { width: min(100%, 280px); height: 520px; border-radius: 28px; }
+    .chrome {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .chrome .dot { width: 8px; height: 8px; border-radius: 50%; background: #555; }
+    .chrome .tabs { margin-left: auto; display: flex; gap: 6px; }
+    .chrome .tab {
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--surface-2);
+      color: var(--muted);
+    }
+    .chrome .tab.on { background: var(--accent); color: var(--accent-text); }
+    .stage {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      background:
+        linear-gradient(180deg, #1e2228 0%, #171a1e 100%);
+      display: flex;
+      flex-direction: column;
+    }
+    .fake-pad {
+      flex: 1;
+      min-height: 0;
+      padding: 12px;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    .fake-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 8px;
+    }
+    .fake-card strong { color: var(--ink); }
+    .fake-row { height: 10px; border-radius: 4px; background: #333841; margin: 6px 0; }
+    .fake-row.short { width: 55%; }
+
+    /* —— Footer / tools drawer —— */
+    .page-foot {
+      flex: 0 0 auto;
+      position: relative;
+      z-index: 5;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      color: var(--ink);
+    }
+    .foot-drawer-handle {
+      display: none;
+      width: 100%;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin: 0;
+      padding: 8px 12px;
+      border: 0;
+      border-bottom: 1px solid transparent;
+      background: var(--surface-2);
+      color: var(--ink);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 650;
+      letter-spacing: .03em;
+      cursor: pointer;
+    }
+    .foot-drawer-handle:hover { filter: brightness(1.06); }
+    .foot-drawer-chevron {
+      display: inline-block;
+      transition: transform .18s ease;
+      font-size: 14px;
+      line-height: 1;
+      color: var(--muted);
+    }
+    .page-foot.is-foot-open .foot-drawer-chevron { transform: rotate(180deg); }
+    .foot-drawer { display: block; }
+    .page-foot-links {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 10px;
+      padding: 10px 12px 8px;
+    }
+    .foot-trackside {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #1b1e23;
+    }
+    .foot-trackside-label {
+      margin: 0 2px 0 6px;
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .btn, .gap-peek, .ticker-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 32px;
+      padding: 0 10px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: var(--surface-2);
+      color: var(--ink);
+      font: inherit;
+      font-size: 12px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .btn.primary { background: var(--accent); border-color: transparent; color: #fff; font-weight: 650; }
+    .btn.ghost:hover, .gap-peek:hover, .ticker-toggle:hover { border-color: #6a7380; }
+    .ticker-toggle[aria-pressed="true"] { outline: 1px solid color-mix(in srgb, var(--accent) 55%, var(--border)); }
+    .badge {
+      display: inline-flex;
+      min-width: 1.1rem;
+      justify-content: center;
+      padding: 0 5px;
+      border-radius: 999px;
+      background: #c44;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .foot-appearance {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 12px;
+      width: 100%;
+      margin-top: 2px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border);
+    }
+    .foot-appearance-kicker {
+      margin: 0;
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .swatches { display: inline-flex; gap: 6px; }
+    .swatch {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 2px solid #555; cursor: pointer;
+    }
+    .swatch.on { border-color: #fff; }
+    .swatch.night { background: #1a1c1f; }
+    .swatch.paper { background: #e8e2d4; }
+    .swatch.slate { background: #3a4554; }
+    .text-size-picker {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .text-size-picker select {
+      height: 28px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--ink);
+    }
+    .foot-hint { color: var(--muted); font-size: 11px; }
+    .credit {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 4px 12px;
+      padding: 4px 12px 10px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+    .credit-line { margin: 0; }
+    .mac-only { display: inline-flex; }
+    .field-only { display: none; }
+
+    /* Field (phone + iPad): collapsed drawer */
+    .is-field .foot-drawer-handle { display: inline-flex; }
+    .is-field .foot-drawer {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows .2s ease;
+    }
+    .is-field .foot-drawer > .foot-drawer-inner {
+      overflow: hidden;
+      min-height: 0;
+    }
+    .is-field .page-foot.is-foot-open .foot-drawer { grid-template-rows: 1fr; }
+    .is-field .page-foot.is-foot-open .foot-drawer-handle {
+      border-bottom-color: var(--border);
+    }
+    .is-field .page-foot-links {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+    .is-field .foot-trackside {
+      display: grid;
+      grid-template-columns: auto 1fr 1fr;
+      width: 100%;
+    }
+    .is-field .page-foot-links > .btn,
+    .is-field .page-foot-links > a.btn {
+      justify-content: center;
+      min-height: 40px;
+      height: auto;
+      padding: 8px 12px;
+    }
+    /* Smaller How to Use / Sync — not full-bleed slabs */
+    .is-field .page-foot-links > a.btn,
+    .is-field .page-foot-links > .btn.primary.field-only {
+      min-height: 32px;
+      height: 32px;
+      padding: 0 12px;
+      font-size: 12px;
+      width: auto;
+      align-self: center;
+    }
+    .iphone.is-field .page-foot-links {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .iphone.is-field .foot-trackside,
+    .iphone.is-field .foot-appearance,
+    .iphone.is-field .foot-hint,
+    .iphone.is-field .credit {
+      flex: 1 1 100%;
+    }
+    .is-field .mac-only { display: none; }
+    .is-field .field-only { display: inline-flex; }
+    .is-field .foot-hint { text-align: center; width: 100%; }
+    .is-field .credit { justify-content: center; text-align: center; }
+
+    .ipad.is-field .page-foot-links {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+    }
+    .ipad.is-field .foot-trackside,
+    .ipad.is-field .foot-appearance,
+    .ipad.is-field .foot-hint,
+    .ipad.is-field .credit { grid-column: 1 / -1; }
+
+    .actions {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .actions button {
+      height: 30px;
+      padding: 0 12px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--ink);
+      cursor: pointer;
+      font: inherit;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Footer / Tools drawer — mockup v1</h1>
+  <p class="lede">
+    Based on the parked design: a bottom <strong>Tools</strong> strip on Mac, and a
+    collapsible drawer on iPhone / iPad. Preview only — not wired into the app yet.
+  </p>
+  <p class="note" style="margin-bottom:12px">
+    <a href="/static/mockups/footer-tools-drawer.html" style="color:#8cb4ff;font-weight:650">v1 — full drawer</a>
+    &nbsp;·&nbsp;
+    <a href="/static/mockups/footer-tools-drawer-v2.html" style="color:#9aa0a8">v2 — slim tray + sheet</a>
+  </p>
+  <p class="note">
+    Tap <strong>Tools</strong> on phone/iPad to open/close. Mac stays open (always-visible footer).
+    Direction: build from <strong>v1</strong> with smaller How to Use / Sync buttons (as in this file). Not wired into the app yet.
+  </p>
+
+  <div class="grid">
+    <!-- MAC -->
+    <section class="device mac" data-device="mac">
+      <h2>Mac</h2>
+      <p class="sub">Wide window · footer always visible (no handle). Updates + Debug stay Mac-side.</p>
+      <div class="bezel">
+        <div class="chrome">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <strong style="margin-left:8px">TRAIN LOG</strong>
+          <div class="tabs"><span class="tab on">New Entry</span><span class="tab">Log</span><span class="tab">Dashboard</span></div>
+        </div>
+        <div class="stage">
+          <div class="fake-pad">
+            <div class="fake-card"><strong>New Entry</strong><div class="fake-row"></div><div class="fake-row short"></div></div>
+            <div class="fake-card"><strong>Logged this date</strong><div class="fake-row"></div></div>
+          </div>
+          <footer class="page-foot is-foot-open" data-foot>
+            <button type="button" class="foot-drawer-handle" aria-expanded="true" hidden>
+              <span class="foot-drawer-chevron" aria-hidden="true">⌃</span>
+              <span class="foot-drawer-label">Tools</span>
+            </button>
+            <div class="foot-drawer">
+              <div class="foot-drawer-inner">
+                <div class="page-foot-links">
+                  <div class="foot-trackside" role="group" aria-label="Trackside">
+                    <p class="foot-trackside-label">Trackside</p>
+                    <button type="button" class="gap-peek" title="Countdown timer">⏱ Timer</button>
+                    <button type="button" class="ticker-toggle" aria-pressed="true" title="Last-train ticker">Ticker</button>
+                  </div>
+                  <a class="btn ghost" href="#">How to Use</a>
+                  <a class="btn ghost mac-only" href="#">Debug <span class="badge">0</span></a>
+                  <button type="button" class="btn ghost mac-only">Updates <span class="badge">1</span></button>
+                  <button type="button" class="btn primary field-only" hidden>Sync with Mac</button>
+                  <div class="foot-appearance">
+                    <p class="foot-appearance-kicker">Appearance</p>
+                    <div class="swatches" title="Color scheme">
+                      <button type="button" class="swatch night on" title="Night"></button>
+                      <button type="button" class="swatch paper" title="Paper"></button>
+                      <button type="button" class="swatch slate" title="Slate"></button>
+                    </div>
+                    <label class="text-size-picker"><span>Text Size</span>
+                      <select><option>Smaller</option><option>Small</option><option selected>Normal</option><option>Large</option><option>Larger</option></select>
+                    </label>
+                  </div>
+                  <span class="foot-hint">Sightings stay on this Mac. Backup from the Log tab.</span>
+                </div>
+                <div class="credit">
+                  <p class="credit-line">Created by Michael Amrine</p>
+                  <p class="foot-screen">Mac · mockup</p>
+                </div>
+              </div>
+            </div>
+          </footer>
+        </div>
+      </div>
+    </section>
+
+    <!-- IPAD -->
+    <section class="device ipad is-field" data-device="ipad">
+      <h2>iPad</h2>
+      <p class="sub">Field ≥701px · Tools handle; drawer opens upward in two columns.</p>
+      <div class="bezel">
+        <div class="chrome">
+          <strong>TRAIN LOG</strong>
+          <div class="tabs"><span class="tab on">Entry</span><span class="tab">Log</span><span class="tab">Dash</span></div>
+        </div>
+        <div class="stage">
+          <div class="fake-pad">
+            <div class="fake-card"><strong>Session · Needles weekend</strong><div class="fake-row"></div><div class="fake-row short"></div></div>
+            <div class="fake-card"><strong>Lead · Spots · Trip Details</strong><div class="fake-row"></div></div>
+          </div>
+          <footer class="page-foot" data-foot>
+            <button type="button" class="foot-drawer-handle" aria-expanded="false">
+              <span class="foot-drawer-chevron" aria-hidden="true">⌃</span>
+              <span class="foot-drawer-label">Tools</span>
+            </button>
+            <div class="foot-drawer">
+              <div class="foot-drawer-inner">
+                <div class="page-foot-links">
+                  <div class="foot-trackside" role="group" aria-label="Trackside">
+                    <p class="foot-trackside-label">Trackside</p>
+                    <button type="button" class="gap-peek">⏱ Timer</button>
+                    <button type="button" class="ticker-toggle" aria-pressed="true">Ticker</button>
+                  </div>
+                  <a class="btn ghost" href="#">How to Use</a>
+                  <button type="button" class="btn primary field-only">Sync with Mac</button>
+                  <div class="foot-appearance">
+                    <p class="foot-appearance-kicker">Appearance</p>
+                    <div class="swatches">
+                      <button type="button" class="swatch night on"></button>
+                      <button type="button" class="swatch paper"></button>
+                      <button type="button" class="swatch slate"></button>
+                    </div>
+                    <label class="text-size-picker"><span>Text Size</span>
+                      <select><option selected>Normal</option><option>Large</option><option>Larger</option></select>
+                    </label>
+                  </div>
+                  <span class="foot-hint">Field copy · sync when the Mac is on the same Wi‑Fi.</span>
+                </div>
+                <div class="credit">
+                  <p class="credit-line">Created by Michael Amrine</p>
+                  <p class="foot-screen">iPad · mockup</p>
+                </div>
+              </div>
+            </div>
+          </footer>
+        </div>
+      </div>
+      <div class="actions">
+        <button type="button" data-toggle>Toggle Tools drawer</button>
+      </div>
+    </section>
+
+    <!-- IPHONE -->
+    <section class="device iphone is-field" data-device="iphone">
+      <h2>iPhone</h2>
+      <p class="sub">Field ≤700px · same Tools drawer, single column, bigger tap targets.</p>
+      <div class="bezel">
+        <div class="chrome">
+          <strong>TRAIN LOG</strong>
+          <div class="tabs"><span class="tab on">Entry</span><span class="tab">Log</span></div>
+        </div>
+        <div class="stage">
+          <div class="fake-pad">
+            <div class="fake-card"><strong>BNSF · Lead</strong><div class="fake-row"></div><div class="fake-row short"></div></div>
+            <div class="fake-card"><strong>Needles Sub</strong><div class="fake-row short"></div></div>
+          </div>
+          <footer class="page-foot" data-foot>
+            <button type="button" class="foot-drawer-handle" aria-expanded="false">
+              <span class="foot-drawer-chevron" aria-hidden="true">⌃</span>
+              <span class="foot-drawer-label">Tools</span>
+            </button>
+            <div class="foot-drawer">
+              <div class="foot-drawer-inner">
+                <div class="page-foot-links">
+                  <div class="foot-trackside" role="group" aria-label="Trackside">
+                    <p class="foot-trackside-label">Trackside</p>
+                    <button type="button" class="gap-peek">⏱ Timer</button>
+                    <button type="button" class="ticker-toggle" aria-pressed="false">Ticker</button>
+                  </div>
+                  <a class="btn ghost" href="#">How to Use</a>
+                  <button type="button" class="btn primary field-only">Sync with Mac</button>
+                  <div class="foot-appearance">
+                    <p class="foot-appearance-kicker">Appearance</p>
+                    <div class="swatches">
+                      <button type="button" class="swatch night on"></button>
+                      <button type="button" class="swatch paper"></button>
+                      <button type="button" class="swatch slate"></button>
+                    </div>
+                    <label class="text-size-picker"><span>Text Size</span>
+                      <select><option selected>Normal</option><option>Large</option></select>
+                    </label>
+                  </div>
+                  <span class="foot-hint">Works offline. Sync when you can.</span>
+                </div>
+                <div class="credit">
+                  <p class="credit-line">Created by Michael Amrine</p>
+                  <p class="foot-screen">iPhone · mockup</p>
+                </div>
+              </div>
+            </div>
+          </footer>
+        </div>
+      </div>
+      <div class="actions">
+        <button type="button" data-toggle>Toggle Tools drawer</button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    function setOpen(foot, open) {
+      foot.classList.toggle("is-foot-open", open);
+      const handle = foot.querySelector(".foot-drawer-handle");
+      if (handle) handle.setAttribute("aria-expanded", open ? "true" : "false");
+    }
+    document.querySelectorAll("[data-foot]").forEach(function (foot) {
+      const handle = foot.querySelector(".foot-drawer-handle");
+      if (!handle || handle.hidden) return;
+      handle.addEventListener("click", function () {
+        setOpen(foot, !foot.classList.contains("is-foot-open"));
+      });
+    });
+    document.querySelectorAll("[data-toggle]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        const device = btn.closest(".device");
+        const foot = device.querySelector("[data-foot]");
+        setOpen(foot, !foot.classList.contains("is-foot-open"));
+      });
+    });
+    document.querySelectorAll(".ticker-toggle").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        btn.setAttribute("aria-pressed", btn.getAttribute("aria-pressed") === "true" ? "false" : "true");
+      });
+    });
+    document.querySelectorAll(".swatches").forEach(function (group) {
+      group.addEventListener("click", function (event) {
+        const sw = event.target.closest(".swatch");
+        if (!sw) return;
+        group.querySelectorAll(".swatch").forEach(function (s) { s.classList.remove("on"); });
+        sw.classList.add("on");
+      });
+    });
+  </script>
+</body>
+</html>

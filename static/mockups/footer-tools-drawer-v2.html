@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TRAIN LOG — Footer / Tools drawer mockup v2</title>
+  <style>
+    :root {
+      --bg: #1a1c1f;
+      --surface: #24272c;
+      --surface-2: #2c3036;
+      --border: #3a3f47;
+      --ink: #e8eaed;
+      --muted: #9aa0a8;
+      --accent: #3d8bfd;
+      --radius: 10px;
+      --shadow: 0 8px 28px rgba(0,0,0,.35);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: #0f1114; color: var(--ink); padding: 28px 24px 48px; }
+    h1 { margin: 0 0 6px; font-size: 22px; font-weight: 700; }
+    .lede { margin: 0 0 10px; color: var(--muted); max-width: 62rem; line-height: 1.45; font-size: 14px; }
+    .lede code { color: #c5d4f0; font-size: 12px; }
+    .versions { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px; }
+    .versions a {
+      display: inline-flex; align-items: center; height: 30px; padding: 0 12px;
+      border-radius: 999px; border: 1px solid var(--border); color: var(--muted);
+      text-decoration: none; font-size: 12px;
+    }
+    .versions a.on { background: var(--accent); border-color: transparent; color: #fff; font-weight: 650; }
+    .note {
+      margin: 0 0 22px; padding: 10px 12px; border: 1px dashed var(--border);
+      border-radius: 8px; color: var(--muted); font-size: 13px; max-width: 62rem;
+    }
+    .grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 22px; align-items: start;
+    }
+    .device {
+      background: #15171a; border: 1px solid var(--border); border-radius: 16px;
+      padding: 12px; box-shadow: var(--shadow);
+    }
+    .device h2 {
+      margin: 0 0 4px; font-size: 14px; letter-spacing: .04em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    .device .sub { margin: 0 0 10px; font-size: 12px; color: #7d848e; min-height: 2.6em; }
+    .bezel {
+      margin: 0 auto; background: #0b0c0e; border: 2px solid #3e4450;
+      border-radius: 18px; overflow: hidden; position: relative;
+      display: flex; flex-direction: column;
+    }
+    .mac .bezel { width: 100%; height: 420px; border-radius: 10px; }
+    .ipad .bezel { width: min(100%, 360px); height: 480px; }
+    .iphone .bezel { width: min(100%, 280px); height: 520px; border-radius: 28px; }
+    .chrome {
+      flex: 0 0 auto; display: flex; align-items: center; gap: 8px;
+      padding: 8px 10px; background: var(--surface); border-bottom: 1px solid var(--border); font-size: 12px;
+    }
+    .chrome .dot { width: 8px; height: 8px; border-radius: 50%; background: #555; }
+    .chrome .tabs { margin-left: auto; display: flex; gap: 6px; }
+    .chrome .tab { padding: 3px 8px; border-radius: 6px; background: var(--surface-2); color: var(--muted); }
+    .chrome .tab.on { background: var(--accent); color: #fff; }
+    .stage {
+      flex: 1; min-height: 0; position: relative;
+      background: linear-gradient(180deg, #1e2228 0%, #171a1e 100%);
+      display: flex; flex-direction: column;
+    }
+    .fake-pad { flex: 1; min-height: 0; padding: 12px; overflow: hidden; color: var(--muted); font-size: 12px; }
+    .fake-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px; margin-bottom: 8px;
+    }
+    .fake-card strong { color: var(--ink); }
+    .fake-row { height: 10px; border-radius: 4px; background: #333841; margin: 6px 0; }
+    .fake-row.short { width: 55%; }
+
+    /* v2 footer: slim always-on tray + optional sheet */
+    .page-foot {
+      flex: 0 0 auto; position: relative; z-index: 5;
+      background: color-mix(in srgb, var(--surface) 92%, #000);
+      border-top: 1px solid var(--border);
+    }
+    .foot-tray {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 8px; min-height: 44px;
+    }
+    .tray-btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+      height: 32px; padding: 0 10px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--surface-2);
+      color: var(--ink); font: inherit; font-size: 12px; cursor: pointer;
+      white-space: nowrap;
+    }
+    .tray-btn.icon {
+      width: 32px; padding: 0; color: var(--muted);
+    }
+    .tray-btn.primary {
+      background: var(--accent); border-color: transparent; color: #fff; font-weight: 650;
+    }
+    .tray-btn.on { outline: 1px solid color-mix(in srgb, var(--accent) 60%, var(--border)); }
+    .tray-grow { flex: 1; min-width: 4px; }
+    .tray-label {
+      font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+      margin-right: 2px;
+    }
+
+    .foot-sheet {
+      display: grid; grid-template-rows: 0fr; transition: grid-template-rows .2s ease;
+      border-top: 1px solid transparent;
+      background: var(--surface);
+    }
+    .page-foot.is-foot-open .foot-sheet {
+      grid-template-rows: 1fr;
+      border-top-color: var(--border);
+    }
+    .foot-sheet-inner { overflow: hidden; min-height: 0; }
+    .sheet-body { padding: 10px 10px 12px; display: grid; gap: 10px; }
+    .sheet-section {
+      border: 1px solid var(--border); border-radius: 10px;
+      background: #1b1e23; padding: 8px;
+    }
+    .sheet-kicker {
+      margin: 0 0 8px; font-size: 10px; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    .chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      height: 30px; padding: 0 10px; border-radius: 999px;
+      border: 1px solid var(--border); background: var(--surface-2);
+      color: var(--ink); font: inherit; font-size: 12px; cursor: pointer;
+      text-decoration: none;
+    }
+    .chip.primary { background: var(--accent); border-color: transparent; color: #fff; font-weight: 650; }
+    .swatches { display: inline-flex; gap: 6px; align-items: center; }
+    .swatch { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #555; cursor: pointer; }
+    .swatch.on { border-color: #fff; }
+    .swatch.night { background: #1a1c1f; }
+    .swatch.paper { background: #e8e2d4; }
+    .swatch.slate { background: #3a4554; }
+    .text-size-picker {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--muted);
+    }
+    .text-size-picker select {
+      height: 28px; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--surface-2); color: var(--ink);
+    }
+    .credit {
+      display: flex; justify-content: space-between; gap: 8px;
+      padding: 0 2px; color: var(--muted); font-size: 11px;
+    }
+    .credit p { margin: 0; }
+    .mac-only { display: inline-flex; }
+    .field-only { display: none; }
+    .is-field .mac-only { display: none !important; }
+    .is-field .field-only { display: inline-flex; }
+
+    /* Phone: keep tray compact; How to Use / Sync are chips in the sheet, not huge tray buttons */
+    .iphone .tray-btn.field-link {
+      height: 30px; font-size: 11px; padding: 0 8px;
+    }
+    .iphone .sheet-body { gap: 8px; padding: 8px 8px 10px; }
+    .iphone .chip { height: 28px; font-size: 11px; padding: 0 9px; }
+    .iphone .chip.block {
+      /* still not full-bleed giants — 2-up row */
+      flex: 1 1 calc(50% - 6px); justify-content: center;
+    }
+
+    .ipad .sheet-body {
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+    }
+    .ipad .sheet-section.span-all,
+    .ipad .credit { grid-column: 1 / -1; }
+
+    .actions { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
+    .actions button {
+      height: 30px; padding: 0 12px; border-radius: 7px; border: 1px solid var(--border);
+      background: var(--surface-2); color: var(--ink); cursor: pointer; font: inherit; font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Footer / Tools drawer — mockup v2</h1>
+  <p class="lede">
+    Alternate take: a <strong>slim always-visible tray</strong> (Timer / Ticker / Tools), with Appearance &amp; links
+    in a sheet. Phone How to Use + Sync are <strong>compact chips</strong>, not full-width slabs.
+  </p>
+  <div class="versions">
+    <a href="/static/mockups/footer-tools-drawer.html">v1 — full drawer</a>
+    <a class="on" href="/static/mockups/footer-tools-drawer-v2.html">v2 — slim tray + sheet</a>
+  </div>
+  <p class="note">
+    Preview only. Open either version on the preview server. Tell me which direction to build — or mix pieces from both.
+  </p>
+
+  <div class="grid">
+    <section class="device mac" data-device="mac">
+      <h2>Mac</h2>
+      <p class="sub">Tray always on. Tools opens a short sheet for Appearance, Debug, Updates, How to Use.</p>
+      <div class="bezel">
+        <div class="chrome">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <strong style="margin-left:8px">TRAIN LOG</strong>
+          <div class="tabs"><span class="tab on">New Entry</span><span class="tab">Log</span><span class="tab">Dashboard</span></div>
+        </div>
+        <div class="stage">
+          <div class="fake-pad">
+            <div class="fake-card"><strong>New Entry</strong><div class="fake-row"></div><div class="fake-row short"></div></div>
+            <div class="fake-card"><strong>Logged this date</strong><div class="fake-row"></div></div>
+          </div>
+          <footer class="page-foot" data-foot>
+            <div class="foot-tray">
+              <span class="tray-label">Trackside</span>
+              <button type="button" class="tray-btn" title="Timer">⏱ Timer</button>
+              <button type="button" class="tray-btn on" data-ticker title="Ticker">Ticker</button>
+              <span class="tray-grow"></span>
+              <a class="tray-btn mac-only" href="#">How to Use</a>
+              <button type="button" class="tray-btn mac-only">Updates <span style="opacity:.85">1</span></button>
+              <button type="button" class="tray-btn" data-tools aria-expanded="false">Tools ▾</button>
+            </div>
+            <div class="foot-sheet">
+              <div class="foot-sheet-inner">
+                <div class="sheet-body">
+                  <div class="sheet-section">
+                    <p class="sheet-kicker">Appearance</p>
+                    <div class="chip-row">
+                      <div class="swatches">
+                        <button type="button" class="swatch night on"></button>
+                        <button type="button" class="swatch paper"></button>
+                        <button type="button" class="swatch slate"></button>
+                      </div>
+                      <label class="text-size-picker"><span>Text</span>
+                        <select><option selected>Normal</option><option>Large</option><option>Larger</option></select>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="sheet-section">
+                    <p class="sheet-kicker">More</p>
+                    <div class="chip-row">
+                      <a class="chip" href="#">Debug</a>
+                      <a class="chip" href="#">How to Use</a>
+                      <button type="button" class="chip">Ticker quotes</button>
+                    </div>
+                  </div>
+                  <div class="credit">
+                    <p>Created by Michael Amrine</p>
+                    <p>Mac · mockup v2</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </footer>
+        </div>
+      </div>
+      <div class="actions"><button type="button" data-toggle>Toggle Tools sheet</button></div>
+    </section>
+
+    <section class="device ipad is-field" data-device="ipad">
+      <h2>iPad</h2>
+      <p class="sub">Same slim tray. Sheet uses two columns; Sync is a normal chip, not a tall button.</p>
+      <div class="bezel">
+        <div class="chrome">
+          <strong>TRAIN LOG</strong>
+          <div class="tabs"><span class="tab on">Entry</span><span class="tab">Log</span><span class="tab">Dash</span></div>
+        </div>
+        <div class="stage">
+          <div class="fake-pad">
+            <div class="fake-card"><strong>Session · Needles weekend</strong><div class="fake-row"></div></div>
+            <div class="fake-card"><strong>Lead · Spots</strong><div class="fake-row short"></div></div>
+          </div>
+          <footer class="page-foot" data-foot>
+            <div class="foot-tray">
+              <button type="button" class="tray-btn" title="Timer">⏱</button>
+              <button type="button" class="tray-btn on" data-ticker>Ticker</button>
+              <span class="tray-grow"></span>
+              <button type="button" class="tray-btn primary field-only field-link" style="display:none">Sync</button>
+              <button type="button" class="tray-btn" data-tools aria-expanded="false">Tools ▾</button>
+            </div>
+            <div class="foot-sheet">
+              <div class="foot-sheet-inner">
+                <div class="sheet-body">
+                  <div class="sheet-section">
+                    <p class="sheet-kicker">Trackside &amp; sync</p>
+                    <div class="chip-row">
+                      <button type="button" class="chip">⏱ Timer</button>
+                      <button type="button" class="chip on" data-ticker>Ticker</button>
+                      <button type="button" class="chip primary">Sync with Mac</button>
+                      <a class="chip" href="#">How to Use</a>
+                    </div>
+                  </div>
+                  <div class="sheet-section">
+                    <p class="sheet-kicker">Appearance</p>
+                    <div class="chip-row">
+                      <div class="swatches">
+                        <button type="button" class="swatch night on"></button>
+                        <button type="button" class="swatch paper"></button>
+                        <button type="button" class="swatch slate"></button>
+                      </div>
+                      <label class="text-size-picker"><span>Text</span>
+                        <select><option selected>Normal</option><option>Large</option></select>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="credit span-all">
+                    <p>Created by Michael Amrine</p>
+                    <p>iPad · mockup v2</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </footer>
+        </div>
+      </div>
+      <div class="actions"><button type="button" data-toggle>Toggle Tools sheet</button></div>
+    </section>
+
+    <section class="device iphone is-field" data-device="iphone">
+      <h2>iPhone</h2>
+      <p class="sub">Smaller controls: tray icons + Tools. How to Use / Sync sit as half-width chips in the sheet.</p>
+      <div class="bezel">
+        <div class="chrome">
+          <strong>TRAIN LOG</strong>
+          <div class="tabs"><span class="tab on">Entry</span><span class="tab">Log</span></div>
+        </div>
+        <div class="stage">
+          <div class="fake-pad">
+            <div class="fake-card"><strong>BNSF · Lead</strong><div class="fake-row"></div></div>
+            <div class="fake-card"><strong>Needles Sub</strong><div class="fake-row short"></div></div>
+          </div>
+          <footer class="page-foot" data-foot>
+            <div class="foot-tray">
+              <button type="button" class="tray-btn icon" title="Timer" aria-label="Timer">⏱</button>
+              <button type="button" class="tray-btn icon on" data-ticker title="Ticker" aria-label="Ticker">☰</button>
+              <span class="tray-grow"></span>
+              <button type="button" class="tray-btn" data-tools aria-expanded="false">Tools ▾</button>
+            </div>
+            <div class="foot-sheet">
+              <div class="foot-sheet-inner">
+                <div class="sheet-body">
+                  <div class="sheet-section">
+                    <p class="sheet-kicker">Actions</p>
+                    <div class="chip-row">
+                      <a class="chip block" href="#">How to Use</a>
+                      <button type="button" class="chip block primary">Sync with Mac</button>
+                    </div>
+                  </div>
+                  <div class="sheet-section">
+                    <p class="sheet-kicker">Appearance</p>
+                    <div class="chip-row">
+                      <div class="swatches">
+                        <button type="button" class="swatch night on"></button>
+                        <button type="button" class="swatch paper"></button>
+                        <button type="button" class="swatch slate"></button>
+                      </div>
+                      <label class="text-size-picker"><span>Text</span>
+                        <select><option selected>Normal</option><option>Large</option></select>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="credit">
+                    <p>Created by Michael Amrine</p>
+                    <p>iPhone · v2</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </footer>
+        </div>
+      </div>
+      <div class="actions"><button type="button" data-toggle>Toggle Tools sheet</button></div>
+    </section>
+  </div>
+
+  <script>
+    function setOpen(foot, open) {
+      foot.classList.toggle("is-foot-open", open);
+      foot.querySelectorAll("[data-tools]").forEach(function (btn) {
+        btn.setAttribute("aria-expanded", open ? "true" : "false");
+        btn.textContent = open ? "Tools ▴" : "Tools ▾";
+      });
+    }
+    document.querySelectorAll("[data-foot]").forEach(function (foot) {
+      foot.querySelectorAll("[data-tools]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          setOpen(foot, !foot.classList.contains("is-foot-open"));
+        });
+      });
+    });
+    document.querySelectorAll("[data-toggle]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        const foot = btn.closest(".device").querySelector("[data-foot]");
+        setOpen(foot, !foot.classList.contains("is-foot-open"));
+      });
+    });
+    document.querySelectorAll("[data-ticker]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        const on = !btn.classList.contains("on");
+        const root = btn.closest("[data-foot]") || btn.closest(".device");
+        root.querySelectorAll("[data-ticker]").forEach(function (b) { b.classList.toggle("on", on); });
+      });
+    });
+    document.querySelectorAll(".swatches").forEach(function (group) {
+      group.addEventListener("click", function (event) {
+        const sw = event.target.closest(".swatch");
+        if (!sw) return;
+        group.querySelectorAll(".swatch").forEach(function (s) { s.classList.remove("on"); });
+        sw.classList.add("on");
+      });
+    });
+  </script>
+</body>
+</html>

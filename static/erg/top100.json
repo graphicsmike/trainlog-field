@@ -1,0 +1,718 @@
+[
+  {
+    "id": "1203",
+    "name": "Gasoline",
+    "cls": "3",
+    "hazard": "Flammable liquid",
+    "use": "Gas station deliveries"
+  },
+  {
+    "id": "1202",
+    "name": "Diesel fuel",
+    "cls": "3",
+    "hazard": "Flammable liquid",
+    "use": "Commercial trucking fuel"
+  },
+  {
+    "id": "1075",
+    "name": "Liquefied petroleum gas (LPG)",
+    "cls": "2.1",
+    "hazard": "Flammable gas",
+    "use": "Propane tanks and heating"
+  },
+  {
+    "id": "1993",
+    "name": "Flammable liquids n.o.s.",
+    "cls": "3",
+    "hazard": "Flammable liquid",
+    "use": "Commercial solvents and cleaners"
+  },
+  {
+    "id": "1263",
+    "name": "Paint",
+    "cls": "3",
+    "hazard": "Flammable liquid",
+    "use": "Industrial and consumer coatings"
+  },
+  {
+    "id": "1005",
+    "name": "Ammonia anhydrous",
+    "cls": "2.2",
+    "hazard": "Non-flammable gas",
+    "use": "Agricultural fertilizer"
+  },
+  {
+    "id": "1017",
+    "name": "Chlorine",
+    "cls": "2.3",
+    "hazard": "Toxic gas",
+    "use": "Water treatment facilities"
+  },
+  {
+    "id": "1830",
+    "name": "Sulfuric acid",
+    "cls": "8",
+    "hazard": "Corrosive",
+    "use": "Car batteries and manufacturing"
+  },
+  {
+    "id": "1090",
+    "name": "Acetone",
+    "cls": "3",
+    "hazard": "Flammable liquid",
+    "use": "Industrial solvent"
+  },
+  {
+    "id": "1267",
+    "name": "Petroleum crude oil",
+    "cls": "3",
+    "hazard": "Flammable liquid",
+    "use": "Rail car transport to refineries"
+  },
+  {
+    "id": "1170",
+    "name": "Ethanol",
+    "cls": "3",
+    "hazard": "Flammable liquid",
+    "use": "Fuel blending and spirits"
+  },
+  {
+    "id": "1789",
+    "name": "Hydrochloric acid",
+    "cls": "8",
+    "hazard": "Corrosive",
+    "use": "Chemical processing and pools"
+  },
+  {
+    "id": "1977",
+    "name": "Nitrogen refrigerated liquid",
+    "cls": "2.2",
+    "hazard": "Non-flammable gas",
+    "use": "Cryogenic medical and industrial uses"
+  },
+  {
+    "id": "1223",
+    "name": "Kerosene",
+    "cls": "3",
+    "hazard": "Flammable liquid",
+    "use": "Jet fuel and heating oil"
+  },
+  {
+    "id": "1013",
+    "name": "Carbon dioxide",
+    "cls": "2.2",
+    "hazard": "Non-flammable gas",
+    "use": "Beverage carbonation and welding"
+  },
+  {
+    "id": "1073",
+    "name": "Oxygen refrigerated liquid",
+    "cls": "2.2",
+    "hazard": "Non-flammable gas",
+    "use": "Hospital medical oxygen supply"
+  },
+  {
+    "id": "1219",
+    "name": "Isopropanol",
+    "cls": "3",
+    "hazard": "Flammable liquid",
+    "use": "Rubbing alcohol and sanitizers"
+  },
+  {
+    "id": "1230",
+    "name": "Methanol",
+    "cls": "3",
+    "hazard": "Flammable liquid",
+    "use": "Racing fuel and industrial feedstock"
+  },
+  {
+    "id": "1307",
+    "name": "Xylenes",
+    "cls": "3",
+    "hazard": "Flammable liquid",
+    "use": "Thinner and printing solvent"
+  },
+  {
+    "id": "1824",
+    "name": "Sodium hydroxide solution",
+    "cls": "8",
+    "hazard": "Corrosive",
+    "use": "Liquid lye and drain cleaners"
+  },
+  {
+    "id": "2031",
+    "name": "Nitric acid",
+    "cls": "8",
+    "hazard": "Corrosive",
+    "use": "Fertilizer production and etching"
+  },
+  {
+    "id": "3082",
+    "name": "Environmentally hazardous substance liquid n.o.s.",
+    "cls": "9",
+    "hazard": "Miscellaneous",
+    "use": "Industrial waste and pollutants"
+  },
+  {
+    "id": "3264",
+    "name": "Corrosive liquid acidic inorganic n.o.s.",
+    "cls": "8",
+    "hazard": "Corrosive",
+    "use": "Industrial acidic waste"
+  },
+  {
+    "id": "1011",
+    "name": "Butane",
+    "cls": "2.1",
+    "hazard": "Flammable gas",
+    "use": "Lighter refills and heating"
+  },
+  {
+    "id": "1049",
+    "name": "Hydrogen compressed",
+    "cls": "2.1",
+    "hazard": "Flammable gas",
+    "use": "Clean energy and industrial processing"
+  },
+  {
+    "id": "1066",
+    "name": "Nitrogen compressed",
+    "cls": "2.2",
+    "hazard": "Non-flammable gas",
+    "use": "Tire inflation and blanketing"
+  },
+  {
+    "id": "1072",
+    "name": "Oxygen compressed",
+    "cls": "2.2",
+    "hazard": "Non-flammable gas",
+    "use": "Welding gas and aerospace"
+  },
+  {
+    "id": "1114",
+    "name": "Benzene",
+    "cls": "3",
+    "hazard": "Flammable liquid",
+    "use": "Plastics manufacturing and petrochemicals"
+  },
+  {
+    "id": "1294",
+    "name": "Toluene",
+    "cls": "3",
+    "hazard": "Flammable liquid",
+    "use": "Industrial paint thinners"
+  },
+  {
+    "id": "1428",
+    "name": "Sodium",
+    "cls": "4.3",
+    "hazard": "Dangerous when wet",
+    "use": "Chemical synthesis"
+  },
+  {
+    "id": "1791",
+    "name": "Hypochlorite solution",
+    "cls": "8",
+    "hazard": "Corrosive",
+    "use": "Commercial bleach and sanitizers"
+  },
+  {
+    "id": "1823",
+    "name": "Sodium hydroxide solid",
+    "cls": "8",
+    "hazard": "Corrosive",
+    "use": "Dry lye and manufacturing flakes"
+  },
+  {
+    "id": "1951",
+    "name": "Argon refrigerated liquid",
+    "cls": "2.2",
+    "hazard": "Non-flammable gas",
+    "use": "Cryogenic insulation and shielding"
+  },
+  {
+    "id": "1956",
+    "name": "Compressed gas n.o.s.",
+    "cls": "2.2",
+    "hazard": "Non-flammable gas",
+    "use": "Mixed industrial gases"
+  },
+  {
+    "id": "1963",
+    "name": "Helium refrigerated liquid",
+    "cls": "2.2",
+    "hazard": "Non-flammable gas",
+    "use": "Superconducting magnets and MRI cooling"
+  },
+  {
+    "id": "1971",
+    "name": "Methane compressed",
+    "cls": "2.1",
+    "hazard": "Flammable gas",
+    "use": "Natural gas utilities"
+  },
+  {
+    "id": "1972",
+    "name": "Methane refrigerated liquid",
+    "cls": "2.1",
+    "hazard": "Flammable gas",
+    "use": "Liquefied Natural Gas (LNG) transport"
+  },
+  {
+    "id": "2187",
+    "name": "Carbon dioxide refrigerated liquid",
+    "cls": "2.2",
+    "hazard": "Non-flammable gas",
+    "use": "Bulk food freezing"
+  },
+  {
+    "id": "2426",
+    "name": "Ammonium nitrate liquid",
+    "cls": "5.1",
+    "hazard": "Oxidizer",
+    "use": "Bulk commercial blasting base"
+  },
+  {
+    "id": "2448",
+    "name": "Sulfur molten",
+    "cls": "4.1",
+    "hazard": "Flammable solid",
+    "use": "Vulcanizing rubber and sulfuric acid base"
+  },
+  {
+    "id": "2588",
+    "name": "Pesticide solid toxic n.o.s.",
+    "cls": "6.1",
+    "hazard": "Toxic",
+    "use": "Agricultural pest control"
+  },
+  {
+    "id": "0012",
+    "name": "Cartridges for weapons inert projectile",
+    "cls": "1.4S",
+    "hazard": "Explosive",
+    "use": "Consumer small arms ammunition",
+    "guide": "114",
+    "file": "explosive-14.png"
+  },
+  {
+    "id": "0335",
+    "name": "Fireworks",
+    "cls": "1.3G",
+    "hazard": "Explosive",
+    "use": "Commercial display fireworks",
+    "guide": "112",
+    "file": "explosive.png"
+  },
+  {
+    "id": "0336",
+    "name": "Fireworks",
+    "cls": "1.4G",
+    "hazard": "Explosive",
+    "use": "Consumer roadside fireworks",
+    "guide": "114",
+    "file": "explosive-14.png"
+  },
+  {
+    "id": "1001",
+    "name": "Acetylene dissolved",
+    "cls": "2.1",
+    "hazard": "Flammable gas",
+    "use": "Oxy-acetylene cutting and torch welding"
+  },
+  {
+    "id": "1053",
+    "name": "Hydrogen sulfide",
+    "cls": "2.3",
+    "hazard": "Toxic gas",
+    "use": "Byproduct of oil refining and sewage"
+  },
+  {
+    "id": "1076",
+    "name": "Phosgene",
+    "cls": "2.3",
+    "hazard": "Toxic gas",
+    "use": "Plastics manufacturing feedstock"
+  },
+  {
+    "id": "2910",
+    "name": "Radioactive material excepted package",
+    "cls": "7",
+    "hazard": "Radioactive",
+    "use": "Smoke detectors and industrial gauges"
+  },
+  {
+    "id": "2915",
+    "name": "Radioactive material Type A package",
+    "cls": "7",
+    "hazard": "Radioactive",
+    "use": "Medical radiopharmaceuticals"
+  },
+  {
+    "id": "3105",
+    "name": "Organic peroxide type D liquid",
+    "cls": "5.2",
+    "hazard": "Organic peroxide",
+    "use": "Plastics catalyst and curing agent"
+  },
+  {
+    "id": "0027",
+    "name": "Black powder granular or as a meal",
+    "cls": "1.1D",
+    "hazard": "Explosive",
+    "use": "Ammunition and blasting powders",
+    "guide": "112",
+    "file": "explosive.png"
+  },
+  {
+    "id": "0094",
+    "name": "Flash powder",
+    "cls": "1.1G",
+    "hazard": "Explosive",
+    "use": "Pyrotechnics manufacturing",
+    "guide": "112",
+    "file": "explosive.png"
+  },
+  {
+    "id": "0161",
+    "name": "Powder smokeless",
+    "cls": "1.3C",
+    "hazard": "Explosive",
+    "use": "Reloading propellant for firearms",
+    "guide": "112",
+    "file": "explosive.png"
+  },
+  {
+    "id": "0222",
+    "name": "Ammonium nitrate",
+    "cls": "1.1D",
+    "hazard": "Explosive",
+    "use": "Industrial blasting agents",
+    "guide": "112",
+    "file": "explosive.png"
+  },
+  {
+    "id": "0331",
+    "name": "Explosive blasting type A",
+    "cls": "1.5D",
+    "hazard": "Explosive",
+    "use": "Mining and construction blasting",
+    "guide": "112",
+    "file": "explosive.png"
+  },
+  {
+    "id": "1006",
+    "name": "Argon compressed",
+    "cls": "2.2",
+    "hazard": "Non-flammable gas",
+    "use": "TIG welding shield gas"
+  },
+  {
+    "id": "1016",
+    "name": "Carbon monoxide compressed",
+    "cls": "2.3",
+    "hazard": "Toxic gas",
+    "use": "Metallurgy and chemical manufacturing"
+  },
+  {
+    "id": "1038",
+    "name": "Ethylene refrigerated liquid",
+    "cls": "2.1",
+    "hazard": "Flammable gas",
+    "use": "Petrochemical polymer processing"
+  },
+  {
+    "id": "1062",
+    "name": "Methyl bromide",
+    "cls": "2.3",
+    "hazard": "Toxic gas",
+    "use": "Agricultural fumigant"
+  },
+  {
+    "id": "1089",
+    "name": "Acetaldehyde",
+    "cls": "3",
+    "hazard": "Flammable liquid",
+    "use": "Chemical synthesis and synthetic flavors"
+  },
+  {
+    "id": "1098",
+    "name": "Allyl alcohol",
+    "cls": "6.1",
+    "hazard": "Toxic",
+    "use": "Glycerol and resins manufacturing"
+  },
+  {
+    "id": "1381",
+    "name": "Phosphorus white dry",
+    "cls": "4.2",
+    "hazard": "Spontaneously combustible",
+    "use": "Industrial chemical synthesis"
+  },
+  {
+    "id": "1547",
+    "name": "Aniline",
+    "cls": "6.1",
+    "hazard": "Toxic",
+    "use": "Polyurethane manufacturing base"
+  },
+  {
+    "id": "1660",
+    "name": "Nitric oxide compressed",
+    "cls": "2.3",
+    "hazard": "Toxic gas",
+    "use": "Semiconductor manufacturing"
+  },
+  {
+    "id": "1992",
+    "name": "Flammable liquid toxic n.o.s.",
+    "cls": "3",
+    "hazard": "Flammable liquid",
+    "use": "Industrial waste blends"
+  },
+  {
+    "id": "2014",
+    "name": "Hydrogen peroxide aqueous solution",
+    "cls": "5.1",
+    "hazard": "Oxidizer",
+    "use": "Industrial bleaching and textiles"
+  },
+  {
+    "id": "2212",
+    "name": "Asbestos blue or brown",
+    "cls": "9",
+    "hazard": "Miscellaneous",
+    "use": "Hazardous remediation waste"
+  },
+  {
+    "id": "2451",
+    "name": "Nitrogen trifluoride",
+    "cls": "2.2",
+    "hazard": "Non-flammable gas",
+    "use": "Plasma etching for electronics"
+  },
+  {
+    "id": "2794",
+    "name": "Batteries wet filled with acid",
+    "cls": "8",
+    "hazard": "Corrosive",
+    "use": "Automotive scrap logistics"
+  },
+  {
+    "id": "2796",
+    "name": "Battery fluid acid",
+    "cls": "8",
+    "hazard": "Corrosive",
+    "use": "Battery manufacturing materials"
+  },
+  {
+    "id": "2810",
+    "name": "Toxic liquid organic n.o.s.",
+    "cls": "6.1",
+    "hazard": "Toxic",
+    "use": "Lab chemical waste"
+  },
+  {
+    "id": "2911",
+    "name": "Radioactive material instruments or articles",
+    "cls": "7",
+    "hazard": "Radioactive",
+    "use": "Industrial dial gauges and sights"
+  },
+  {
+    "id": "2912",
+    "name": "Radioactive material low specific activity",
+    "cls": "7",
+    "hazard": "Radioactive",
+    "use": "Uranium ore transport"
+  },
+  {
+    "id": "2913",
+    "name": "Radioactive material surface contaminated objects",
+    "cls": "7",
+    "hazard": "Radioactive",
+    "use": "Decommissioned equipment transport"
+  },
+  {
+    "id": "2916",
+    "name": "Radioactive material Type B(U) package",
+    "cls": "7",
+    "hazard": "Radioactive",
+    "use": "Industrial radiography sources"
+  },
+  {
+    "id": "2924",
+    "name": "Flammable liquid corrosive n.o.s.",
+    "cls": "3",
+    "hazard": "Flammable liquid",
+    "use": "Specialized chemical processing waste"
+  },
+  {
+    "id": "2977",
+    "name": "Radioactive material uranium hexafluoride fissile",
+    "cls": "7",
+    "hazard": "Radioactive",
+    "use": "Nuclear fuel cycle transport"
+  },
+  {
+    "id": "2978",
+    "name": "Radioactive material uranium hexafluoride non-fissile",
+    "cls": "7",
+    "hazard": "Radioactive",
+    "use": "Nuclear fuel processing"
+  },
+  {
+    "id": "3077",
+    "name": "Environmentally hazardous substance solid n.o.s.",
+    "cls": "9",
+    "hazard": "Miscellaneous",
+    "use": "Contaminated soil remediation"
+  },
+  {
+    "id": "3101",
+    "name": "Organic peroxide type B liquid",
+    "cls": "5.2",
+    "hazard": "Organic peroxide",
+    "use": "Polymerization initiator"
+  },
+  {
+    "id": "3103",
+    "name": "Organic peroxide type C liquid",
+    "cls": "5.2",
+    "hazard": "Organic peroxide",
+    "use": "Chemical curing processes"
+  },
+  {
+    "id": "3265",
+    "name": "Corrosive liquid acidic organic n.o.s.",
+    "cls": "8",
+    "hazard": "Corrosive",
+    "use": "Organic industrial cleaners"
+  },
+  {
+    "id": "3323",
+    "name": "Radioactive material Type C package",
+    "cls": "7",
+    "hazard": "Radioactive",
+    "use": "High-activity transport by air"
+  },
+  {
+    "id": "3332",
+    "name": "Radioactive material Type A package special form",
+    "cls": "7",
+    "hazard": "Radioactive",
+    "use": "Moisture density soil gauges"
+  },
+  {
+    "id": "3475",
+    "name": "Ethanol and gasoline mixture",
+    "cls": "3",
+    "hazard": "Flammable liquid",
+    "use": "E85 pump fuel transport"
+  },
+  {
+    "id": "1033",
+    "name": "Dimethyl ether",
+    "cls": "2.1",
+    "hazard": "Flammable gas",
+    "use": "Aerosol propellant"
+  },
+  {
+    "id": "1035",
+    "name": "Ethane",
+    "cls": "2.1",
+    "hazard": "Flammable gas",
+    "use": "Refrigerant and petrochemical feedstock"
+  },
+  {
+    "id": "1050",
+    "name": "Hydrogen chloride anhydrous",
+    "cls": "2.3",
+    "hazard": "Toxic gas",
+    "use": "Semiconductor processing"
+  },
+  {
+    "id": "1079",
+    "name": "Sulfur dioxide",
+    "cls": "2.3",
+    "hazard": "Toxic gas",
+    "use": "Wine preservative and bleaching agent"
+  },
+  {
+    "id": "1155",
+    "name": "Diethyl ether",
+    "cls": "3",
+    "hazard": "Flammable liquid",
+    "use": "Laboratory solvent"
+  },
+  {
+    "id": "1165",
+    "name": "Dioxane",
+    "cls": "3",
+    "hazard": "Flammable liquid",
+    "use": "Stabilizer for chlorinated solvents"
+  },
+  {
+    "id": "1208",
+    "name": "Hexanes",
+    "cls": "3",
+    "hazard": "Flammable liquid",
+    "use": "Edible oil extraction solvent"
+  },
+  {
+    "id": "1212",
+    "name": "Isobutanol",
+    "cls": "3",
+    "hazard": "Flammable liquid",
+    "use": "Coating and paint solvent"
+  },
+  {
+    "id": "1213",
+    "name": "Isobutyl acetate",
+    "cls": "3",
+    "hazard": "Flammable liquid",
+    "use": "Lacquer and varnish solvent"
+  },
+  {
+    "id": "1221",
+    "name": "Isopropylamine",
+    "cls": "3",
+    "hazard": "Flammable liquid",
+    "use": "Agrochemical manufacturing"
+  },
+  {
+    "id": "1274",
+    "name": "n-Propanol",
+    "cls": "3",
+    "hazard": "Flammable liquid",
+    "use": "Flexographic printing inks"
+  },
+  {
+    "id": "1299",
+    "name": "Turpentine",
+    "cls": "3",
+    "hazard": "Flammable liquid",
+    "use": "Paint solvents and resins"
+  },
+  {
+    "id": "1300",
+    "name": "Turpentine substitute",
+    "cls": "3",
+    "hazard": "Flammable liquid",
+    "use": "Mineral spirits for industrial cleaning"
+  },
+  {
+    "id": "1402",
+    "name": "Calcium carbide",
+    "cls": "4.3",
+    "hazard": "Dangerous when wet",
+    "use": "Acetylene gas production"
+  },
+  {
+    "id": "1805",
+    "name": "Phosphoric acid solution",
+    "cls": "8",
+    "hazard": "Corrosive",
+    "use": "Food rustproofing and fertilizers"
+  }
+]

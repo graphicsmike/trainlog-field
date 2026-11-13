@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="night">
+<head>
+<meta charset="utf-8" />
+<title>KMI E variants</title>
+<style>
+  :root {
+    --font-ui: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+    --radius: 6px;
+    --bg: #10161e;
+    --surface: #1b2430;
+    --ink: #e8eef6;
+    --muted: #93a1b3;
+    --border: #334155;
+    --accent: #ef4444;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 28px 28px 72px;
+    font-family: var(--font-ui);
+    background: var(--bg);
+    color: var(--ink);
+  }
+  h1 { margin: 0 0 6px; font-size: 22px; font-weight: 650; }
+  .intro { margin: 0 0 26px; color: var(--muted); font-size: 14px; line-height: 1.45; max-width: 86ch; }
+  .option { margin-bottom: 34px; }
+  .option-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; margin-bottom: 8px; }
+  .option-head h2 { margin: 0; font-size: 14px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .tag {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted);
+  }
+  .tag.rec { color: #86efac; border-color: color-mix(in srgb, #16a34a 50%, var(--border)); }
+  .blurb { margin: 0 0 12px; color: var(--muted); font-size: 13px; line-height: 1.4; max-width: 92ch; }
+  .frame {
+    padding: 12px;
+    border: 1px dashed color-mix(in srgb, var(--border) 80%, transparent);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--surface) 35%, transparent);
+  }
+  .rail {
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+  }
+  .kpi {
+    --card-tint: var(--accent);
+    position: relative;
+    overflow: hidden;
+    min-height: 118px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 10px 11px;
+    border-radius: var(--radius);
+    border: 1px solid color-mix(in srgb, var(--card-tint) 26%, var(--border));
+    background:
+      radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--card-tint) 16%, transparent), transparent 60%),
+      linear-gradient(180deg, color-mix(in srgb, var(--card-tint) 8%, var(--surface)) 0%, var(--surface) 55%);
+  }
+  .kpi::before {
+    content: "";
+    position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--card-tint) 78%, transparent);
+  }
+  .kpi[data-kpi="when"], .kpi[data-kpi="ampm"] { --card-tint: #0369a1; }
+  .kpi[data-kpi="where"] { --card-tint: #2f6b8a; }
+  .kpi[data-kpi="trains"], .kpi[data-kpi="direction"], .kpi[data-kpi="mix"] { --card-tint: #9a3412; }
+  .kpi[data-kpi="media"] { --card-tint: #a16207; }
+  .kpi[data-kpi="symbols"] { --card-tint: #5b4b8a; }
+  .kpi[data-kpi="special"] { --card-tint: #c2410c; }
+
+  .head { display: flex; align-items: baseline; gap: 0.35em; margin: 0 0 8px; min-width: 0; }
+  .head b { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .head span { font-size: 11px; color: var(--muted); font-weight: 500; }
+
+  .grid2, .grid4 {
+    display: grid;
+    gap: 6px 8px;
+    width: 100%;
+    flex: 1;
+    align-content: center;
+    justify-items: center;
+    text-align: center;
+  }
+  .grid2 { grid-template-columns: 1fr 1fr; }
+  .grid4 { grid-template-columns: 1fr 1fr; }
+  .cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    gap: 1px;
+  }
+  .cell b {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.05;
+  }
+  .cell span {
+    font-size: 10px;
+    color: var(--muted);
+    font-weight: 500;
+    line-height: 1.1;
+  }
+  .grid4 .cell b { font-size: 15px; }
+
+  /* E1: hero + centered 2x2 under a thin rule */
+  .e1 .kpi { justify-content: flex-start; padding-top: 11px; padding-bottom: 10px; }
+  .e1 .head { margin-bottom: 0; }
+  .e1 .rule {
+    height: 1px; width: 100%;
+    background: color-mix(in srgb, var(--ink) 22%, transparent);
+    margin: 8px 0 8px;
+  }
+  .e1 .grid2 { align-content: start; }
+
+  /* E2: pure centered 2x2 / 2x2-of-4 — no hero, every cell equal */
+  .e2 .kpi { min-height: 112px; }
+  .e2 .grid4 .cell b { font-size: 17px; }
+  .e2 .title {
+    position: absolute;
+    top: 8px; right: 10px;
+    font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: color-mix(in srgb, var(--muted) 85%, transparent);
+    font-weight: 650;
+  }
+
+  /* E3: mosaic — one tall hero number centered over a 3-cell footer row */
+  .e3 .kpi { text-align: center; align-items: center; min-height: 124px; }
+  .e3 .hero {
+    display: flex; flex-direction: column; align-items: center; gap: 1px; margin-bottom: 8px;
+  }
+  .e3 .hero b { font-size: 28px; font-weight: 750; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .e3 .hero span { font-size: 11px; color: var(--muted); }
+  .e3 .foot {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+    width: 100%;
+    padding-top: 8px;
+    border-top: 1px solid color-mix(in srgb, var(--ink) 22%, transparent);
+  }
+  .e3 .foot .cell b { font-size: 13px; }
+  .e3 .foot2 { grid-template-columns: 1fr 1fr; }
+  .e3 .foot4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .e3 .foot4 .cell b { font-size: 12px; }
+  .e3 .foot4 .cell span { font-size: 9px; }
+
+  /* E4: 2×2 equal tiles with tiny labels above numbers (label-on-top) */
+  .e4 .kpi { min-height: 120px; padding: 12px 10px; }
+  .e4 .grid4 { gap: 8px 6px; height: 100%; align-content: center; }
+  .e4 .cell { gap: 2px; }
+  .e4 .cell span {
+    order: -1;
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 650;
+  }
+  .e4 .cell b { font-size: 18px; }
+  .e4 .solo {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2px; height: 100%;
+  }
+  .e4 .solo b { font-size: 28px; font-weight: 750; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+  .e4 .solo span { font-size: 11px; color: var(--muted); }
+  .e4 .solo .sub {
+    margin-top: 8px; padding-top: 8px; width: 100%;
+    border-top: 1px solid color-mix(in srgb, var(--ink) 22%, transparent);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+  }
+</style>
+</head>
+<body>
+  <h1>Option E · denser / centered variants</h1>
+  <p class="intro">Same eight-card rail. Goal: more facts per card, grids that feel centered and even, without turning into a spreadsheet.</p>
+
+  <!-- E1 -->
+  <section class="option e1" id="opt-e1">
+    <div class="option-head"><h2>E1 · Hero + centered 2×2</h2><span class="tag">Familiar</span></div>
+    <p class="blurb">Keep a big lead number, then a ruled, centered 2×2 underneath. Adds night / states / media% / AM·PM / trips without new columns.</p>
+    <div class="frame"><div class="rail">
+      <div class="kpi" data-kpi="trains">
+        <p class="head"><b>79</b><span>trains</span></p>
+        <div class="rule"></div>
+        <div class="grid2">
+          <div class="cell"><b>21</b><span>loads</span></div>
+          <div class="cell"><b>14</b><span>empties</span></div>
+          <div class="cell"><b>11</b><span>night</span></div>
+          <div class="cell"><b>3</b><span>meets</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="when">
+        <p class="head"><b>43</b><span>days</span></p>
+        <div class="rule"></div>
+        <div class="grid2">
+          <div class="cell"><b>1.8</b><span>avg/day</span></div>
+          <div class="cell"><b>16:00</b><span>busiest</span></div>
+          <div class="cell"><b>34</b><span>AM</span></div>
+          <div class="cell"><b>45</b><span>PM</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="where">
+        <p class="head"><b>38</b><span>locations</span></p>
+        <div class="rule"></div>
+        <div class="grid2">
+          <div class="cell"><b>16</b><span>subs</span></div>
+          <div class="cell"><b>7</b><span>states</span></div>
+          <div class="cell"><b>5</b><span>trips</span></div>
+          <div class="cell"><b>9</b><span>zones</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="direction">
+        <p class="head"><b>75</b><span>moving</span></p>
+        <div class="rule"></div>
+        <div class="grid2">
+          <div class="cell"><b>9</b><span>North</span></div>
+          <div class="cell"><b>28</b><span>East</span></div>
+          <div class="cell"><b>7</b><span>South</span></div>
+          <div class="cell"><b>31</b><span>West</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="media">
+        <p class="head"><b>49%</b><span>with media</span></p>
+        <div class="rule"></div>
+        <div class="grid2">
+          <div class="cell"><b>39</b><span>photos</span></div>
+          <div class="cell"><b>10</b><span>videos</span></div>
+          <div class="cell"><b>28</b><span>notes</span></div>
+          <div class="cell"><b>11</b><span>night</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="symbols">
+        <p class="head"><b>22</b><span>symbols</span></p>
+        <div class="rule"></div>
+        <div class="grid2">
+          <div class="cell"><b>12</b><span>types</span></div>
+          <div class="cell"><b>41</b><span>consists</span></div>
+          <div class="cell"><b>18</b><span>leads</span></div>
+          <div class="cell"><b>6</b><span>RRs</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="mix">
+        <p class="head"><b>6</b><span>railroads</span></p>
+        <div class="rule"></div>
+        <div class="grid2">
+          <div class="cell"><b>33</b><span>BNSF</span></div>
+          <div class="cell"><b>24</b><span>UP</span></div>
+          <div class="cell"><b>13</b><span>AMTK</span></div>
+          <div class="cell"><b>9</b><span>other</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="special">
+        <p class="head"><b>15</b><span>special</span></p>
+        <div class="rule"></div>
+        <div class="grid2">
+          <div class="cell"><b>7</b><span>heritage</span></div>
+          <div class="cell"><b>8</b><span>steam</span></div>
+          <div class="cell"><b>2</b><span>A250</span></div>
+          <div class="cell"><b>1</b><span>DH</span></div>
+        </div>
+      </div>
+    </div></div>
+  </section>
+
+  <!-- E2 -->
+  <section class="option e2" id="opt-e2">
+    <div class="option-head"><h2>E2 · Equal 2×2 tiles</h2><span class="tag rec">Centered</span></div>
+    <p class="blurb">No hero number fighting the grid — every cell is the same weight, centered. Corner title keeps the card identity. Feels most “balanced.”</p>
+    <div class="frame"><div class="rail">
+      <div class="kpi" data-kpi="trains">
+        <span class="title">Trains</span>
+        <div class="grid4">
+          <div class="cell"><b>79</b><span>total</span></div>
+          <div class="cell"><b>21</b><span>loads</span></div>
+          <div class="cell"><b>14</b><span>empties</span></div>
+          <div class="cell"><b>11</b><span>night</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="when">
+        <span class="title">When</span>
+        <div class="grid4">
+          <div class="cell"><b>43</b><span>days</span></div>
+          <div class="cell"><b>1.8</b><span>avg</span></div>
+          <div class="cell"><b>34</b><span>AM</span></div>
+          <div class="cell"><b>45</b><span>PM</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="where">
+        <span class="title">Where</span>
+        <div class="grid4">
+          <div class="cell"><b>38</b><span>spots</span></div>
+          <div class="cell"><b>16</b><span>subs</span></div>
+          <div class="cell"><b>7</b><span>states</span></div>
+          <div class="cell"><b>5</b><span>trips</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="direction">
+        <span class="title">Direction</span>
+        <div class="grid4">
+          <div class="cell"><b>9</b><span>North</span></div>
+          <div class="cell"><b>28</b><span>East</span></div>
+          <div class="cell"><b>7</b><span>South</span></div>
+          <div class="cell"><b>31</b><span>West</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="media">
+        <span class="title">Media</span>
+        <div class="grid4">
+          <div class="cell"><b>39</b><span>photos</span></div>
+          <div class="cell"><b>10</b><span>videos</span></div>
+          <div class="cell"><b>49%</b><span>either</span></div>
+          <div class="cell"><b>28</b><span>notes</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="symbols">
+        <span class="title">Power</span>
+        <div class="grid4">
+          <div class="cell"><b>22</b><span>symbols</span></div>
+          <div class="cell"><b>12</b><span>types</span></div>
+          <div class="cell"><b>18</b><span>leads</span></div>
+          <div class="cell"><b>41</b><span>consists</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="mix">
+        <span class="title">Railroads</span>
+        <div class="grid4">
+          <div class="cell"><b>33</b><span>BNSF</span></div>
+          <div class="cell"><b>24</b><span>UP</span></div>
+          <div class="cell"><b>13</b><span>AMTK</span></div>
+          <div class="cell"><b>9</b><span>other</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="special">
+        <span class="title">Special</span>
+        <div class="grid4">
+          <div class="cell"><b>7</b><span>heritage</span></div>
+          <div class="cell"><b>8</b><span>steam</span></div>
+          <div class="cell"><b>2</b><span>A250</span></div>
+          <div class="cell"><b>3</b><span>meets</span></div>
+        </div>
+      </div>
+    </div></div>
+  </section>
+
+  <!-- E3 -->
+  <section class="option e3" id="opt-e3">
+    <div class="option-head"><h2>E3 · Centered hero + footer row</h2><span class="tag">Different</span></div>
+    <p class="blurb">Big number dead-center. Three (or four) tiny facts on a footer rail. Strong glance value; secondary stats stay quiet.</p>
+    <div class="frame"><div class="rail">
+      <div class="kpi" data-kpi="trains">
+        <div class="hero"><b>79</b><span>trains</span></div>
+        <div class="foot">
+          <div class="cell"><b>21</b><span>loads</span></div>
+          <div class="cell"><b>14</b><span>emp</span></div>
+          <div class="cell"><b>11</b><span>night</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="when">
+        <div class="hero"><b>43</b><span>days</span></div>
+        <div class="foot">
+          <div class="cell"><b>1.8</b><span>avg</span></div>
+          <div class="cell"><b>34</b><span>AM</span></div>
+          <div class="cell"><b>45</b><span>PM</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="where">
+        <div class="hero"><b>38</b><span>locations</span></div>
+        <div class="foot">
+          <div class="cell"><b>16</b><span>subs</span></div>
+          <div class="cell"><b>7</b><span>states</span></div>
+          <div class="cell"><b>5</b><span>trips</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="direction">
+        <div class="hero"><b>W</b><span>busiest</span></div>
+        <div class="foot foot4">
+          <div class="cell"><b>9</b><span>N</span></div>
+          <div class="cell"><b>28</b><span>E</span></div>
+          <div class="cell"><b>7</b><span>S</span></div>
+          <div class="cell"><b>31</b><span>W</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="media">
+        <div class="hero"><b>49%</b><span>with media</span></div>
+        <div class="foot">
+          <div class="cell"><b>39</b><span>photo</span></div>
+          <div class="cell"><b>10</b><span>video</span></div>
+          <div class="cell"><b>28</b><span>notes</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="symbols">
+        <div class="hero"><b>22</b><span>symbols</span></div>
+        <div class="foot">
+          <div class="cell"><b>12</b><span>types</span></div>
+          <div class="cell"><b>18</b><span>leads</span></div>
+          <div class="cell"><b>41</b><span>consist</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="mix">
+        <div class="hero"><b>6</b><span>railroads</span></div>
+        <div class="foot foot4">
+          <div class="cell"><b>33</b><span>BNSF</span></div>
+          <div class="cell"><b>24</b><span>UP</span></div>
+          <div class="cell"><b>13</b><span>AMTK</span></div>
+          <div class="cell"><b>9</b><span>+</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="special">
+        <div class="hero"><b>15</b><span>special</span></div>
+        <div class="foot foot2">
+          <div class="cell"><b>7</b><span>heritage</span></div>
+          <div class="cell"><b>8</b><span>steam</span></div>
+        </div>
+      </div>
+    </div></div>
+  </section>
+
+  <!-- E4 -->
+  <section class="option e4" id="opt-e4">
+    <div class="option-head"><h2>E4 · Label-on-top tiles</h2><span class="tag rec">Live on Log</span></div>
+    <p class="blurb">Tiny uppercase labels above numbers (dashboard-stat style). Every card is a centered 2×2 — or a solo hero with a 2-up subline. Most readable at a glance once you learn the labels.</p>
+    <div class="frame"><div class="rail">
+      <div class="kpi" data-kpi="trains">
+        <div class="grid4">
+          <div class="cell"><b>79</b><span>Trains</span></div>
+          <div class="cell"><b>21</b><span>Loads</span></div>
+          <div class="cell"><b>14</b><span>Empties</span></div>
+          <div class="cell"><b>11</b><span>Night</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="when">
+        <div class="grid4">
+          <div class="cell"><b>43</b><span>Days</span></div>
+          <div class="cell"><b>1.8</b><span>Avg</span></div>
+          <div class="cell"><b>34</b><span>AM</span></div>
+          <div class="cell"><b>45</b><span>PM</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="where">
+        <div class="grid4">
+          <div class="cell"><b>38</b><span>Spots</span></div>
+          <div class="cell"><b>16</b><span>Subs</span></div>
+          <div class="cell"><b>7</b><span>States</span></div>
+          <div class="cell"><b>5</b><span>Trips</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="direction">
+        <div class="grid4">
+          <div class="cell"><b>9</b><span>North</span></div>
+          <div class="cell"><b>28</b><span>East</span></div>
+          <div class="cell"><b>7</b><span>South</span></div>
+          <div class="cell"><b>31</b><span>West</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="media">
+        <div class="grid4">
+          <div class="cell"><b>39</b><span>Photos</span></div>
+          <div class="cell"><b>10</b><span>Videos</span></div>
+          <div class="cell"><b>49%</b><span>Either</span></div>
+          <div class="cell"><b>28</b><span>Notes</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="symbols">
+        <div class="grid4">
+          <div class="cell"><b>22</b><span>Symbols</span></div>
+          <div class="cell"><b>12</b><span>Types</span></div>
+          <div class="cell"><b>18</b><span>Leads</span></div>
+          <div class="cell"><b>41</b><span>Consists</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="mix">
+        <div class="grid4">
+          <div class="cell"><b>33</b><span>BNSF</span></div>
+          <div class="cell"><b>24</b><span>UP</span></div>
+          <div class="cell"><b>13</b><span>AMTK</span></div>
+          <div class="cell"><b>9</b><span>Other</span></div>
+        </div>
+      </div>
+      <div class="kpi" data-kpi="special">
+        <div class="grid4">
+          <div class="cell"><b>7</b><span>Heritage</span></div>
+          <div class="cell"><b>8</b><span>Steam</span></div>
+          <div class="cell"><b>2</b><span>A250</span></div>
+          <div class="cell"><b>3</b><span>Meets</span></div>
+        </div>
+      </div>
+    </div></div>
+  </section>
+</body>
+</html>

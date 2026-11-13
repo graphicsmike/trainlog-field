@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="night">
+<head>
+<meta charset="utf-8" />
+<title>Header timer options</title>
+<style>
+  :root {
+    --font-ui: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+    --radius: 6px;
+    --bg: #10161e;
+    --surface: #1b2430;
+    --surface-muted: #222c3a;
+    --ink: #e8eef6;
+    --muted: #93a1b3;
+    --border: #334155;
+    --accent: #ef4444;
+    --control-h: 36px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 28px 28px 72px;
+    font-family: var(--font-ui);
+    background: var(--bg);
+    color: var(--ink);
+  }
+  h1 { margin: 0 0 6px; font-size: 22px; font-weight: 650; }
+  .intro { margin: 0 0 26px; color: var(--muted); font-size: 14px; line-height: 1.45; max-width: 78ch; }
+  .option { margin-bottom: 34px; }
+  .option-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; margin-bottom: 8px; }
+  .option-head h2 { margin: 0; font-size: 14px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .tag {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted);
+  }
+  .tag.rec { color: #86efac; border-color: color-mix(in srgb, #16a34a 50%, var(--border)); }
+  .blurb { margin: 0 0 12px; color: var(--muted); font-size: 13px; line-height: 1.4; max-width: 90ch; }
+  .frame {
+    padding: 14px 16px 16px;
+    border: 1px dashed color-mix(in srgb, var(--border) 80%, transparent);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--surface) 40%, transparent);
+  }
+  .bar {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .field { display: grid; gap: 6px; min-width: 0; }
+  .field > span {
+    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
+  }
+  .control, .btn {
+    height: var(--control-h);
+    min-height: var(--control-h);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink);
+    padding: 0 12px;
+    font: inherit;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .date { width: 148px; }
+  .trip { width: 180px; }
+  .btn.ghost { background: transparent; }
+  .btn.primary {
+    background: var(--accent);
+    border-color: color-mix(in srgb, var(--accent) 70%, #7f1d1d);
+    color: #fff;
+    font-weight: 650;
+  }
+  .actions { display: flex; gap: 8px; align-items: center; margin-left: auto; }
+  .mid { flex: 1; display: flex; justify-content: center; align-items: flex-end; min-width: 80px; }
+
+  /* A current flip */
+  .flip {
+    display: inline-flex; align-items: center; gap: 5px; height: 52px; padding: 0; border: 0; background: transparent; color: inherit;
+  }
+  .flip .lab { display: none; }
+  .flap {
+    width: 28px; height: 100%;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: #f4f6f8; color: #111;
+    border-radius: 6px; font-size: 22px; font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    box-shadow: 0 2px 0 #05070b, 0 3px 6px rgba(0,0,0,.35);
+  }
+  .colon { width: 8px; text-align: center; font-weight: 700; opacity: .7; }
+
+  /* B quiet chip in actions */
+  .chip {
+    height: var(--control-h);
+    padding: 0 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--ink);
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 13px;
+  }
+  .chip .time { font-variant-numeric: tabular-nums; font-weight: 650; letter-spacing: 0.02em; }
+  .chip .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: color-mix(in srgb, var(--muted) 70%, transparent);
+  }
+  .chip.is-run .dot { background: #22c55e; box-shadow: 0 0 0 3px color-mix(in srgb, #22c55e 25%, transparent); }
+  .chip.is-done .dot { background: var(--accent); }
+
+  /* C icon only */
+  .icon-btn {
+    width: var(--control-h); height: var(--control-h);
+    padding: 0; justify-content: center;
+    border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--ink);
+    position: relative;
+  }
+  .icon-btn svg { width: 16px; height: 16px; }
+  .icon-btn .badge {
+    position: absolute; top: -5px; right: -5px;
+    min-width: 18px; height: 16px; padding: 0 4px;
+    border-radius: 999px; background: var(--accent); color: #fff;
+    font-size: 9px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .icon-btn.is-idle .badge { display: none; }
+
+  /* D under-card strip */
+  .under {
+    margin-top: 12px;
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+  }
+  .under .refs { display: flex; gap: 8px; color: var(--muted); font-size: 13px; }
+  .under .day { margin-left: auto; text-align: right; font-size: 12px; color: var(--muted); }
+  .under .day b { display: block; color: var(--ink); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .under-timer {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 10px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--surface-muted);
+    font-size: 13px;
+  }
+  .under-timer .time { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  /* E idle-hidden / running only */
+  .run-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    height: var(--control-h); padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, #22c55e 45%, var(--border));
+    background: color-mix(in srgb, #22c55e 12%, var(--surface));
+    color: var(--ink); font-size: 13px;
+  }
+  .run-pill .time { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .ghost-note { font-size: 12px; color: var(--muted); font-style: italic; }
+
+  /* F ring progress */
+  .ring-btn {
+    width: 40px; height: 40px; border: 0; background: transparent; padding: 0;
+    display: inline-grid; place-items: center; position: relative; color: var(--ink);
+  }
+  .ring-btn svg.ring { width: 40px; height: 40px; transform: rotate(-90deg); }
+  .ring-btn .track { fill: none; stroke: var(--border); stroke-width: 3; }
+  .ring-btn .prog { fill: none; stroke: #22c55e; stroke-width: 3; stroke-linecap: round;
+    stroke-dasharray: 100; stroke-dashoffset: 28; }
+  .ring-btn .face { position: absolute; font-size: 9px; font-weight: 700; letter-spacing: 0.04em; }
+</style>
+</head>
+<body>
+  <h1>Header timer options</h1>
+  <p class="intro">The flip-clock digits currently sit in the middle of the session row and read louder than Date / Trip / Submit. Same night theme. Each option keeps the 15‑minute dialog — only the header treatment changes.</p>
+
+  <section class="option" id="opt-a">
+    <div class="option-head"><h2>A · Current flip clock</h2><span class="tag">Baseline</span></div>
+    <p class="blurb">Centered scoreboard flaps. Always visible, even at rest. Visually separate from every other control.</p>
+    <div class="frame">
+      <div class="bar">
+        <label class="field"><span>Date Trackside</span><input class="control date" value="11/01/2026" readonly /></label>
+        <label class="field"><span>Trip</span><input class="control trip" readonly /></label>
+        <label class="field"><span>From</span><input class="control date" placeholder="mm/dd/yyyy" readonly /></label>
+        <label class="field"><span>To</span><input class="control date" placeholder="mm/dd/yyyy" readonly /></label>
+        <button class="btn ghost">Trip Details…</button>
+        <div class="mid">
+          <button class="flip" type="button" aria-label="15 min timer">
+            <span class="flap">0</span><span class="flap">1</span><span class="colon">:</span><span class="flap">0</span><span class="flap">0</span>
+          </button>
+        </div>
+        <div class="actions">
+          <button class="btn ghost">☆ Spots</button>
+          <button class="btn ghost">Clear</button>
+          <button class="btn ghost">Quick Add</button>
+          <button class="btn primary">Submit</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="option" id="opt-b">
+    <div class="option-head"><h2>B · Quiet chip in the action row</h2><span class="tag rec">Live on pad</span></div>
+    <p class="blurb">Same height as Spots / Clear. Status lamp + plain time. Idle shows “15 min”; running shows countdown. No middle gap hogging space.</p>
+    <div class="frame">
+      <div class="bar">
+        <label class="field"><span>Date Trackside</span><input class="control date" value="11/01/2026" readonly /></label>
+        <label class="field"><span>Trip</span><input class="control trip" readonly /></label>
+        <label class="field"><span>From</span><input class="control date" readonly /></label>
+        <label class="field"><span>To</span><input class="control date" readonly /></label>
+        <button class="btn ghost">Trip Details…</button>
+        <div class="actions">
+          <button class="chip" type="button" title="15 minute countdown"><i class="dot"></i><span>15 min</span></button>
+          <button class="btn ghost">☆ Spots</button>
+          <button class="btn ghost">Clear</button>
+          <button class="btn ghost">Quick Add</button>
+          <button class="btn primary">Submit</button>
+        </div>
+      </div>
+      <p class="ghost-note" style="margin:10px 0 0">While running →</p>
+      <div class="bar" style="margin-top:8px">
+        <label class="field"><span>Date Trackside</span><input class="control date" value="11/01/2026" readonly /></label>
+        <label class="field"><span>Trip</span><input class="control trip" readonly /></label>
+        <label class="field"><span>From</span><input class="control date" readonly /></label>
+        <label class="field"><span>To</span><input class="control date" readonly /></label>
+        <button class="btn ghost">Trip Details…</button>
+        <div class="actions">
+          <button class="chip is-run" type="button"><i class="dot"></i><span class="time">12:48</span></button>
+          <button class="btn ghost">☆ Spots</button>
+          <button class="btn ghost">Clear</button>
+          <button class="btn ghost">Quick Add</button>
+          <button class="btn primary">Submit</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="option" id="opt-c">
+    <div class="option-head"><h2>C · Icon only (+ badge when running)</h2><span class="tag">Minimal</span></div>
+    <p class="blurb">Clock icon matches Spots. Idle is silent. Running pins a small countdown badge on the icon.</p>
+    <div class="frame">
+      <div class="bar">
+        <label class="field"><span>Date Trackside</span><input class="control date" value="11/01/2026" readonly /></label>
+        <label class="field"><span>Trip</span><input class="control trip" readonly /></label>
+        <label class="field"><span>From</span><input class="control date" readonly /></label>
+        <label class="field"><span>To</span><input class="control date" readonly /></label>
+        <button class="btn ghost">Trip Details…</button>
+        <div class="actions">
+          <button class="icon-btn is-idle" type="button" title="15 minute countdown" aria-label="Timer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 8v5l3 2"/><path d="M9 3h6"/></svg>
+            <span class="badge">12:48</span>
+          </button>
+          <button class="btn ghost">☆ Spots</button>
+          <button class="btn ghost">Clear</button>
+          <button class="btn ghost">Quick Add</button>
+          <button class="btn primary">Submit</button>
+        </div>
+      </div>
+      <p class="ghost-note" style="margin:10px 0 0">While running →</p>
+      <div class="bar" style="margin-top:8px">
+        <label class="field"><span>Date Trackside</span><input class="control date" value="11/01/2026" readonly /></label>
+        <label class="field"><span>Trip</span><input class="control trip" readonly /></label>
+        <label class="field"><span>From</span><input class="control date" readonly /></label>
+        <label class="field"><span>To</span><input class="control date" readonly /></label>
+        <button class="btn ghost">Trip Details…</button>
+        <div class="actions">
+          <button class="icon-btn" type="button" title="Countdown running" aria-label="Timer 12:48">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 8v5l3 2"/><path d="M9 3h6"/></svg>
+            <span class="badge">12:48</span>
+          </button>
+          <button class="btn ghost">☆ Spots</button>
+          <button class="btn ghost">Clear</button>
+          <button class="btn ghost">Quick Add</button>
+          <button class="btn primary">Submit</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="option" id="opt-d">
+    <div class="option-head"><h2>D · Move under the train card</h2><span class="tag">Out of header</span></div>
+    <p class="blurb">Header is only session + actions. Timer lives with Guide / day count — closer to where you’re working, not competing with Trip.</p>
+    <div class="frame">
+      <div class="bar">
+        <label class="field"><span>Date Trackside</span><input class="control date" value="11/01/2026" readonly /></label>
+        <label class="field"><span>Trip</span><input class="control trip" readonly /></label>
+        <label class="field"><span>From</span><input class="control date" readonly /></label>
+        <label class="field"><span>To</span><input class="control date" readonly /></label>
+        <button class="btn ghost">Trip Details…</button>
+        <div class="actions">
+          <button class="btn ghost">☆ Spots</button>
+          <button class="btn ghost">Clear</button>
+          <button class="btn ghost">Quick Add</button>
+          <button class="btn primary">Submit</button>
+        </div>
+      </div>
+      <div class="under">
+        <div class="refs"><span>Guide</span><span>Placards</span><span>Marks</span><span>Legend</span></div>
+        <button class="under-timer" type="button"><span>⏱</span><span>15 min</span><span class="time">12:48</span></button>
+        <div class="day"><b>6 trains logged</b>Last BNSF 8124 · West · 4:40 PM</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="option" id="opt-e">
+    <div class="option-head"><h2>E · Hide until running</h2><span class="tag">Appear on demand</span></div>
+    <p class="blurb">Idle: no header timer (footer ⏱ Timer remains). Running: a soft green pill appears in the action row. Done: turns red until dismissed.</p>
+    <div class="frame">
+      <p class="ghost-note" style="margin:0 0 8px">Idle — timer absent from header</p>
+      <div class="bar">
+        <label class="field"><span>Date Trackside</span><input class="control date" value="11/01/2026" readonly /></label>
+        <label class="field"><span>Trip</span><input class="control trip" readonly /></label>
+        <label class="field"><span>From</span><input class="control date" readonly /></label>
+        <label class="field"><span>To</span><input class="control date" readonly /></label>
+        <button class="btn ghost">Trip Details…</button>
+        <div class="actions">
+          <button class="btn ghost">☆ Spots</button>
+          <button class="btn ghost">Clear</button>
+          <button class="btn ghost">Quick Add</button>
+          <button class="btn primary">Submit</button>
+        </div>
+      </div>
+      <p class="ghost-note" style="margin:14px 0 8px">Running →</p>
+      <div class="bar">
+        <label class="field"><span>Date Trackside</span><input class="control date" value="11/01/2026" readonly /></label>
+        <label class="field"><span>Trip</span><input class="control trip" readonly /></label>
+        <label class="field"><span>From</span><input class="control date" readonly /></label>
+        <label class="field"><span>To</span><input class="control date" readonly /></label>
+        <button class="btn ghost">Trip Details…</button>
+        <div class="actions">
+          <button class="run-pill" type="button"><span>⏱</span><span class="time">12:48</span></button>
+          <button class="btn ghost">☆ Spots</button>
+          <button class="btn ghost">Clear</button>
+          <button class="btn ghost">Quick Add</button>
+          <button class="btn primary">Submit</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="option" id="opt-f">
+    <div class="option-head"><h2>F · Progress ring</h2><span class="tag">Different</span></div>
+    <p class="blurb">Small ring that empties over 15 minutes. No digit flaps in the header — open the dialog for exact time. Nice visual, slightly less precise at a glance.</p>
+    <div class="frame">
+      <div class="bar">
+        <label class="field"><span>Date Trackside</span><input class="control date" value="11/01/2026" readonly /></label>
+        <label class="field"><span>Trip</span><input class="control trip" readonly /></label>
+        <label class="field"><span>From</span><input class="control date" readonly /></label>
+        <label class="field"><span>To</span><input class="control date" readonly /></label>
+        <button class="btn ghost">Trip Details…</button>
+        <div class="actions">
+          <button class="ring-btn" type="button" title="15 minute countdown" aria-label="Timer about 12 minutes left">
+            <svg class="ring" viewBox="0 0 40 40" aria-hidden="true">
+              <circle class="track" cx="20" cy="20" r="16"></circle>
+              <circle class="prog" cx="20" cy="20" r="16" pathLength="100"></circle>
+            </svg>
+            <span class="face">15</span>
+          </button>
+          <button class="btn ghost">☆ Spots</button>
+          <button class="btn ghost">Clear</button>
+          <button class="btn ghost">Quick Add</button>
+          <button class="btn primary">Submit</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</body>
+</html>

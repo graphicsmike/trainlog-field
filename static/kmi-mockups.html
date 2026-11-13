@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="night">
+<head>
+<meta charset="utf-8" />
+<title>KMI rail mockups</title>
+<style>
+  :root {
+    --font-ui: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+    --radius: 6px;
+    --bg: #10161e;
+    --surface: #1b2430;
+    --surface-muted: #222c3a;
+    --ink: #e8eef6;
+    --muted: #93a1b3;
+    --border: #334155;
+    --accent: #ef4444;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 28px 32px 64px;
+    font-family: var(--font-ui);
+    background: var(--bg);
+    color: var(--ink);
+  }
+  h1 { margin: 0 0 8px; font-size: 22px; font-weight: 650; }
+  .intro { margin: 0 0 28px; color: var(--muted); max-width: 78ch; line-height: 1.45; font-size: 14px; }
+  .option { margin-bottom: 36px; }
+  .option-head {
+    display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  .option-head h2 {
+    margin: 0; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .tag {
+    font-size: 11px; font-weight: 650; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted);
+  }
+  .tag.rec { color: #86efac; border-color: color-mix(in srgb, #16a34a 50%, var(--border)); }
+  .blurb { margin: 0 0 12px; color: var(--muted); font-size: 13px; line-height: 1.4; max-width: 90ch; }
+  .rail {
+    display: grid;
+    gap: 10px;
+    width: 100%;
+  }
+  .kpi {
+    --card-tint: var(--accent);
+    position: relative;
+    overflow: hidden;
+    min-height: 104px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 12px 14px;
+    border-radius: var(--radius);
+    border: 1px solid color-mix(in srgb, var(--card-tint) 26%, var(--border));
+    background:
+      radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--card-tint) 16%, transparent), transparent 60%),
+      linear-gradient(180deg, color-mix(in srgb, var(--card-tint) 8%, var(--surface)) 0%, var(--surface) 55%);
+  }
+  .kpi::before {
+    content: "";
+    position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--card-tint) 78%, transparent);
+  }
+  .kpi[data-kpi="when"], .kpi[data-kpi="ampm"] { --card-tint: #0369a1; }
+  .kpi[data-kpi="where"] { --card-tint: #2f6b8a; }
+  .kpi[data-kpi="trains"], .kpi[data-kpi="direction"], .kpi[data-kpi="mix"] { --card-tint: #9a3412; }
+  .kpi[data-kpi="media"] { --card-tint: #a16207; }
+  .kpi[data-kpi="symbols"] { --card-tint: #5b4b8a; }
+  .kpi[data-kpi="special"] { --card-tint: #c2410c; }
+  .line { display: flex; align-items: baseline; gap: 0.4em; margin: 0; min-width: 0; }
+  .line b { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .line span { font-size: 11px; font-weight: 500; color: var(--muted); }
+  .extra {
+    margin-top: 8px; padding-top: 7px;
+    border-top: 1px solid color-mix(in srgb, var(--ink) 24%, transparent);
+  }
+  .extra.is-split { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 10px; align-items: baseline; }
+  .extra .line b { font-size: 14px; }
+  .extra .line span { font-size: 10px; }
+  .note { margin: 0; font-size: 10px; line-height: 1.25; color: var(--muted); }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; flex: 1; align-content: center; width: 100%; }
+  .grid.is-dirs .cell b { font-size: 16px; }
+  .cell { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; min-width: 0; }
+  .cell b { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .cell span { font-size: 11px; color: var(--muted); font-weight: 500; }
+  .chips {
+    display: flex; flex-wrap: wrap; gap: 6px 8px; margin-top: 8px;
+  }
+  .chip {
+    display: inline-flex; align-items: baseline; gap: 0.35em;
+    padding: 5px 9px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 12px;
+  }
+  .chip b { font-size: 13px; font-variant-numeric: tabular-nums; }
+  .chip span { color: var(--muted); font-size: 11px; }
+  .chip .lab {
+    font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-right: 2px;
+  }
+  .tier {
+    display: grid; gap: 8px;
+  }
+  .tier-bottom {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .mini {
+    --card-tint: #475569;
+    min-height: 0;
+    padding: 8px 10px;
+  }
+  .mini .line b { font-size: 16px; }
+  .mini .line span { font-size: 10px; }
+  .mini[data-kpi="direction"] { --card-tint: #9a3412; }
+  .mini[data-kpi="ampm"] { --card-tint: #0369a1; }
+  .mini[data-kpi="media"] { --card-tint: #a16207; }
+  .mini[data-kpi="mix"] { --card-tint: #9a3412; }
+  .mini[data-kpi="where"] { --card-tint: #2f6b8a; }
+  .mini[data-kpi="special"] { --card-tint: #c2410c; }
+  .a .rail { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  .b .rail { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  .c .rail-hero { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .d .rail-top { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .e .rail { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+  .e .kpi { min-height: 96px; padding: 10px 12px; }
+  .e .line b { font-size: 22px; }
+  .frame {
+    padding: 12px;
+    border: 1px dashed color-mix(in srgb, var(--border) 80%, transparent);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--surface) 35%, transparent);
+  }
+</style>
+</head>
+<body>
+  <h1>KMI rail options</h1>
+  <p class="intro">Same night theme and card language as Log Stats. Seeded-ish numbers from the preview book. Goal: more signal without turning the strip into a wall of type.</p>
+
+  <!-- A -->
+  <section class="option a" id="opt-a">
+    <div class="option-head"><h2>A · Current rail</h2><span class="tag">Baseline</span></div>
+    <p class="blurb">Seven cards as today. Clear, but leaves RR / type / night / symbol detail for other panels.</p>
+    <div class="frame">
+      <div class="rail">
+        <div class="kpi" data-kpi="trains"><p class="line"><b>79</b><span>trains</span></p><div class="extra is-split"><p class="line"><b>21</b><span>loads</span></p><p class="line"><b>14</b><span>empties</span></p></div></div>
+        <div class="kpi" data-kpi="when"><p class="line"><b>43</b><span>days trackside</span></p><div class="extra"><p class="note">2026-06-12 – 2026-11-01</p></div></div>
+        <div class="kpi" data-kpi="where"><p class="line"><b>38</b><span>locations</span></p><div class="extra"><p class="line"><b>16</b><span>subdivisions</span></p></div></div>
+        <div class="kpi dash-kpi-grid is-dirs" data-kpi="direction"><div class="grid is-dirs"><div class="cell"><b>9</b><span>North</span></div><div class="cell"><b>28</b><span>East</span></div><div class="cell"><b>7</b><span>South</span></div><div class="cell"><b>31</b><span>West</span></div></div></div>
+        <div class="kpi" data-kpi="media"><div class="grid"><div class="cell"><b>39</b><span>photos</span></div><div class="cell"><b>10</b><span>videos</span></div></div></div>
+        <div class="kpi" data-kpi="mix"><div class="grid"><div class="cell"><b>12</b><span>types</span></div><div class="cell"><b>41</b><span>consists</span></div><div class="cell"><b>6</b><span>railroads</span></div><div class="cell"><b>5</b><span>trips</span></div></div></div>
+        <div class="kpi" data-kpi="ampm"><div class="grid"><div class="cell"><b>34</b><span>AM</span></div><div class="cell"><b>45</b><span>PM</span></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- B -->
+  <section class="option b" id="opt-b">
+    <div class="option-head"><h2>B · Richer sublines</h2><span class="tag rec">Recommended</span></div>
+    <p class="blurb">Keep seven cards. Add one quiet secondary fact per card (night, avg/day, states, notes %, symbols, busiest hour). No new columns — density goes down, not across.</p>
+    <div class="frame">
+      <div class="rail">
+        <div class="kpi" data-kpi="trains">
+          <p class="line"><b>79</b><span>trains</span></p>
+          <div class="extra is-split">
+            <p class="line"><b>21</b><span>loads</span></p>
+            <p class="line"><b>14</b><span>empties</span></p>
+          </div>
+          <p class="note" style="margin-top:6px">11 night</p>
+        </div>
+        <div class="kpi" data-kpi="when">
+          <p class="line"><b>43</b><span>days trackside</span></p>
+          <div class="extra"><p class="note">2026-06-12 – 2026-11-01</p><p class="line" style="margin-top:4px"><b>1.8</b><span>avg / day</span></p></div>
+        </div>
+        <div class="kpi" data-kpi="where">
+          <p class="line"><b>38</b><span>locations</span></p>
+          <div class="extra is-split">
+            <p class="line"><b>16</b><span>subs</span></p>
+            <p class="line"><b>7</b><span>states</span></p>
+          </div>
+        </div>
+        <div class="kpi" data-kpi="direction"><div class="grid is-dirs"><div class="cell"><b>9</b><span>North</span></div><div class="cell"><b>28</b><span>East</span></div><div class="cell"><b>7</b><span>South</span></div><div class="cell"><b>31</b><span>West</span></div></div></div>
+        <div class="kpi" data-kpi="media">
+          <div class="grid"><div class="cell"><b>39</b><span>photos</span></div><div class="cell"><b>10</b><span>videos</span></div></div>
+          <div class="extra"><p class="line"><b>49%</b><span>with media</span></p></div>
+        </div>
+        <div class="kpi" data-kpi="mix">
+          <div class="grid">
+            <div class="cell"><b>12</b><span>types</span></div>
+            <div class="cell"><b>22</b><span>symbols</span></div>
+            <div class="cell"><b>6</b><span>railroads</span></div>
+            <div class="cell"><b>5</b><span>trips</span></div>
+          </div>
+        </div>
+        <div class="kpi" data-kpi="ampm">
+          <div class="grid"><div class="cell"><b>34</b><span>AM</span></div><div class="cell"><b>45</b><span>PM</span></div></div>
+          <div class="extra"><p class="note">Busiest 16:00</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- C -->
+  <section class="option c" id="opt-c">
+    <div class="option-head"><h2>C · Five heroes + chip strip</h2><span class="tag">More RR/type detail</span></div>
+    <p class="blurb">Widen the main cards, park directions / AM·PM / top railroads / top types as chips underneath. Best if you still want those BNSF 33 · COAL 21 lists without a second dashboard panel.</p>
+    <div class="frame">
+      <div class="rail rail-hero" style="display:grid">
+        <div class="kpi" data-kpi="trains"><p class="line"><b>79</b><span>trains</span></p><div class="extra is-split"><p class="line"><b>21</b><span>loads</span></p><p class="line"><b>14</b><span>empties</span></p></div><p class="note" style="margin-top:6px">11 night</p></div>
+        <div class="kpi" data-kpi="when"><p class="line"><b>43</b><span>days trackside</span></p><div class="extra"><p class="note">Jun 12 – Nov 1</p><p class="line" style="margin-top:4px"><b>1.8</b><span>avg / day</span></p></div></div>
+        <div class="kpi" data-kpi="where"><p class="line"><b>38</b><span>locations</span></p><div class="extra is-split"><p class="line"><b>16</b><span>subs</span></p><p class="line"><b>7</b><span>states</span></p></div></div>
+        <div class="kpi" data-kpi="media"><div class="grid"><div class="cell"><b>39</b><span>photos</span></div><div class="cell"><b>10</b><span>videos</span></div></div><div class="extra"><p class="line"><b>49%</b><span>with media</span></p></div></div>
+        <div class="kpi" data-kpi="mix"><div class="grid"><div class="cell"><b>12</b><span>types</span></div><div class="cell"><b>22</b><span>symbols</span></div><div class="cell"><b>6</b><span>railroads</span></div><div class="cell"><b>5</b><span>trips</span></div></div></div>
+      </div>
+      <div class="chips">
+        <span class="chip"><span class="lab">Dir</span><b>9</b><span>N</span><b>28</b><span>E</span><b>7</b><span>S</span><b>31</b><span>W</span></span>
+        <span class="chip"><span class="lab">Day</span><b>34</b><span>AM</span><b>45</b><span>PM</span></span>
+        <span class="chip"><span class="lab">RR</span><b>33</b><span>BNSF</span><b>24</b><span>UP</span><b>13</b><span>AMTK</span><b>3</b><span>NS</span></span>
+        <span class="chip"><span class="lab">Type</span><b>21</b><span>COAL</span><b>19</b><span>MIXED</span><b>13</b><span>PASS</span><b>10</b><span>CON</span></span>
+        <span class="chip"><span class="lab">Special</span><b>7</b><span>heritage</span><b>8</b><span>steam</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- D -->
+  <section class="option d" id="opt-d">
+    <div class="option-head"><h2>D · Two-tier rail</h2><span class="tag">Clearest hierarchy</span></div>
+    <p class="blurb">Big story on top (counts you glance). Thin second tier for directions, daypart, mix, specials. Reads as one rail, not twelve competing cards.</p>
+    <div class="frame tier">
+      <div class="rail rail-top" style="display:grid">
+        <div class="kpi" data-kpi="trains"><p class="line"><b>79</b><span>trains</span></p><div class="extra is-split"><p class="line"><b>21</b><span>loads</span></p><p class="line"><b>14</b><span>empties</span></p></div></div>
+        <div class="kpi" data-kpi="when"><p class="line"><b>43</b><span>days trackside</span></p><div class="extra"><p class="note">2026-06-12 – 2026-11-01</p></div></div>
+        <div class="kpi" data-kpi="where"><p class="line"><b>38</b><span>locations</span></p><div class="extra"><p class="line"><b>16</b><span>subdivisions</span></p></div></div>
+        <div class="kpi" data-kpi="media"><div class="grid"><div class="cell"><b>39</b><span>photos</span></div><div class="cell"><b>10</b><span>videos</span></div></div></div>
+        <div class="kpi" data-kpi="mix"><div class="grid"><div class="cell"><b>6</b><span>railroads</span></div><div class="cell"><b>12</b><span>types</span></div><div class="cell"><b>22</b><span>symbols</span></div><div class="cell"><b>5</b><span>trips</span></div></div></div>
+      </div>
+      <div class="tier-bottom">
+        <div class="kpi mini" data-kpi="direction" style="grid-column: span 4"><div class="grid is-dirs" style="gap:4px 8px"><div class="cell"><b>9</b><span>North</span></div><div class="cell"><b>28</b><span>East</span></div><div class="cell"><b>7</b><span>South</span></div><div class="cell"><b>31</b><span>West</span></div></div></div>
+        <div class="kpi mini" data-kpi="ampm" style="grid-column: span 2"><div class="grid"><div class="cell"><b>34</b><span>AM</span></div><div class="cell"><b>45</b><span>PM</span></div></div></div>
+        <div class="kpi mini" data-kpi="media" style="grid-column: span 2"><p class="line"><b>49%</b><span>with media</span></p><p class="note" style="margin-top:4px">11 night</p></div>
+        <div class="kpi mini" data-kpi="where" style="grid-column: span 2"><p class="line"><b>7</b><span>states</span></p><p class="note" style="margin-top:4px">1.8 avg / day</p></div>
+        <div class="kpi mini" data-kpi="special" style="grid-column: span 2"><p class="line"><b>7</b><span>heritage</span></p><p class="line" style="margin-top:2px"><b>8</b><span>steam</span></p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- E -->
+  <section class="option e" id="opt-e">
+    <div class="option-head"><h2>E · Eight tighter cards</h2><span class="tag">More columns</span></div>
+    <p class="blurb">Add Symbols and Special (heritage/steam) as peers. Works on a wide Mac; gets cramped before the chip/two-tier options on narrower windows.</p>
+    <div class="frame">
+      <div class="rail">
+        <div class="kpi" data-kpi="trains"><p class="line"><b>79</b><span>trains</span></p><div class="extra is-split"><p class="line"><b>21</b><span>loads</span></p><p class="line"><b>14</b><span>empties</span></p></div></div>
+        <div class="kpi" data-kpi="when"><p class="line"><b>43</b><span>days</span></p><div class="extra"><p class="note">Jun 12 – Nov 1</p></div></div>
+        <div class="kpi" data-kpi="where"><p class="line"><b>38</b><span>locations</span></p><div class="extra"><p class="line"><b>16</b><span>subs</span></p></div></div>
+        <div class="kpi" data-kpi="direction"><div class="grid is-dirs"><div class="cell"><b>9</b><span>N</span></div><div class="cell"><b>28</b><span>E</span></div><div class="cell"><b>7</b><span>S</span></div><div class="cell"><b>31</b><span>W</span></div></div></div>
+        <div class="kpi" data-kpi="media"><div class="grid"><div class="cell"><b>39</b><span>photos</span></div><div class="cell"><b>10</b><span>videos</span></div></div></div>
+        <div class="kpi" data-kpi="symbols"><p class="line"><b>22</b><span>symbols</span></p><div class="extra"><p class="line"><b>12</b><span>types</span></p></div></div>
+        <div class="kpi" data-kpi="mix"><div class="grid"><div class="cell"><b>6</b><span>RRs</span></div><div class="cell"><b>5</b><span>trips</span></div></div></div>
+        <div class="kpi" data-kpi="special"><div class="grid"><div class="cell"><b>7</b><span>heritage</span></div><div class="cell"><b>8</b><span>steam</span></div></div></div>
+      </div>
+    </div>
+  </section>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Timer + Ticker footer placements</title>
+  <style>
+    :root {
+      --bg: #10161e; --ink: #e8eef6; --muted: #93a1b3; --border: #334155;
+      --accent: #c81e2a; --surface: #1a222d; --surface2: #151c26;
+      --paper: #f4efe6; --paper-ink: #1c2430; --paper-muted: #5c6b7a;
+      --paper-border: #d5cbb8; --paper-surface: #fffdf8; --focus: #2b6cb0;
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      background: var(--bg); color: var(--ink);
+      font: 14px/1.4 "Avenir Next", "Segoe UI", system-ui, sans-serif;
+    }
+    button { font: inherit; color: inherit; cursor: pointer; }
+    .shell { display: grid; grid-template-columns: 300px minmax(0, 1fr); min-height: 100vh; }
+    .rail {
+      position: sticky; top: 0; align-self: start; height: 100vh;
+      padding: 22px 16px; border-right: 1px solid var(--border);
+      background: #0d131b; overflow: auto;
+    }
+    .rail h1 { margin: 0 0 6px; font-size: 18px; letter-spacing: -0.02em; }
+    .rail .note { margin: 0 0 14px; color: var(--muted); font-size: 13px; }
+    .opt {
+      display: block; width: 100%; margin: 0 0 8px; padding: 10px 12px;
+      text-align: left; border: 1px solid var(--border); border-radius: 10px; background: transparent;
+    }
+    .opt strong { display: block; font-size: 14px; }
+    .opt span { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; line-height: 1.35; }
+    .opt.is-on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
+    .opt.is-on span { color: var(--ink); }
+    .pick {
+      margin-top: 14px; padding: 10px 12px; border-radius: 8px;
+      border: 1px dashed var(--border); color: var(--muted); font-size: 12px;
+    }
+    .pick b { color: var(--ink); }
+    .stage { padding: 22px 22px 48px; overflow: auto; }
+    .mock { display: none; }
+    .mock.is-on { display: block; }
+    .intro h2 { margin: 0 0 6px; font-size: 22px; letter-spacing: -0.03em; }
+    .intro p { margin: 0 0 16px; max-width: 72ch; color: var(--muted); }
+
+    .shot {
+      display: block; width: min(960px, 100%); margin: 0 0 18px;
+      border: 1px solid var(--border); border-radius: 12px;
+      background: #0a0e14;
+    }
+
+    .wire {
+      width: min(960px, 100%);
+      border: 1px solid var(--border); border-radius: 14px;
+      background: var(--paper); color: var(--paper-ink);
+      overflow: hidden; box-shadow: 0 18px 40px rgba(0,0,0,.35);
+    }
+    .wire-label {
+      margin: 0; padding: 8px 14px; background: #121820; color: var(--muted);
+      font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .session {
+      display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 14px;
+      padding: 14px 16px; border-bottom: 1px solid var(--paper-border);
+      background: var(--paper-surface);
+    }
+    .field span {
+      display: block; font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--paper-muted); margin-bottom: 4px;
+    }
+    .fake-input {
+      min-width: 9.5rem; height: 34px; padding: 0 10px;
+      border: 1px solid var(--paper-border); border-radius: 8px;
+      background: #fff; display: flex; align-items: center; font-size: 13px;
+    }
+    .ghost, .primary, .pill {
+      appearance: none; border-radius: 999px; border: 1px solid var(--paper-border);
+      background: #fff; color: var(--paper-ink); padding: 7px 12px;
+      font-size: 12px; font-weight: 700;
+    }
+    .primary { background: #1c2430; color: #fff; border-color: #1c2430; }
+    .pill.on {
+      border-color: color-mix(in srgb, var(--focus) 50%, var(--paper-border));
+      background: color-mix(in srgb, var(--focus) 12%, #fff);
+    }
+    .count {
+      margin: 0; font-size: 13px; font-weight: 700; letter-spacing: 0.04em;
+      text-transform: uppercase; color: var(--paper-ink);
+    }
+    .grow { flex: 1; min-width: 8px; }
+    .body-fake {
+      height: 110px; margin: 14px 16px; border: 1px dashed var(--paper-border);
+      border-radius: 10px; color: var(--paper-muted); display: grid; place-items: center;
+      font-size: 13px; background: color-mix(in srgb, var(--paper-surface) 70%, #efe7d8);
+    }
+    .actions {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+      padding: 12px 16px; border-top: 1px solid var(--paper-border);
+      background: var(--paper-surface);
+    }
+    .actions .refs { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; min-width: 0; }
+    .chip {
+      height: 34px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--paper-border);
+      background: #fff; font-size: 12px; font-weight: 650; display: inline-flex; align-items: center;
+    }
+    .foot {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      gap: 10px 18px; padding: 10px 16px 12px;
+      border-top: 1px solid var(--paper-border); background: #efe9dc;
+    }
+    .foot-links { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+    .foot .btn {
+      appearance: none; border: 1px solid var(--paper-border); border-radius: 999px;
+      background: #fff; color: var(--paper-ink); font-size: 11px; font-weight: 650;
+      padding: 4px 10px;
+    }
+    .foot .credit { margin: 0; font-size: 12px; color: var(--paper-muted); }
+    .group {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+      padding-right: 12px; margin-right: 4px; border-right: 1px solid var(--paper-border);
+    }
+    .group-label {
+      width: 100%; margin: 0 0 -2px; font-size: 9px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase; color: var(--paper-muted);
+    }
+    .hi {
+      outline: 2px solid var(--accent); outline-offset: 2px;
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent);
+    }
+    .callout {
+      margin: 14px 0 0; padding: 10px 12px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--surface); color: var(--muted); font-size: 13px;
+      max-width: 72ch;
+    }
+    .callout b { color: var(--ink); }
+    @media (max-width: 860px) {
+      .shell { grid-template-columns: 1fr; }
+      .rail { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--border); }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="rail">
+      <h1>Timer + Ticker</h1>
+      <p class="note">Day count stays in the session bar. Pick where Timer and Ticker go.</p>
+      <button type="button" class="opt is-on" data-opt="a">
+        <strong>A · Page footer</strong>
+        <span>Pills in the bottom page footer next to How to Use / Debug.</span>
+      </button>
+      <button type="button" class="opt" data-opt="b">
+        <strong>B · Entry actions</strong>
+        <span>Between Symbol/Placards/Marks and Clear / Quick Add / Submit.</span>
+      </button>
+      <button type="button" class="opt" data-opt="c">
+        <strong>C · Trackside group</strong>
+        <span>Labeled Trackside cluster in the page footer; Timer can show time.</span>
+      </button>
+      <p class="pick">Selected: <b id="pick-label">A · Page footer</b></p>
+    </aside>
+
+    <main class="stage">
+      <section class="mock is-on" data-mock="a">
+        <div class="intro">
+          <h2>A · Page footer</h2>
+          <p>Session bar stays clean (date, Trip Details, day count, Spots / Submit). Timer + Ticker sit in <code>page-foot</code> with How to Use.</p>
+        </div>
+        <img class="shot" src="mockup-footer-A.jpg" alt="Concept art for option A" />
+        <div class="wire" aria-label="Wireframe A">
+          <p class="wire-label">Wireframe · matches current chrome</p>
+          <div class="session">
+            <label class="field"><span>Date Trackside</span><div class="fake-input">2026-10-28</div></label>
+            <button type="button" class="ghost">Trip Details</button>
+            <p class="count">35 trains logged</p>
+            <span class="grow"></span>
+            <button type="button" class="ghost">Spots</button>
+            <button type="button" class="ghost">Quick Add</button>
+            <button type="button" class="primary">Submit</button>
+          </div>
+          <div class="body-fake">Train card / rows…</div>
+          <div class="foot">
+            <div class="foot-links">
+              <button type="button" class="pill hi">⏱ Timer</button>
+              <button type="button" class="pill on hi">Ticker</button>
+              <button type="button" class="btn">How to Use</button>
+              <button type="button" class="btn">Debug</button>
+              <button type="button" class="btn">Updates</button>
+              <button type="button" class="btn">Text Size ▾</button>
+            </div>
+            <p class="credit">Created by Michael Amrine</p>
+          </div>
+        </div>
+        <p class="callout"><b>Pros:</b> frees the session bar on Mac + phone. <b>Cons:</b> Timer is farther from the form while logging.</p>
+      </section>
+
+      <section class="mock" data-mock="b">
+        <div class="intro">
+          <h2>B · Entry actions</h2>
+          <p>Timer + Ticker live under the card with the reference chips and Submit — natural “tools while logging” zone (especially on tablet).</p>
+        </div>
+        <img class="shot" src="mockup-footer-B.jpg" alt="Concept art for option B" />
+        <div class="wire" aria-label="Wireframe B">
+          <p class="wire-label">Wireframe · entry-actions-row</p>
+          <div class="session">
+            <label class="field"><span>Date Trackside</span><div class="fake-input">2026-10-28</div></label>
+            <button type="button" class="ghost">Trip Details</button>
+            <p class="count">35 trains logged</p>
+            <span class="grow"></span>
+            <button type="button" class="ghost">Spots</button>
+            <button type="button" class="primary">Submit</button>
+          </div>
+          <div class="body-fake">Train card / rows…</div>
+          <div class="actions">
+            <div class="refs">
+              <span class="chip">Symbol</span>
+              <span class="chip">Placards</span>
+              <span class="chip">Marks</span>
+              <span class="chip">Legend</span>
+              <span class="chip">Library</span>
+            </div>
+            <button type="button" class="pill hi">⏱ Timer</button>
+            <button type="button" class="pill on hi">Ticker</button>
+            <button type="button" class="ghost">Quick Add</button>
+            <button type="button" class="primary">Submit</button>
+          </div>
+        </div>
+        <p class="callout"><b>Pros:</b> closest to the pad while working. <b>Cons:</b> that row is already busy on narrow phones; Mac currently hides the bottom actions strip.</p>
+      </section>
+
+      <section class="mock" data-mock="c">
+        <div class="intro">
+          <h2>C · Trackside group in page footer</h2>
+          <p>Same footer as A, but a labeled <b>Trackside</b> cluster so Timer/Ticker read as session tools, not docs links. Timer can show the running countdown.</p>
+        </div>
+        <img class="shot" src="mockup-footer-C.jpg" alt="Concept art for option C" />
+        <div class="wire" aria-label="Wireframe C">
+          <p class="wire-label">Wireframe · grouped page-foot</p>
+          <div class="session">
+            <label class="field"><span>Date Trackside</span><div class="fake-input">2026-10-28</div></label>
+            <button type="button" class="ghost">Trip Details</button>
+            <p class="count">35 trains logged</p>
+            <span class="grow"></span>
+            <button type="button" class="ghost">Spots</button>
+            <button type="button" class="ghost">Quick Add</button>
+            <button type="button" class="primary">Submit</button>
+          </div>
+          <div class="body-fake">Train card / rows…</div>
+          <div class="foot">
+            <div class="foot-links">
+              <div class="group hi">
+                <p class="group-label">Trackside</p>
+                <button type="button" class="pill">⏱ Timer · 15:00</button>
+                <button type="button" class="pill on">Ticker</button>
+              </div>
+              <button type="button" class="btn">How to Use</button>
+              <button type="button" class="btn">Debug</button>
+              <button type="button" class="btn">Updates</button>
+              <button type="button" class="btn">Text Size ▾</button>
+            </div>
+            <p class="credit">Created by Michael Amrine</p>
+          </div>
+        </div>
+        <p class="callout"><b>Pros:</b> clearest grouping; room to show timer digits. <b>Cons:</b> still a reach from the top of a long form.</p>
+      </section>
+    </main>
+  </div>
+  <script>
+    const labels = {
+      a: "A · Page footer",
+      b: "B · Entry actions",
+      c: "C · Trackside group"
+    };
+    const pick = document.getElementById("pick-label");
+    function showOpt(id) {
+      if (!labels[id]) id = "a";
+      document.querySelectorAll(".opt").forEach(function (el) {
+        el.classList.toggle("is-on", el.getAttribute("data-opt") === id);
+      });
+      document.querySelectorAll(".mock").forEach(function (el) {
+        el.classList.toggle("is-on", el.getAttribute("data-mock") === id);
+      });
+      pick.textContent = labels[id];
+      try { history.replaceState(null, "", "#" + id); } catch (err) {}
+    }
+    document.querySelectorAll(".opt").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        showOpt(btn.getAttribute("data-opt"));
+      });
+    });
+    showOpt((location.hash || "#a").replace(/^#/, "").toLowerCase());
+  </script>
+</body>
+</html>

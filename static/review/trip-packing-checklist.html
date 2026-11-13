@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Trip packing / field checklist — placements</title>
+  <style>
+    :root {
+      --bg: #10161e; --ink: #e8eef6; --muted: #93a1b3; --border: #334155;
+      --accent: #c81e2a; --surface: #1a222d; --surface2: #151c26; --ok: #3d8a58;
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      background: var(--bg); color: var(--ink);
+      font: 14px/1.4 "Avenir Next", "Segoe UI", system-ui, sans-serif;
+    }
+    button, input { font: inherit; color: inherit; }
+    button { cursor: pointer; }
+    .shell { display: grid; grid-template-columns: 300px minmax(0, 1fr); min-height: 100vh; }
+    .rail {
+      position: sticky; top: 0; align-self: start; height: 100vh;
+      padding: 22px 16px; border-right: 1px solid var(--border);
+      background: #0d131b; overflow: auto;
+    }
+    .rail h1 { margin: 0 0 6px; font-size: 18px; letter-spacing: -0.02em; }
+    .rail .note { margin: 0 0 14px; color: var(--muted); font-size: 13px; }
+    .opt {
+      display: block; width: 100%; margin: 0 0 8px; padding: 10px 12px;
+      text-align: left; border: 1px solid var(--border); border-radius: 10px; background: transparent;
+    }
+    .opt strong { display: block; font-size: 14px; }
+    .opt span { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; line-height: 1.35; }
+    .opt.is-on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
+    .opt.is-on span { color: var(--ink); }
+    .pick {
+      margin-top: 14px; padding: 10px 12px; border-radius: 8px;
+      border: 1px dashed var(--border); color: var(--muted); font-size: 12px;
+    }
+    .pick b { color: var(--ink); }
+    .stage { padding: 22px 22px 48px; overflow: auto; }
+    .mock { display: none; }
+    .mock.is-on { display: block; }
+    .intro h2 { margin: 0 0 6px; font-size: 22px; letter-spacing: -0.03em; }
+    .intro p { margin: 0 0 16px; max-width: 70ch; color: var(--muted); }
+
+    .phone {
+      width: min(390px, 100%);
+      border: 1px solid var(--border); border-radius: 16px;
+      background: var(--surface2); overflow: hidden;
+      box-shadow: 0 18px 40px rgba(0,0,0,.35);
+    }
+    .phone-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 12px; border-bottom: 1px solid var(--border); background: #121820;
+      font-size: 12px; color: var(--muted);
+    }
+    .phone-bar strong { color: var(--ink); font-size: 13px; }
+    .card {
+      margin: 12px; padding: 12px; border: 1px solid var(--border);
+      border-radius: 12px; background: var(--surface);
+    }
+    .kicker {
+      margin: 0; font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    .card h3 { margin: 2px 0 12px; font-size: 20px; letter-spacing: -0.02em; }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+    .field label {
+      display: block; margin: 0 0 8px; font-size: 11px; font-weight: 650;
+      letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted);
+    }
+    .field input, .field .fake {
+      display: block; width: 100%; height: 36px; margin-top: 4px;
+      border: 1px solid var(--border); border-radius: 8px;
+      background: #121820; color: var(--ink); padding: 0 10px;
+    }
+    .field .fake {
+      display: flex; align-items: center; color: var(--muted); font-size: 13px;
+      text-transform: none; letter-spacing: normal; font-weight: 500;
+    }
+    .hero {
+      margin: 0 0 10px; padding: 10px; border-radius: 10px;
+      background: #121820; border: 1px solid var(--border); text-align: center;
+    }
+    .hero b { display: block; font-size: 28px; letter-spacing: -0.03em; }
+    .hero span { color: var(--muted); font-size: 12px; }
+    .section {
+      margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--border);
+    }
+    .section-head {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      margin-bottom: 8px;
+    }
+    .section-head h4 { margin: 0; font-size: 13px; font-weight: 700; }
+    .btn {
+      height: 32px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--border);
+      background: transparent; font-size: 12px; font-weight: 650;
+    }
+    .btn.primary { background: var(--accent); border-color: #a81822; color: #fff; }
+    .btn.ghost { color: var(--ink); }
+    .checks { display: flex; flex-direction: column; gap: 6px; }
+    .check {
+      display: grid; grid-template-columns: 1.1rem minmax(0, 1fr) auto; gap: 8px;
+      align-items: center; padding: 8px 8px; border-radius: 8px;
+      border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+      background: #121820; font-size: 13px;
+    }
+    .check.on {
+      border-color: color-mix(in srgb, var(--ok) 55%, var(--border));
+      background: color-mix(in srgb, var(--ok) 12%, #121820);
+    }
+    .box {
+      width: 1.1rem; height: 1.1rem; border-radius: 4px; border: 1.5px solid var(--border);
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 11px; color: transparent;
+    }
+    .check.on .box {
+      background: var(--ok); border-color: var(--ok); color: #fff;
+    }
+    .muted { color: var(--muted); font-size: 12px; }
+    .progress {
+      margin: 0 0 8px; font-size: 12px; color: var(--muted);
+    }
+    .progress b { color: var(--ink); }
+    .menu {
+      display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px;
+    }
+    .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }
+    .chip {
+      height: 28px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--border);
+      background: transparent; font-size: 12px; color: var(--muted);
+    }
+    .chip.on {
+      border-color: var(--ok);
+      background: color-mix(in srgb, var(--ok) 18%, transparent);
+      color: var(--ink);
+    }
+    .wide {
+      display: grid; grid-template-columns: minmax(0, 390px) minmax(0, 1fr);
+      gap: 18px; align-items: start;
+    }
+    .aside {
+      border: 1px solid var(--border); border-radius: 12px; background: var(--surface);
+      padding: 12px; min-height: 280px;
+    }
+    .aside h4 { margin: 0 0 8px; font-size: 14px; }
+    .foot { margin-top: 10px; color: var(--muted); font-size: 12px; max-width: 42ch; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="rail">
+      <h1>Trip packing</h1>
+      <p class="note">Chosen: <b>A</b> with an editable default kit per Mac (Edit My Kit). Friends keep their own gear list. Ticks are per trip.</p>
+      <button type="button" class="opt is-on" data-opt="a">
+        <strong>A · Section in Trip Details</strong>
+        <span>Collapsible block under Vehicle / Attendees. Check items off before you leave.</span>
+      </button>
+      <button type="button" class="opt" data-opt="b">
+        <strong>B · Manage Packing…</strong>
+        <span>Same pattern as Manage Lists — button opens a panel with the checklist.</span>
+      </button>
+      <button type="button" class="opt" data-opt="c">
+        <strong>C · Own dialog</strong>
+        <span>Trip Details keeps a Packing button; checklist opens in its own window.</span>
+      </button>
+      <button type="button" class="opt" data-opt="d">
+        <strong>D · Defaults + per trip</strong>
+        <span>Shipped / editable default kit in Settings; each trip copies it and you tick items.</span>
+      </button>
+      <div class="pick">Looking at: <b id="pick">A · Section in Trip Details</b></div>
+    </aside>
+
+    <main class="stage">
+      <section class="mock is-on" data-mock="a">
+        <div class="intro">
+          <h2>A · Section in Trip Details</h2>
+          <p>Always visible once Trip Details is open. Lightest path: no extra dialog. Risk: the window gets taller.</p>
+        </div>
+        <div class="phone">
+          <div class="phone-bar"><span>Trip Details</span><strong>Cajon Pass</strong></div>
+          <div class="card">
+            <p class="kicker">Trip Details</p>
+            <h3>Cajon Pass</h3>
+            <div class="row2">
+              <div class="field"><label>From<div class="fake">2026-10-18</div></label></div>
+              <div class="field"><label>To<div class="fake">2026-10-19</div></label></div>
+            </div>
+            <div class="hero"><b>286 mi</b><span>1.4 trains/mi · 18.2 mpg</span></div>
+            <div class="row2">
+              <div class="field"><label>Vehicle<div class="fake">White Taco</div></label></div>
+              <div class="field"><label>Attendees<div class="fake">Michael, Sam</div></label></div>
+            </div>
+
+            <div class="section">
+              <div class="section-head">
+                <h4>Packing</h4>
+                <button type="button" class="btn ghost">Edit Kit…</button>
+              </div>
+              <p class="progress"><b>4 of 7</b> packed</p>
+              <div class="checks">
+                <div class="check on"><span class="box">✓</span><span>Scanner + spare batteries</span><span class="muted">radio</span></div>
+                <div class="check on"><span class="box">✓</span><span>Camera + charged cards</span><span class="muted">photo</span></div>
+                <div class="check on"><span class="box">✓</span><span>70–200 lens</span><span class="muted">photo</span></div>
+                <div class="check"><span class="box">✓</span><span>Tripod</span><span class="muted">photo</span></div>
+                <div class="check on"><span class="box">✓</span><span>Phone + cable</span><span class="muted">power</span></div>
+                <div class="check"><span class="box">✓</span><span>Water + snacks</span><span class="muted">kit</span></div>
+                <div class="check"><span class="box">✓</span><span>Hi-vis / vest</span><span class="muted">safety</span></div>
+              </div>
+              <p class="foot">Ticks reset per trip. Edit Kit changes the list for this trip only unless you save it as the default.</p>
+            </div>
+
+            <div class="menu">
+              <button type="button" class="btn ghost">Cancel</button>
+              <button type="button" class="btn primary">Save</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mock" data-mock="b">
+        <div class="intro">
+          <h2>B · Manage Packing…</h2>
+          <p>Matches Manage Lists. Trip Details stays short until you open the panel.</p>
+        </div>
+        <div class="phone">
+          <div class="phone-bar"><span>Trip Details</span><strong>Cajon Pass</strong></div>
+          <div class="card">
+            <p class="kicker">Trip Details</p>
+            <h3>Cajon Pass</h3>
+            <div class="row2">
+              <div class="field"><label>Vehicle<div class="fake">White Taco</div></label></div>
+              <div class="field"><label>Attendees<div class="fake">Michael, Sam</div></label></div>
+            </div>
+            <div class="section" style="border-top:0;padding-top:0;margin-top:0">
+              <div class="section-head">
+                <button type="button" class="btn ghost">Manage Packing…</button>
+                <span class="muted">4/7 packed</span>
+              </div>
+              <div class="aside" style="margin-top:8px">
+                <h4>Field checklist</h4>
+                <div class="chip-row">
+                  <button type="button" class="chip on">All</button>
+                  <button type="button" class="chip">Radio</button>
+                  <button type="button" class="chip">Photo</button>
+                  <button type="button" class="chip">Kit</button>
+                </div>
+                <div class="checks">
+                  <div class="check on"><span class="box">✓</span><span>Scanner + spare batteries</span><span class="muted"></span></div>
+                  <div class="check on"><span class="box">✓</span><span>Camera + charged cards</span><span class="muted"></span></div>
+                  <div class="check"><span class="box">✓</span><span>Tripod</span><span class="muted"></span></div>
+                  <div class="check"><span class="box">✓</span><span>Water + snacks</span><span class="muted"></span></div>
+                </div>
+                <div class="menu" style="justify-content:space-between">
+                  <button type="button" class="btn ghost">Edit Kit…</button>
+                  <button type="button" class="btn primary">Done</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mock" data-mock="c">
+        <div class="intro">
+          <h2>C · Own dialog</h2>
+          <p>Keeps Trip Details focused on miles/fuel/people. Packing gets a full card of its own — good if the kit list grows.</p>
+        </div>
+        <div class="wide">
+          <div class="phone">
+            <div class="phone-bar"><span>Trip Details</span><strong>Cajon Pass</strong></div>
+            <div class="card">
+              <p class="kicker">Trip Details</p>
+              <h3>Cajon Pass</h3>
+              <div class="hero"><b>286 mi</b><span>rates · fuel · temps stay here</span></div>
+              <div class="row2">
+                <div class="field"><label>Vehicle<div class="fake">White Taco</div></label></div>
+                <div class="field"><label>Attendees<div class="fake">Michael, Sam</div></label></div>
+              </div>
+              <div class="menu" style="justify-content:flex-start">
+                <button type="button" class="btn ghost">Manage Lists…</button>
+                <button type="button" class="btn primary">Packing…</button>
+              </div>
+            </div>
+          </div>
+          <div class="aside">
+            <p class="kicker">Separate dialog</p>
+            <h4>Packing · Cajon Pass</h4>
+            <p class="progress"><b>4 of 7</b> packed · resets for the next trip</p>
+            <div class="checks">
+              <div class="check on"><span class="box">✓</span><span>Scanner + spare batteries</span><span class="muted">radio</span></div>
+              <div class="check on"><span class="box">✓</span><span>Camera + charged cards</span><span class="muted">photo</span></div>
+              <div class="check on"><span class="box">✓</span><span>70–200 lens</span><span class="muted">photo</span></div>
+              <div class="check"><span class="box">✓</span><span>Tripod</span><span class="muted">photo</span></div>
+              <div class="check on"><span class="box">✓</span><span>Phone + cable</span><span class="muted">power</span></div>
+              <div class="check"><span class="box">✓</span><span>Water + snacks</span><span class="muted">kit</span></div>
+              <div class="check"><span class="box">✓</span><span>Hi-vis / vest</span><span class="muted">safety</span></div>
+            </div>
+            <div class="menu">
+              <button type="button" class="btn ghost">Edit Kit…</button>
+              <button type="button" class="btn primary">Close</button>
+            </div>
+            <p class="foot">Same checklist content as A/B — only the chrome changes.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="mock" data-mock="d">
+        <div class="intro">
+          <h2>D · Defaults + per trip</h2>
+          <p>Settings holds your usual kit. Opening a trip copies it; ticks are per trip. Closest to how Trip Details Picks work.</p>
+        </div>
+        <div class="wide">
+          <div class="aside">
+            <p class="kicker">Settings · Guides or Pad Lists</p>
+            <h4>Default field kit</h4>
+            <p class="muted" style="margin-top:0">Shipped starter list. Edit once; every new trip starts from this.</p>
+            <div class="checks">
+              <div class="check"><span class="box"></span><span>Scanner + spare batteries</span><span class="muted">drag</span></div>
+              <div class="check"><span class="box"></span><span>Camera + charged cards</span><span class="muted">drag</span></div>
+              <div class="check"><span class="box"></span><span>70–200 lens</span><span class="muted">drag</span></div>
+              <div class="check"><span class="box"></span><span>Tripod</span><span class="muted">drag</span></div>
+              <div class="check"><span class="box"></span><span>Phone + cable</span><span class="muted">drag</span></div>
+            </div>
+            <div class="menu" style="justify-content:space-between">
+              <button type="button" class="btn ghost">Restore Shipped</button>
+              <button type="button" class="btn primary">Add item</button>
+            </div>
+          </div>
+          <div class="phone">
+            <div class="phone-bar"><span>This trip</span><strong>Cajon Pass</strong></div>
+            <div class="card">
+              <p class="kicker">Copied from default kit</p>
+              <h3>Packing</h3>
+              <p class="progress"><b>2 of 5</b> packed</p>
+              <div class="checks">
+                <div class="check on"><span class="box">✓</span><span>Scanner + spare batteries</span><span class="muted"></span></div>
+                <div class="check on"><span class="box">✓</span><span>Camera + charged cards</span><span class="muted"></span></div>
+                <div class="check"><span class="box">✓</span><span>70–200 lens</span><span class="muted"></span></div>
+                <div class="check"><span class="box">✓</span><span>Tripod</span><span class="muted"></span></div>
+                <div class="check"><span class="box">✓</span><span>Phone + cable</span><span class="muted"></span></div>
+              </div>
+              <p class="foot">Changing the default does not rewrite ticks already made on this trip.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script>
+    const labels = {
+      a: "A · Section in Trip Details",
+      b: "B · Manage Packing…",
+      c: "C · Own dialog",
+      d: "D · Defaults + per trip",
+    };
+    const opts = document.querySelectorAll(".opt");
+    const mocks = document.querySelectorAll(".mock");
+    const pick = document.getElementById("pick");
+    opts.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = btn.getAttribute("data-opt");
+        opts.forEach((b) => b.classList.toggle("is-on", b === btn));
+        mocks.forEach((m) => m.classList.toggle("is-on", m.getAttribute("data-mock") === id));
+        pick.textContent = labels[id] || id;
+      });
+    });
+  </script>
+</body>
+</html>

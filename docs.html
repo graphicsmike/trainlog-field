@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <title>TRAIN LOG — How to Use</title>
+  <link rel="icon" href="static/icon.png" />
+  <link rel="stylesheet" href="static/styles.css?v=514" />
+  <link rel="stylesheet" href="field.css" />
+  <script>
+    (function () {
+      var map = { light: "paper", dark: "night" };
+      var allowed = {
+        paper: 1, linen: 1, sage: 1, fog: 1, sand: 1, frost: 1,
+        night: 1, slate: 1, ember: 1, pine: 1, ink: 1, coal: 1
+      };
+      var saved = null;
+      try { saved = localStorage.getItem("rr-theme"); } catch (e) {}
+      var theme = map[saved] || saved;
+      if (!allowed[theme]) {
+        theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "night" : "paper";
+      }
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+</head>
+<body class="docs-page">
+  <div class="spine" aria-hidden="true"></div>
+  <header class="masthead">
+    <div class="brand">
+      <img src="static/icon.png" alt="" width="48" height="48" />
+      <div>
+        <p class="kicker">Field Book for Railfans · 1.0.27</p>
+        <h1>How to Use Train Log</h1>
+      </div>
+    </div>
+    <div class="header-tools">
+      <nav class="tabs">
+        <a class="tab is-active" href="/#entry">Back to Log</a>
+      </nav>
+      <label class="theme-picker">
+        <span>Color scheme</span>
+        <select id="theme-select" aria-label="Color scheme">
+          <optgroup label="Light">
+            <option value="paper">Paper</option>
+            <option value="linen">Linen</option>
+            <option value="sage">Sage</option>
+            <option value="fog">Fog</option>
+            <option value="sand">Sand</option>
+            <option value="frost">Frost</option>
+          </optgroup>
+          <optgroup label="Dark">
+            <option value="night">Night</option>
+            <option value="slate">Slate</option>
+            <option value="ember">Ember</option>
+            <option value="pine">Pine</option>
+            <option value="ink">Ink</option>
+            <option value="coal">Coal</option>
+          </optgroup>
+        </select>
+      </label>
+    </div>
+  </header>
+  <main>
+    <section class="train-row doc-start">
+      <h2>Start Here</h2>
+      <p class="doc-lead">TRAIN LOG is your field book. Each train you see is one entry. Everything stays on your own Mac or field device.</p>
+      <ol>
+        <li>Open <strong>New Entry</strong>. Today's date is already filled in.</li>
+        <li>Pick the <strong>Railroad</strong>, <strong>Direction</strong>, and <strong>Train type</strong>.</li>
+        <li>Type the <strong>Location</strong> and the <strong>Time</strong>, and choose AM or PM.</li>
+        <li>Add anything else you know (lead loco, consist, cars, symbol, notes). It's all optional.</li>
+        <li>Press <strong>Submit</strong>. The train shows under the pad and on the <strong>Log</strong> tab.</li>
+      </ol>
+      <p>Every so often, back up your log: <strong>Log → Export → Backup Database</strong>.</p>
+      <h3>On This Page</h3>
+      <ul class="doc-toc">
+        <li><a href="#new">What's New</a></li>
+        <li><a href="#logging">Logging a Train</a></li>
+        <li><a href="#log">The Log</a></li>
+        <li><a href="#dashboard">Dashboard</a></li>
+        <li><a href="#settings">Settings</a></li>
+        <li><a href="#field-devices">Field Devices</a></li>
+        <li><a href="#data-updates">Updates</a></li>
+        <li><a href="#sharing">Sharing and Backups</a></li>
+        <li><a href="#appearance">Color and Text Size</a></li>
+      </ul>
+    </section>
+
+    <section class="train-row" id="new">
+      <h2>What's New</h2>
+      
+      <h3>1.0.27</h3>
+      <ul>
+        <li><strong>Trip Details picks.</strong> Vehicle and Attendees dropdowns fill from your lists again; Manage Lists… edits them in place.</li>
+        <li><strong>Held import on Review.</strong> Editing a held duplicate and tapping Add to Log clears the row and refreshes Review.</li>
+        <li><strong>Settings &amp; pad polish.</strong> Open/Manage tiles stay complete (no duplicate popup control). Pad defaults no longer set Direction. Gap Timer close matches other windows.</li>
+      </ul>
+      <h3>1.0.26</h3>
+      <ul>
+        <li><strong>Field devices stand alone.</strong> Live Field Sync / pairing is retired in new builds. Updates come from the public field site (Check for Updates → Get Update). Move sightings with Save a copy / AirDrop, then Import on the Mac.</li>
+        <li><strong>This device.</strong> The footer control covers Get Update, Repair Install, Save a copy, and Import — no Mac code.</li>
+      </ul>
+      <h3>1.0.25</h3>
+      <ul>
+        <li><strong>Scan Mac QR.</strong> Sync with Mac could point the camera at the Mac Link / Pair code (last release that offered live pairing).</li>
+      </ul>
+      <h3>1.0.24</h3>
+      <ul>
+        <li><strong>Public field site packaging.</strong> Field installs load styles and scripts with relative paths so GitHub Pages works. Marks / placards ship in the field package. Night appearance stays when the install address changes.</li>
+      </ul>
+      <h3>1.0.23</h3>
+      <ul>
+        <li><strong>Simpler field install.</strong> Install from the public site (QR / github.io). Field Sync starts an easy HTTPS link so pairing usually needs no Mac certificate. Scan Install, wait for easy link, scan Link. Trust / AirDrop certificate is fallback only.</li>
+        <li><strong>Field Device wording.</strong> Phone Sync is now Field Sync; iPhone/iPad copy says field device.</li>
+      </ul>
+      <h3>1.0.22</h3>
+      <ul>
+        <li><strong>Updates on field devices.</strong> The footer Updates button works on field devices: same key code as the Mac, Check for Updates, then Get Update on Wi‑Fi with Field Sync on. Do not delete the Home Screen icon.</li>
+        <li><strong>Field Media / Symbol / Notes.</strong> On a phone-sized field device those are three separate full-width sections. Symbol keeps a short box beside its button; Notes matches the button height.</li>
+        <li><strong>Field install wording.</strong> Add to Home Screen and update steps match the current footer (This device, Updates, Sync with Mac).</li>
+      </ul>
+      <h3>1.0.21</h3>
+      <ul>
+        <li><strong>Intel Mac / macOS 26 Field Sync.</strong> Asks for Local Network permission so the field device can reach the Mac. The offline file fill waits until the pad has started, so Add to Home Screen no longer stalls while Pyodide and the cache fight for Wi‑Fi.</li>
+      </ul>
+
+    </section>
+
+    <section class="train-row" id="logging">
+      <h2>Logging a Train</h2>
+      <p class="doc-lead">New Entry is the pad. It always shows one new train, ready to fill in.</p>
+      <h3>The Top of the Pad</h3>
+      <ul>
+        <li><strong>Date Trackside</strong> is the date the train is saved under.</li>
+        <li><strong>Trip</strong>, with optional <strong>From</strong> and <strong>To</strong> dates, names an outing. It is saved with every train until you change it.</li>
+        <li><strong>Trip Details…</strong> opens once the trip has a name; with no name it points you to the Trip box. The window is one column on a field device, a field device, and a Mac. Miles driven is the large number. Trains per mile, trains per gallon, and the fuel cost per train sit under it. Starting and ending mileage are the next line (up to 7 characters each). Vehicle and who came along share a line. Names are separated by commas. <strong>Fill-ups</strong> start in one entry card: the date, the outside temperature in °F at that stop, the place, gallons, price per gallon, and cost. Price per gallon and cost fill each other in once the gallons are there. Add Fill-up moves that stop onto the list and clears the card for the next one. A line on the list can be opened again to change it. The temperature belongs to that stop, not the whole trip. The chips under the card show the gallons, what you spent, the price per gallon, miles per gallon, and the fuel cost per mile. Notes are last. Under the vehicle and attendee boxes, a dropdown lists names to pick: first the ones in Settings under Trip Details Picks, in that order, then others used on past trips, A to Z. Picking an attendee adds them to the list; you can still type any name. Cancel asks before throwing away changes.</li>
+        <li><strong>Quick Add</strong> copies the railroad, subdivision, and location from your last train.</li>
+        <li><strong>Clear</strong> empties the card. Trains already logged that day are listed under the Legend, oldest first.</li>
+      </ul>
+
+      <h3>Railroad and Lead Loco</h3>
+      <ul>
+        <li><strong>Railroad</strong> is the railroad running the train: Freight, Passenger / Commuter, or Tourist, or Other to type one. <strong>Legend</strong>, the button under the card, says what each mark and train type stands for. Railroads are grouped, and on a field device or a Mac they sit beside the train types.</li>
+        <li><strong>Lead loco</strong> is separate, so an NS unit can lead a BNSF train. Pick the mark, then type the number, up to 4 digits.</li>
+        <li>If you couldn't read the number, tick <strong>Missed</strong>, <strong>Hidden</strong>, <strong>Too Dark</strong>, or <strong>Too Far</strong> beside it (under it on a field device). Tick more than one if they all apply, such as Hidden and Too Dark; tick a box again to clear it. The mark is kept, Log Stats leaves the train out of the lead loco counts, and Data Check doesn't list it as missing a number.</li>
+        <li><strong>Library</strong>, under the card, opens the Railroad Library. Look up a railroad, or add one to the Railroad menu, without leaving the pad.</li>
+      </ul>
+
+      <h3>Direction, Train Type, and Loads</h3>
+      <ul>
+        <li><strong>Direction</strong>: tap North, South, East, or West; tap it again to clear it. Tap any of <strong>Stopped</strong>, <strong>In Siding</strong>, <strong>Crew Change</strong>, and <strong>No Crew</strong>, with a direction or without one. On the field devices they are outline chips under the directions. On a Mac they are small checks after the divider. On a Mac they sit after the divider. When any of them is on, Direction isn't required.</li>
+        <li><strong>Train type</strong>: tap one or more chips, such as CON, PIG, or GRAIN, or Other to type one. Tap a lit chip again to turn it off.</li>
+        <li><strong>Loads or Empties</strong> is optional. The small <strong>Loads</strong> and <strong>Empties</strong> boxes sit on the Train Type line. Tick one, both, or neither if you don't know.</li>
+        <li><strong>PASS</strong> trains get a small <strong>Train #</strong> box for numbered trains, such as Amtrak 3 or Metrolink 203.</li>
+        <li><strong>COAL</strong> trains get a <strong>Mark</strong> box for the coal cars' reporting mark (up to 4 letters).</li>
+        <li><strong>CON</strong> trains get <strong>Overseas</strong> and <strong>Domestic</strong>. They stay only while CON is on, and the Log shows them as Ovr and Dom.</li>
+      </ul>
+
+      <h3>Consist and Cars</h3>
+      <ul>
+        <li><strong>Consist</strong> is units on the head end × helpers or DP. 2x1 is two units and one helper; 3x0 is three units and no DP.</li>
+        <li>Use the third box only for a second helper group (4x2x1). Leave it blank and it's left off. The middle number means DP is really there, so 3x0x1 is saved as 3x1.</li>
+        <li><strong>Unit Numbers.</strong> When the consist has more than one unit, a <strong>Unit Numbers</strong> heading shows under it. Click it to open a box for each unit behind the lead: Trailing, then Mid-train DP and Rear DP (just DP when there's one helper group). Fill in only the ones you caught; a bare number takes the lead loco's mark. Units on the heritage list are added to Heritage Units for you. The numbers show on the train in Edit, and the Trailing and DP Units chart on More Stats counts them. The Lead filter and Notes search look at the lead loco only.</li>
+        <li><strong>Cars</strong> is two boxes. Use the second one for cars between helper groups; Log Stats adds them together.</li>
+        <li>On the Mac, the small ▴ and ▾ beside a number box, or the up and down arrow keys, add or take away one.</li>
+      </ul>
+
+      <h3>Where</h3>
+      <ul>
+        <li><strong>Subdivision</strong> lists the station book, with the number of stations on each, such as Needles Sub (32). Same-named subdivisions show their railroad, such as Lakeside Sub (BNSF).</li>
+        <li><strong>Location</strong> suggests stations on that subdivision with their milepost, such as <code>Victorville (MP 36.7)</code>. Pick one or type your own spot.</li>
+        <li><strong>State</strong> fills in from the station you pick. The time zone follows that state. When a state has two zones, the zone from your recent trains in that state is the guess.</li>
+      </ul>
+
+      <h3>When</h3>
+      <ul>
+        <li>Type the <strong>Time</strong> and choose AM or PM. On the field devices, <strong>Now</strong> fills in the date and time for you.</li>
+        <li>The <strong>time zone</strong> is the globe beside the time. It starts on your device's zone, then follows the location. Click it to change the zone.</li>
+        <li>Times stay exactly as you typed them. When a train's zone differs from the one before it that day, a ⇆ badge shows the new zone.</li>
+      </ul>
+
+      <h3>Media, Symbol, and Notes</h3>
+      <ul>
+        <li><strong>Photo</strong> and <strong>Video</strong> mark that you got a picture or video.</li>
+        <li>The <strong>moon</strong> marks a sighting after dark (Night).</li>
+        <li><strong>Symbol</strong> opens a box for the train symbol (capital letters, numbers, and hyphens).</li>
+        <li><strong>Notes</strong> opens a box that uses the rest of the row.</li>
+        <li><strong>Record</strong>, on its own card under that row, films the whole train. Tap it and set the field device down. The time is set when you start. It stops when you tap Stop, or after 10 minutes. Play the clip on the card. It stays until you delete it or save the train, and it is not stored in the log. Leaving New Entry, or opening Read Units, stops a recording that is still running and keeps the clip on the card. Quick Add starts the next train on its own row and leaves this clip where it is.</li>
+      </ul>
+      <p>For BNSF, UP, NS, and CSX symbols, and Amtrak, Metrolink, Coaster, Caltrain, and ACE train numbers, a gray line reads the train back to you: what kind of train it is, where it runs, and how often. It's saved with the train but never touches your own notes.</p>
+<p>When the symbol says what the train carries, such as coal or intermodal, that train type chip gets a dashed outline. It's only a hint: tap the chip if it's right. Commuter train numbers (Metrolink, Coaster, Caltrain, ACE) typed in the Symbol box read back their route too.</p>
+      <p><strong>Symbol</strong>, under the card, explains how each railroad builds its symbols and lets you search every train number, symbol, and station code the pad knows. <strong>Placards</strong>, beside it and again in the guide and on Settings, is the 2024 Emergency Response Guidebook. Pick the diamond on the car, or type its four-digit number, and the names, guide, and matching diamonds show, with the first actions behind icons. <strong>Legend</strong> lists the railroads by group beside the train types. On a field device the groups stack. On a field device or a Mac the two lists sit side by side.</p>
+
+
+      <h3>Heritage Units and Steam</h3>
+      <ol>
+        <li>Click <strong>Heritage Units</strong> or <strong>Steam Specials</strong> under the Media row. Each opens on its own. On a wide screen the two sections sit side by side.</li>
+        <li>Choose <strong>+ Add Heritage Unit</strong> or <strong>+ Add Steam Engine</strong>. Unit cards sit three across on a wide Mac section, two on a narrower section or a field device, and one on a field device.</li>
+        <li>Type the number, such as UP 1996 or UP 4014. The scheme, name, and wheel arrangement fill in from the list. A unit that isn't on the list can still be added.</li>
+        <li>Use the <strong>Position</strong> menu for Leading, Trailing, DP, or Assist. America 250 units are marked from their own list.</li>
+      </ol>
+      <p>If the lead loco is on the list, a button offers to add it for you, marked Leading. Units you log join the list for next time.</p>
+      <p>When diesels help a steam engine, check <strong>Diesel assist</strong> and type each diesel; <strong>+ Add Diesel</strong> adds another. A diesel on the heritage list is added to Heritage Units as Steam assist.</p>
+      <p>For two steam engines together, check <strong>Doubleheader</strong> and fill in the second engine. Each engine counts as its own steam sighting, and the Log shows "Steam doubleheader UP 4014 Big Boy (4-8-8-4) + UP 844 Living Legend (4-8-4)".</p>
+<p>To change the list itself, use <strong>Edit List</strong> on the panel, or <strong>Settings → Heritage &amp; Steam List → Open</strong>. Add a missing unit, edit one, or remove one. Restore Shipped puts the list back.</p>
+      <h3>Saving</h3>
+      <p>On a keyboard, <strong>Tab</strong> moves through the pad in logging order: Railroad, Lead loco, Time and AM or PM, Consist, Cars, Direction, Train Type and its Loads or Empties boxes, Subdivision, Location, Media, Symbol, and Notes. Shift-Tab goes back.</p>
+      <p>Press <strong>Submit</strong>. Anything required that's missing turns red. If the same railroad, lead, and location going the same way was saved within the last minute, TRAIN LOG asks first; you can save anyway.</p>
+    </section>
+
+    <section class="train-row" id="log">
+      <h2>The Log</h2>
+      <p class="doc-lead">Every sighting, newest first, folded into trips and days.</p>
+
+      <h3>Folders</h3>
+      <ul>
+        <li>Named trips sit under a bar with their dates, with a folder for each day of the trip inside. Days outside a trip get their own folders.</li>
+        <li>Click a bar to fold its trains away or show them again, like a folder in Finder. Option-click opens or closes every folder at that level. <strong>Expand All</strong> beside Group By opens every folder at once; click it again (Collapse All) to fold them back.</li>
+        <li>A closed folder shows a summary on its bar: trains, days, the top railroads, and photos.</li>
+        <li>When the Log opens, only your newest folder is open.</li>
+        <li><strong>Group By</strong> picks the folders: Trip Then Day, Trip, Day, Month, Location, or None. Your choice is remembered.</li>
+        <li>A trip's bar shows its miles driven, the fuel total, the vehicle, who came along, and the start of its notes. <strong>Details…</strong> on the bar opens Trip Details to read or change them. Trip Report on More Stats repeats the fuel totals, the price per gallon, miles per gallon, and the cost per mile. At a Glance adds those totals for every trip in the current view.</li>
+        <li>On the Mac, the box on a bar ticks every train in that folder, so you can change or delete a whole trip at once.</li>
+      </ul>
+
+      <h3>Find Trains</h3>
+      <ul>
+        <li>Set any of the filters at the top, then press <strong>Filter</strong>. <strong>Reset</strong> clears them.</li>
+        <li>On the field devices the filters apply as you change them. To clear one, empty it or pick Any.</li>
+        <li>Click a column heading to sort by it; click again to reverse.</li>
+        <li>The counts under the filters total whatever is showing, by railroad and train type.</li>
+      </ul>
+
+      <h3>Choose What Shows</h3>
+      <ul>
+        <li>The <strong>View</strong> menu holds everything below.</li>
+        <li><strong>Columns</strong> (in View) turns columns on or off; the rest widen to fill the table.</li>
+        <li><strong>Notes</strong> (in View) picks Short Line, Icon, or Full Line. Click a short line or the icon to read the whole note.</li>
+        <li><strong>Layout</strong> (in View) picks how the Log reads. <strong>Auto</strong> shows the table, makes its text smaller as the window narrows, and switches to train cards when the table no longer fits. <strong>Table</strong> always shows the table and scrolls sideways if it has to. <strong>Cards</strong> always shows train cards.</li>
+        <li><strong>Table text</strong> (in View) sets how big the table text gets: <strong>Small</strong>, <strong>Medium</strong>, <strong>Large</strong>, or <strong>Fit Width</strong>, which grows the text to fill a wide window. The table still makes its text smaller when the window is too narrow. The Text Size at the bottom of the page still scales everything.</li>
+        <li>A train card shows the date and time, railroad, lead, direction, type, location, and the first line of the notes. Click it to open the whole train, with Edit and Delete. The tick box and the pencil and trash buttons on the card work as they do in the table.</li>
+        <li>Point at a symbol or a time zone to see what it means.</li>
+      </ul>
+
+      <h3>Change Trains</h3>
+      <ul>
+        <li>The pencil edits one train in a window over the Log. The trash can deletes it.</li>
+        <li>To change several at once, tick their boxes and choose <strong>Change Selected…</strong> to set the trip, subdivision, state, or time zone. Anything left on Leave as Is stays the same. The box on a day or trip bar ticks every train in it.</li>
+        <li><strong>Trip</strong> in Change Selected puts the ticked trains in a trip. Pick one of your trips to add them to it, or <strong>New Trip…</strong> and type a name. The trip's dates stretch to cover the ticked days, and the rest of that trip gets the same dates. <strong>No Trip</strong> takes the trains out of their trip; the trains themselves stay in the log.</li>
+        <li>Every Change Selected is listed in Dashboard → Activity. Details shows each sighting's values before and after.</li>
+        <li>To delete some trains but not the whole log, tick them, or tick a day or trip bar, and choose <strong>Delete Selected…</strong>. It asks first and lists how many trains, which dates, and which trips. Activity keeps a copy of each deleted train, but they can't be put back.</li>
+        <li>Each sighting keeps its number for good, so gaps after a delete are normal.</li>
+      </ul>
+
+      <h3>Import and Export</h3>
+      <ul>
+        <li><strong>Import → Import File</strong> reads TRAIN LOG CSV or JSON files and most spreadsheets (Date, RR, Location, and so on). Trains you already have are skipped, and near-duplicates wait in <a href="#dashboard">Import Review</a>.</li>
+        <li><strong>Import → Import Filters</strong> teaches TRAIN LOG extra words for train types in your files.</li>
+        <li><strong>Export</strong> is a menu: CSV file, JSON file, Copy for spreadsheet (paste into Google Sheets or Excel), and Backup Database. Exports use the filters on screen.</li>
+      </ul>
+
+      <h3>Delete All Data</h3>
+      <p>The red trash can button at the end of the Log toolbar deletes every sighting after a warning. Activity is kept. Back up first if you might want them again.</p>
+
+      <h3 id="backups">Automatic Backups</h3>
+      <p>The first time a new version of TRAIN LOG opens your log, it saves a full copy first, so an update can never lose a sighting or a note. The newest five copies are kept in <code>~/Library/Application Support/RailroadTrainLog/backups/</code>. To go back to one, use File → Open Database.</p>
+    </section>
+
+    <section class="train-row" id="dashboard">
+      <h2>Dashboard</h2>
+      <p class="doc-lead">Five pages on the Mac: Log Stats, Activity, Data Check, Import Review, and Settings. The page you're on is filled in; the others are outlined.</p>
+
+      <h3>Log Stats</h3>
+      <ul>
+        <li>Totals for your whole book across the top: trains, days, locations, photos, railroads, AM/PM, and directions.</li>
+        <li><strong>From</strong>, <strong>To</strong>, and <strong>Trip</strong> limit every card and chart. All dates puts the full book back.</li>
+        <li>Each chart card has a data menu (what it counts) and a Chart menu (bars, columns, donut, or tiles). <strong>Top</strong> sets how many rows show.</li>
+        <li>The <strong>Split</strong> menu on a card splits each bar by direction, railroad, train type, loads or empties, time of day, or photo and video. Point at a piece of a bar to read its count.</li>
+        <li>Click any row on a chart, or a railroad card, to list the trains behind that number. The list follows From, To, and Trip. <strong>Edit</strong> opens a train, <strong>Show These in the Log</strong> shows only those trains in the Log (Show All Trains puts the rest back), and for a lead loco, consist, location, subdivision, state, or railroad, <strong>Replace This Value</strong> opens Find and Replace with that value picked.</li>
+        <li><strong>Add Chart</strong> puts more cards on the board. Drag a card by its ⠿ handle to move it.</li>
+        <li>Charts you can add include <strong>Railroad Class</strong>, <strong>Freight / Passenger / Tourist</strong>, <strong>Trains by Date</strong> (your most recent days; <strong>Top</strong> sets how many) and <strong>Trains by Month</strong> (both start as columns, oldest first), <strong>Wait Between Trains</strong> (minutes between trains at the same spot on the same day), and <strong>New Lead Locos by Month</strong> (lead locos you saw for the first time). Clicking a row lists those trains, like any other chart.</li>
+        <li>The width menu beside the ⠿ handle makes a card ½, 1, 2, or 3 columns wide, or the full width of the board. Every card starts at 1 column, except Railroads with Train Types at the top, which starts at Auto. Each card remembers its own width.</li>
+        <li><strong>⤢</strong> opens a chart in a popup sized to the card. You can still change the list, the chart type, or the split, and click a row to see its trains. Close it with × or Esc. Fill Window makes the popup and its chart bigger; Fit to Card shrinks it back.</li>
+        <li><strong>More → More Stats</strong> opens many more charts, grouped as Progress, When, Where, Trackside, Trains, Power, Media, Symbols, and Special Power. Tap the chips across the top to pick which show.</li>
+        <li>Progress has your streaks of days in a row trackside and milestones (1st, 100th, 1,000th train), how much of each list you've seen, and running totals by month. Trackside has the gaps between trains, trains per hour at each spot, and Along the Line, which draws a subdivision by milepost with the trains you logged at each station.</li>
+        <li><strong>Trailing and DP Units</strong> (Power) counts the units you noted with Unit Numbers, once per train. <strong>Steam Doubleheaders and Assists</strong> (Special Power) shows how each steam engine ran: alone or as a doubleheader, with or without diesels; <strong>Steam Assist Diesels</strong> lists the diesels that helped.</li>
+        <li><strong>Firsts by Month</strong> (Progress) lists the railroads, heritage units, states, and train types you saw for the first time ever, month by month. It always looks at your whole log, so a train only counts as a first if you'd never seen that railroad or unit before.</li>
+        <li><strong>Calendar</strong> (When) shades every day you logged by how many trains you saw, one year after another, newest first. Each year shows its days trackside and trains. Click a day to see its trains.</li>
+        <li><strong>Trip Report</strong> (Where) sums up one trip: trains, days, hours trackside, trains per hour, miles driven, the vehicle, who came along, the trip notes, the top railroads and locations, heritage units and steam, and the railroads, states, heritage units, and lead locos you saw there for the first time.</li>
+        <li><strong>Best Time to Go</strong> (Trackside) shows, for each spot, the hour with the most trains per visit and the best day of the week. The strip runs midnight to midnight; darker hours were busier, and blank hours are ones you weren't there.</li>
+        <li><strong>Meets and Passes</strong> (Trackside) counts two trains going opposite ways at the same spot within 3 minutes of each other, by location, with the latest meets listed. It needs a direction and a time on both trains.</li>
+        <li><strong>Traffic Flow</strong> (Trains) shows loads and empties by direction, for all spots or the one you pick, so you can see which way the loaded trains run.</li>
+        <li><strong>Symbol Timetable</strong> (Symbols) lists symbols you logged at the same spot on two or more days, with the usual time they come by and the earliest and latest you saw them.</li>
+        <li><strong>Loco Travels</strong> (Power) follows numbered lead locos seen on two or more days. Pick one to see every day and place it turned up and how many days apart.</li>
+        <li>Click a row on a More Stats card, a day on the Calendar, or "See the trains on this trip" to list the trains behind it, the same as on Log Stats.</li>
+        <li><strong>More → Side by Side</strong> puts two trips, years, or months next to each other: trains, days, railroads, the busiest hour, and the top railroads, types, and locations.</li>
+        <li><strong>More → Compare</strong> (on the Mac and field devices) counts trains by two things at once, such as hour of day by railroad or location by train type. Pick the Rows and Columns, then show plain numbers or percentages. Darker squares mean more trains; click a number to list those trains.</li>
+        <li><strong>More → Export Graph</strong> saves the charts you tick as an SVG or PDF, in any color scheme.</li>
+      </ul>
+
+      <h3>Activity</h3>
+      <p>Every change to your book, newest first. <strong>Details</strong> shows exactly what changed, and deleted trains keep a full copy. Clear activity erases this history after a warning.</p>
+
+      <h3>Data Check</h3>
+      <p>On the Mac only. It scans the whole log for sightings that look wrong.</p>
+      <ul>
+        <li>Each check that finds something shows how many trains it found. Click it to list them, then <strong>Edit</strong> each one or show them in the Log to use Change Selected. Checks with nothing to fix sit on one All clear line.</li>
+        <li>The checks: a lead loco with no number (unless it's marked Missed, Hidden, Too Dark, or Too Far) or with its mark twice, no units on the head end (any number above zero is fine, since more than 10 is not unusual), more than 250 cars, no railroad, direction, location, train type, time, or time zone, a time zone that doesn't fit the state, a date in the future or outside its trip's dates, a trip with no dates, trips whose dates overlap, a trip or place spelled different ways, a location with no state or a different state than its other trains, a railroad or train type that isn't on the lists, light power with a car count, more unit numbers than the consist has room for, a heritage or steam unit that wasn't added, the same train saved twice, and the same lead loco within 10 minutes.</li>
+        <li>When a check has a safe correction, <strong>Fix</strong> does it and Activity keeps the old value. <strong>Fix All</strong> runs every fix that is ready. A row can have its own Fix. A railroad that isn't on the menu can be replaced, and a train type can be replaced or added to the list. Places that still need a state can be set one place at a time. The Trips card renames a trip and keeps its details.</li>
+        <li><strong>Find and Replace</strong> changes one exact value in one field: Lead Loco, Consist, Cars, Railroad, Symbol, Train #, Location, Subdivision, or State. Pick the field, type to narrow the list of values, and pick one. The number beside each value is how many trains have it. <strong>See These Trains</strong> lists them first.</li>
+        <li>Type the new value in <strong>Replace with</strong>, or empty it to clear the value, then choose <strong>Replace</strong> and confirm. Notes are never changed. Activity keeps every train's old value.</li>
+        <li><strong>Check Again</strong> runs the checks again.</li>
+      </ul>
+
+      <h3>Import Review</h3>
+      <ul>
+        <li>Trains that look like ones you already have wait here until you <strong>Add to Log</strong> or discard them. Nothing is dropped silently.</li>
+        <li><strong>Check Subdivisions and Time Zones</strong> lists imported trains where TRAIN LOG had to guess. Guesses are in italics; point at one to see why. Tick rows, pick a value, and set them all at once, or choose <strong>Looks Right</strong>.</li>
+      </ul>
+
+      <h3>Debug</h3>
+      <p>If something breaks, open <strong>Debug</strong> in the footer, describe what happened, and choose <strong>Export Debug Report</strong> or <strong>Copy Report</strong>. It does not include your log. A red count on the button shows errors since the app opened.</p>
+    </section>
+
+    <section class="train-row" id="settings">
+      <h2>Settings</h2>
+      <p class="doc-lead">The lists the pad uses and the Railroad Library. Changes show on the pad right away. Open it from the last tab on the Dashboard, or on the Mac with File → Settings or TRAIN LOG → Settings… (⌘,).</p>
+      <h3>Arrange the Cards</h3>
+      <ul>
+        <li>Drag a card by its ⠿ handle to move it, or click the handle and use the arrow keys.</li>
+        <li><strong>⤢</strong> opens a card in a popup sized to the card. Everything on the card still works there. An outline with the card's name holds its spot on the board until you close the popup with × or Esc, or click outside it.</li>
+        <li>Popups open at <strong>Fit to Card</strong>. <strong>Fill Window</strong> makes one nearly as big as the window, so a long list gets the whole window, and Fit to Card shrinks it back. Each card remembers which one you picked.</li>
+        <li>The width menu beside the handle makes a card ½, 1, 2, or 3 columns wide, or the full width of the page.</li>
+        <li>Your layout is remembered. Once you change it, <strong>Reset Layout</strong> appears beside the Dashboard tabs and puts every card back where it started.</li>
+        <li>On first open every card fits on one screen, the Railroad Library included.</li>
+      </ul>
+
+      <h3>Railroads and Train Types</h3>
+      <ul>
+        <li><strong>Add</strong> opens a small window for a new railroad or train type, with what it stands for.</li>
+        <li>Railroads are in three columns: Freight, Passenger / Commuter, and Tourist. Pick the column when you add one.</li>
+        <li>Every railroad can have a <strong>Class</strong>. Freight: Class I, Regional, Shortline, or Tourist. Passenger / Commuter: Nationwide, Commuter, or Light Rail. Tourist: Heritage, Scenic, or Dinner Train. Pick it when you add the railroad, or click the class button in its row (+ Class when none is set) and pick from the short list. Not Set clears it.</li>
+        <li>Drag a row by its ⋮⋮ handle to change the order on the pad. PASS always stays first.</li>
+        <li>Type in <strong>Stands for</strong> to change what a mark or chip means. The × removes one.</li>
+        <li><strong>Restore Defaults</strong> puts the list back the way it came.</li>
+      </ul>
+
+      <h3>Trip Details Picks</h3>
+      <ul>
+        <li>The attendees and vehicles in the Trip Details dropdowns. They show in this order, followed by any other names used on past trips, A to Z.</li>
+        <li>Type a name and press <strong>Add</strong> or Return. Drag a row by its ⋮⋮ handle to change the order. The × takes one off the dropdown; trips that already list that name keep it.</li>
+        <li><strong>Restore Defaults</strong> puts back the list the app came with.</li>
+      </ul>
+
+      <h3>Subdivisions</h3>
+      <ul>
+        <li>The list opens sorted by Railroads. Click Subdivision, Railroads, or Locs to sort by it; click again to reverse. Your choice is remembered.</li>
+        <li>Search, or pick a railroad, to find a subdivision. The ⋯ menu on each row has Edit, Hide or Unhide, and Delete.</li>
+        <li><strong>Add Subdivision</strong> lets you type one in, with its railroads, stations, and mileposts, or import a subdivision CSV.</li>
+        <li><strong>Files → Watch Folder</strong> adds many CSVs at once: drop them in the folder and TRAIN LOG imports them while it's open.</li>
+        <li><strong>Files → Restore Shipped</strong> undoes your edits to the subdivisions that came with the app. Ones you added stay.</li>
+      </ul>
+      <p>About 462 files and 8,655 stations are shipped. Each subdivision is one CSV: row 1 lists its railroads, and row 2 is <code>Subdivision,Location,Milepost,State</code>.</p>
+
+      <h3>Railroad Library</h3>
+      <p>The Railroad Library is on this page and under the pad (the Library button). It lists US railroads: Class I, regional, and short line freight roads, commuter lines, and tourist lines, each with its mark, class, type of operation, region, states, time zone, and track miles. On a field device or a Mac the facts are two columns. On a field device they are one column. Track miles can include a decimal, and the Timetables box sits on that line on every device.</p>
+<ul>
+        <li>The list is on the left. Search, or pick a group, region, or state. Click a railroad to see everything about it on the right.</li>
+        <li>Mark Status tells you how sure the mark is: <strong>Verified</strong> was confirmed by hand, <strong>From a list</strong> came from a published reporting-mark list, and a <strong>Check</strong> tag means it still needs confirming. <strong>Menu</strong> means it's already on the Railroad menu on the pad.</li>
+        <li><strong>Aliases</strong> lists other marks the same railroad goes by, like GCRY for Grand Canyon Railway (GCRX) or SNRD for Coaster (SDNX). A mark is always saved the way you type it; lookups such as the heritage and steam lists, Stands for, and passenger train numbers treat both as the same railroad. Add an alias with <strong>Edit</strong>.</li>
+        <li><strong>Timetables</strong>: tick it in a railroad's details, or with <strong>Edit</strong>, when you have its timetables. A TT tag shows on the list, and <strong>Has Timetables</strong> shows only those railroads.</li>
+        <li><strong>Add to Railroad Menu</strong> puts it on the pad with its group, class, and full name in Stands for.</li>
+        <li><strong>Edit</strong> changes any field. Leave Time Zone on From the States to fill it in from the states. <strong>Add</strong> starts a new railroad.</li>
+        <li><strong>Import List…</strong> adds many at once. Paste or choose a CSV with a header row (Railroad Name, Reporting Mark, Type, States, Track Mileage, and so on), or a list with a region name on its own line and then one railroad per line as <code>Name | State | Type of operation</code>. A TextEdit RTF file works too. A railroad already in the library, found by mark or name, only gets its blank fields filled in.</li>
+        <li><strong>Add More Railroads</strong> brings in short lines of Genesee &amp; Wyoming, Watco, Patriot Rail, OmniTRAX, and R.J. Corman that are not already in the shipped list, including their Canadian roads. Roads already in the library are not added again. <strong>Hide More Railroads</strong> takes that list back out. A mark is added only when it was published; several named lines still have no mark to add.</li>
+        <li><strong>Remove</strong> takes one out of the library. <strong>Restore Shipped</strong> undoes all your library changes and turns More Railroads off. Neither touches the Railroad menu or your log.</li>
+      </ul>
+      <p class="doc-note">Your Settings changes are saved on this Mac, outside the app, so an update never undoes them. Sightings already in your log are never changed by an edit here.</p>
+    </section>
+
+    <section class="train-row" id="field-devices">
+      <h2>Field Devices</h2>
+      <p class="doc-lead">TRAIN LOG runs on a field device as a Home Screen app that works trackside with no signal. Its log lives on that device. Updates come from the public field site. Move sightings to the Mac with <strong>Save a copy</strong> / AirDrop, then <strong>Import File</strong> on the Mac — the apps are not live-linked.</p>
+      <p>The field device has the full New Entry card, the Log, Log Stats, and Activity. Importing, Export tools beyond Save a copy, charts, Data Check, and Settings are on the Mac.</p>
+      <a class="btn ghost doc-download" href="static/docs/iphone-sync-guide.pdf" download="TRAIN LOG Field Device Setup.pdf">Download Printable Field Device Setup Guide (PDF)</a>
+
+      <h3>Set Up Once</h3>
+      <p class="doc-note">Use Safari. Prefer the public install address below — no Mac certificate and no pairing code.</p>
+      <ol>
+        <li><strong>Install:</strong> open <a href="https://graphicsmike.github.io/trainlog-field/">https://graphicsmike.github.io/trainlog-field/</a> in Safari → Share → <strong>Add to Home Screen</strong>. Open the icon until <strong>Offline ready</strong>.</li>
+        <li><strong>Updates:</strong> on the field device use footer <strong>Updates → Check for Updates → Get Update</strong> (refreshes from that site). You can also use footer <strong>This device → Get Update</strong> or <strong>Repair Install</strong>. Do not delete the Home Screen icon.</li>
+        <li><strong>Sightings to the Mac:</strong> on the field device tap <strong>This device → Save a copy</strong> (or AirDrop the file), then on the Mac use <strong>Import → Import File</strong>. The Mac and field logs stay independent until you import.</li>
+        <li>Optional check: Airplane Mode → open the icon. If TRAIN LOG starts, you're set trackside.</li>
+      </ol>
+      <p class="doc-note"><strong>Do not delete the Home Screen icon to update.</strong> Use footer <strong>Updates</strong> or <strong>This device → Repair Install</strong> if Reload is stuck.</p>
+      <h3 id="offline">Offline Ready</h3>
+      <p>The badge under the TRAIN LOG name tells you whether the field device can be used with no signal:</p>
+      <ul>
+        <li><strong>Offline ready</strong> (green): everything is saved on the device.</li>
+        <li><strong>Saving for offline…</strong>: keep the app open on Wi-Fi until it finishes. If it's closed early, it carries on next time.</li>
+        <li><strong>Not offline yet</strong>: open it on Wi-Fi (cellular is fine for the public site) until the badge turns green.</li>
+        <li><strong>Open from your Home Screen</strong>: you're in Safari. Use the Home Screen icon; it keeps its own copy and its own log.</li>
+        <li><strong>Can't work offline here</strong>: use the address that starts with <code>https://</code>.</li>
+      </ul>
+      <p>Tap the badge for details and <strong>Check Again</strong>.</p>
+
+      <h3>Moving Sightings</h3>
+      <ol>
+        <li>On the field device, open the Home Screen icon and tap <strong>This device → Save a copy</strong> (JSON). AirDrop or otherwise send that file to the Mac.</li>
+        <li>On the Mac, use <strong>Import → Import File</strong>. Trains already in the Mac log are skipped; edited copies wait in Import Review and never replace the Mac's row.</li>
+      </ol>
+      <ul>
+        <li>Each field install keeps its own log. Importing onto the Mac does not clear the field device.</li>
+        <li>After a new TRAIN LOG release is published to the field site, open <strong>Updates</strong> (or This device) and tap <strong>Get Update</strong>. When the refresh finishes, use <strong>Reload New Version</strong> if offered.</li>
+        <li>If Reload is stuck, or the Home Screen copy won't open after an update, use <strong>Repair Install</strong> on This device, or open the field site with <code>?repair=1</code>. Sightings stay on the device. Do not delete the Home Screen icon to update.</li>
+      </ul>
+
+      <h3 id="read-units">Read Units</h3>
+      <p>On the field devices, <strong>Read Units</strong> reads locomotive numbers off a video. It is not in the Mac app. <strong>Tracks</strong> and <strong>Storyboard</strong> are the two ways to watch the clip.</p>
+      <ul>
+        <li>The <strong>Railroad</strong> on a train fills the mark on every unit of that train. A mark you type, or a known mark for a different railroad, stays. An empty mark, or one the reader didn't recognize, follows the railroad you pick.</li>
+        <li><strong>Next train</strong> parks this train and opens a blank one.</li>
+        <li>Opening Read Units stops a recording that is still running and keeps the clip. It is on the entry card when you come back.</li>
+      </ul>
+      <h3 id="on-the-phone">On the Phone</h3>
+      <ul>
+        <li><strong>New Entry</strong> has Submit at the top and again under the train card.</li>
+        <li><strong>Log</strong> filters by From and To dates. Tap a train card to see everything about it, then Edit or Delete.</li>
+        <li><strong>Dashboard</strong> opens on <strong>Trackside</strong>: tap <strong>Day</strong> or <strong>Trip</strong>, then pick which one. It shows the count, first and last times, the last train and how long ago it passed, directions, railroads, train types, and where you saw them. Activity is the other tab.</li>
+        <li>The full charts, Compare, More Stats, and Data Check are on the Mac.</li>
+      </ul>
+
+      <h3 id="cant-reach">If Updates Won't Load</h3>
+      <ol>
+        <li>Confirm the field device can reach the public site in Safari: <a href="https://graphicsmike.github.io/trainlog-field/">https://graphicsmike.github.io/trainlog-field/</a>.</li>
+        <li>Open footer <strong>Updates → Check for Updates</strong>. If a newer TRAIN LOG is listed, tap <strong>Get Update</strong>.</li>
+        <li>If Reload is stuck after an update, use <strong>This device → Repair Install</strong>. Sightings stay on the device.</li>
+        <li>The Home Screen icon should still open from its offline copy even when the site is unreachable.</li>
+      </ol>
+    </section>
+
+    <section class="train-row" id="data-updates">
+      <h2>Updates</h2>
+      <h3>On the Mac</h3>
+      <ol>
+        <li>Click <strong>Updates</strong> in the footer (or Help → Check for Updates…).</li>
+        <li>The first time, paste the key code you were given and choose Save.</li>
+        <li>When a new version is ready, a note at the bottom says so and Updates shows a red 1. Choose <strong>See Update</strong>, then <strong>Update</strong>.</li>
+      </ol>
+      <p>TRAIN LOG downloads the new version, checks it really came from TRAIN LOG, and reopens by itself. Your log is backed up first. Keep TRAIN LOG in your Applications folder so it can replace itself.</p>
+      <p>New subdivisions, symbols, and heritage units can also arrive without a new version: choose <strong>Install Station Data</strong> in the same window. Your log and your own edits are never touched. <strong>Use Built-in Data</strong> goes back to the data that came with the app.</p>
+      <h3>On field devices</h3>
+      <ol>
+        <li>Keep using the same Home Screen icon — do not delete it to update.</li>
+        <li>Open <strong>Updates</strong> in the footer (or <strong>This device</strong>). No key code is needed — Check for Updates looks at the public field site.</li>
+        <li>When a new TRAIN LOG is ready, tap <strong>Get Update</strong>. That refreshes this Home Screen install from the field site. Sightings stay on the device.</li>
+        <li>When the refresh finishes, tap <strong>Reload New Version</strong> if offered. Use <strong>Repair Install</strong> if Reload is stuck.</li>
+      </ol>
+    </section>
+
+    <section class="train-row" id="sharing">
+      <h2>Sharing and Backups</h2>
+      <h3>Give Someone the App</h3>
+      <p>Apple Silicon Macs use <strong>TRAIN LOG.app</strong>; Intel Macs (macOS 11 or later) use <strong>TRAIN LOG Intel.app</strong>. Drag it to Applications, then right-click → Open the first time. Everyone keeps their own log.</p>
+      <h3>Share Your Sightings</h3>
+      <ul>
+        <li><strong>Log → Export → CSV File</strong> or <strong>JSON File</strong>, then send the file. The other person uses Log → Import → Import File.</li>
+        <li><strong>Copy for Spreadsheet</strong> copies the Log so you can paste it into Google Sheets or Excel.</li>
+      </ul>
+      <h3>Keep a Copy</h3>
+      <ul>
+        <li><strong>Log → Export → Backup Database</strong> (or File → Backup Database) saves your whole log in one file.</li>
+        <li>File → Open Database opens a copy. File → Reveal Database shows the live file in Finder.</li>
+      </ul>
+      <p class="doc-note">Your log is stored at <code>~/Library/Application Support/RailroadTrainLog/trains.db</code>, never inside the app, so updating or replacing the app doesn't touch it.</p>
+    </section>
+
+    <section class="train-row" id="appearance">
+      <h2>Color and Text Size</h2>
+      <ul>
+        <li><strong>Appearance</strong> (footer Tools) sets color scheme and text size, and can prefer Night for new sessions. Six light and six dark palettes. On the Mac, View → Dark Mode switches between your last light and dark ones.</li>
+        <li><strong>Text Size</strong> (in the footer) makes everything Smaller, Small, Normal, Large, or Larger on this device. On the Mac, View → Larger Text (⌘=), Smaller Text (⌘−), and Normal Text Size (⌘0) do the same.</li>
+        <li>The footer also shows whether you're on the Phone, Tablet, or Desktop view, and which version is running.</li>
+      </ul>
+    </section>
+    <nav class="doc-end" aria-label="Leave How to Use">
+      <a class="btn primary" href="/#entry">Back to Log</a>
+      <a class="btn ghost" href="#top">Top of Page</a>
+    </nav>
+  </main>
+  <div class="credit">
+    <p class="credit-line">Created by Michael Amrine
+      <span class="credit-note">
+        <button type="button" class="credit-note-btn" aria-label="Dedicated to Lowell Amrine" aria-expanded="false" aria-controls="credit-note-pop"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="M8 7.15V11.4M8 4.7v.4"/></svg></button>
+        <span class="credit-note-pop" id="credit-note-pop" role="note">
+          <span class="credit-note-card">
+            <span class="credit-note-head">Dedicated to Lowell Amrine</span>
+            <span class="credit-note-text">Thank you for being so much more than my father—you’re my railfan companion, my fellow land shark, and, most of all, my best friend. I’m grateful for every mile we’ve traveled, every train we’ve chased, every laugh we’ve shared, and all the little adventures that have become some of my favorite memories.</span>
+            <span class="credit-note-text">You’ve always been someone I can count on, have fun with, and be completely myself around. I feel lucky to have you in my corner and even luckier to call you Dad. Thanks for making life a little more adventurous and a whole lot better. I dedicate this to you—with all my love and gratitude.</span>
+          </span>
+        </span>
+      </span>
+    </p>
+  </div>
+  <script src="static/theme.js?v=9"></script>
+  <script src="static/docs.js?v=4"></script>
+</body>
+</html>

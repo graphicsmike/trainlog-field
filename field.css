@@ -1,0 +1,3836 @@
+#field-boot {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  background: var(--bg, #11161f);
+  color: var(--ink, #e8edf5);
+  font-family: var(--font-ui, system-ui, sans-serif);
+}
+
+.field-boot-card {
+  text-align: center;
+  padding: 24px;
+}
+
+.field-boot-card img {
+  border-radius: 14px;
+}
+
+.field-boot-card h1 {
+  margin: 12px 0 6px;
+  font-size: 22px;
+  letter-spacing: 0.08em;
+}
+
+.field-boot-card p {
+  margin: 0;
+  color: var(--muted, #8a97a8);
+  font-size: 14px;
+}
+
+#field-update {
+  position: fixed;
+  left: 50%;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: calc(100vw - 24px);
+  padding: 10px 12px 10px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  font-size: 14px;
+}
+
+#field-update .btn {
+  min-height: 40px;
+  flex: none;
+}
+
+@media (max-width: 700px) {
+  #field-update {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transform: none;
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+    border-radius: 0;
+    border-inline: 0;
+    border-bottom: 0;
+    padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
+    justify-content: space-between;
+  }
+
+  #field-update span {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+
+/* Wide tables scroll inside their own wrap instead of widening the page. */
+html.is-field body {
+  grid-template-columns: 10px minmax(0, 1fr);
+}
+
+/* AM over PM keeps the time zone on the same row as the hours. */
+html.is-field .time-fields {
+  grid-template-columns: minmax(44px, 64px) 10px minmax(44px, 64px) max-content max-content max-content;
+  width: max-content;
+  max-width: 100%;
+}
+
+html.is-field .time-fields input[type="number"] {
+  width: 100%;
+  min-width: 0;
+}
+
+/* iPad: the wide layout with finger-sized controls. */
+html.is-field :is(#view-entry, #edit-dialog) .train-row {
+  --pad-control-h: 42px;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .train-row > :not(.row-top) :is(select, input, .seg, .chip),
+html.is-field .session-meta input,
+html.is-field .session-actions .btn {
+  min-height: 42px;
+}
+
+/* Safari zooms the page when a box or menu under 16px is tapped. */
+html.is-field :is(#view-entry, #edit-dialog) .train-row .sp-card :is(.sp-board input, .sp-title-field input, .sp-meta select, .sp-wheels-other, .sp-mini-board, .sp-loco input, .sp-decode select) {
+  min-height: 0;
+  font-size: 16px;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .train-row .sp-line .sp-loco input {
+  height: 42px;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .train-row .sp-line .sp-decode select {
+  height: 36px;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .train-row .sp-card label.sp-board {
+  width: 104px;
+  height: 56px;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .train-row .sp-card :is(.sp-title-field input, .sp-meta select, .sp-wheels-other, .sp-meta label.sp-check) {
+  height: 30px;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .train-row .sp-card {
+  padding-right: 40px;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .train-row .sp-card .sp-remove {
+  width: 32px;
+  height: 32px;
+  min-height: 0;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .train-row .sp-card .sp-mini-board {
+  width: 96px;
+  height: 38px;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .train-row .consist-units .cu-toggle {
+  min-height: 32px;
+  font-size: 13px;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .train-row > :not(.row-top) .consist-units input.cu-unit {
+  width: 84px;
+  height: 38px;
+  min-height: 0;
+  font-size: 16px;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .train-row .sp-card .sp-assist-unit {
+  grid-template-columns: 96px 30px;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .train-row .sp-card :is(.sp-assist-remove, .sp-assist-add) {
+  min-height: 0;
+  height: 38px;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .train-row .sp-card .sp-assist-remove {
+  width: 30px;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .train-row .sp-card .sp-check input {
+  width: 18px;
+  height: 18px;
+  min-height: 0;
+}
+
+html.is-field .sp-card .sp-board-face b {
+  font-size: 20px;
+}
+
+html.is-field .sp-card .sp-title-cap {
+  top: 6px;
+  font-size: 15px;
+}
+
+@media (max-width: 700px) {
+  html.is-field .sp-card .sp-meta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  html.is-field .sp-card .sp-meta-dot {
+    display: none;
+  }
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .train-row .lead-stack .f-lead-status input {
+  width: 12px;
+  height: 12px;
+  min-height: 0;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .train-row .type-con {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .train-row .field-con {
+  display: inline-flex;
+  flex: 0 0 auto;
+  flex-flow: column nowrap;
+  align-items: flex-start;
+  align-self: center;
+  width: max-content;
+  height: auto;
+  gap: 3px;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .train-row .field-con input {
+  width: 12px;
+  height: 12px;
+  min-width: 12px;
+  min-height: 0;
+  margin: 0;
+  flex: none;
+}
+
+html.is-field .lead-stack .f-lead-status {
+  padding-block: 2px;
+  font-size: 11px;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .train-row .lead-fields {
+  max-width: none;
+}
+
+@media (max-width: 700px) {
+  html.is-field .lead-fields {
+    flex-wrap: wrap;
+    height: auto;
+  }
+
+  html.is-field .lead-stack .f-lead-status {
+    display: grid;
+    flex: 1 1 100%;
+    width: 100%;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(2, auto);
+    grid-auto-flow: column;
+    justify-content: stretch;
+    align-content: center;
+    gap: 10px 12px;
+    padding-block: 2px;
+    font-size: 16px;
+  }
+
+  html.is-field .lead-stack .f-lead-status label {
+    gap: 8px;
+    min-height: 28px;
+  }
+
+  html.is-field .lead-stack .f-lead-status input {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+/* Safari ignores min-height on date boxes unless their native look is off. */
+html.is-field .session-meta :is(input, .btn) {
+  box-sizing: border-box;
+  height: 42px;
+}
+
+html.is-field .session-meta input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  text-align: left;
+}
+
+html.is-field :is(.type-group, .load-group, .media-group) {
+  gap: 6px;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .media-row {
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .media-pair {
+  display: inline-flex;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .media-pair:has(.field-notes:not([hidden])) {
+  flex: 1 1 auto;
+  min-width: 8rem;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .media-row > .media-sep {
+  display: none;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .media-pair :is(.field-symbol, .field-notes) {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  max-width: none;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .media-pair .f-notes {
+  width: 100%;
+  min-width: 0;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .media-pair .chip {
+  flex: none;
+}
+
+html.is-field :is(.type-group, .load-group, .media-group, .media-pair) :is(.chip, .seg) {
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+html.is-field .dir-group > .media-sep {
+  display: none;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .train-row .time-fields .ampm-group .seg {
+  min-width: 36px;
+  height: auto;
+  min-height: 0;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .train-row .daynight-group {
+  height: var(--pad-control-h, 42px);
+  min-height: 0;
+  flex: none;
+  align-self: center;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .train-row .media-group .daynight-group .seg {
+  min-width: 28px;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  padding: 0 4px;
+}
+
+html.is-field .time-fields .f-now {
+  min-width: 44px;
+  height: var(--pad-control-h);
+}
+
+html.is-field .time-fields .f-now {
+  font-weight: 650;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .consist {
+  grid-template-columns: 72px 10px 72px 10px 72px;
+  gap: 4px;
+  width: max-content;
+  min-width: 0;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .car-fields {
+  grid-template-columns: 72px 10px 72px;
+  gap: 4px;
+  width: max-content;
+  min-width: 0;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) :is(.consist, .car-fields) input {
+  width: 100%;
+  min-width: 0;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .field-cars {
+  min-width: 0;
+}
+
+/* Phone and iPad: a lighter Log and Dashboard. Filters apply as you change them. */
+html.is-field #view-log .filter-actions,
+html.is-field #view-log .filters-more,
+html.is-field #view-log .filters-primary > label:not(.filter-date),
+html.is-field #view-log .log-tool-danger,
+html.is-field #view-log .log-tool-group:is([aria-label="View"]),
+html.is-field #view-log .log-select,
+html.is-field #dash-log-tools > :not(.dash-log-more),
+html.is-field #dash-log-tools > .dash-log-add,
+html.is-field #dash-log-types,
+html.is-field #dash-log-lists,
+html.is-field #dash-pane-log .dash-card-size,
+html.is-field #dash-pane-log .dash-grip {
+  display: none !important;
+}
+
+html.is-field #view-log .log-toolbar {
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+html.is-field #view-log .log-table tr[hidden],
+html.is-field #view-log .log-table .group-select {
+  display: none !important;
+}
+
+html.is-field #view-log .log-table tr.trip-head .trip-toggle {
+  min-height: 36px;
+}
+
+html.is-field #view-log .filters :is(input, select) {
+  height: 42px;
+  min-height: 42px;
+}
+
+@media (min-width: 701px) {
+  html.is-field .log-table th .le-short {
+    display: none;
+  }
+
+  html.is-field .log-table th .le-long {
+    display: inline;
+  }
+
+  html.is-field #placards.is-numbered .placard-pick img {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+html.is-field #view-log .filter-wipe {
+  order: 3;
+  display: flex;
+  align-items: flex-end;
+  margin-left: 0;
+}
+
+html.is-field #view-log .filter-wipe .btn {
+  height: 42px;
+  min-height: 42px;
+  white-space: nowrap;
+}
+
+html.is-field .page-foot .credit {
+  width: 100%;
+  text-align: left;
+}
+
+html.is-field .credit-line {
+  position: relative;
+}
+
+html.is-field .credit-note {
+  position: static;
+}
+
+html.is-field .credit-note-pop {
+  right: auto;
+  left: 0;
+  width: min(380px, calc(100vw - 48px));
+}
+
+html.is-field .credit-note-btn {
+  width: 32px;
+  height: 32px;
+  margin: -10px -6px;
+}
+
+/* Short pages still put the footer at the bottom of the screen. */
+html {
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+:root.is-field body {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Popups: fit the visible screen (100vh runs under the status bar and home indicator in a Home Screen
+   app), scroll as one piece, and keep the page behind still so a swipe always moves the popup. */
+html.is-field :is(dialog, #train-ref, #sp-list-dialog, #sub-editor, #station-stats, #type-filters-dialog, #dash-log-legend-dialog, #dash-more-stats, #dash-compare, #dash-periods, #edit-dialog) {
+  max-height: calc(100vh - 16px);
+  max-height: calc(100dvh - 16px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - var(--keyboard-inset, 0px));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+html.is-field #entry-legend-dialog {
+  width: min(920px, calc(100vw - 24px));
+  max-width: min(920px, calc(100vw - 24px));
+  overflow: hidden;
+}
+
+html.is-field :is(.train-ref-card, .placard-card, .station-stats-card, .dash-editor, #type-filters-dialog .type-filters-panel) {
+  max-height: none;
+  overflow: visible;
+}
+
+html.is-field .train-ref-wrap {
+  flex: none;
+  height: min(60vh, 560px);
+  height: min(60dvh, 560px);
+  min-height: 0;
+}
+
+/* Phone: one scroll for the whole guide, a single column of meanings, and lookup rows that fit the screen. */
+@media (max-width: 700px) {
+  html.is-field #train-ref {
+    width: calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 28px);
+    max-width: calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 28px);
+    height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - var(--keyboard-inset, 0px) - 28px);
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - var(--keyboard-inset, 0px) - 28px);
+    margin: calc(env(safe-area-inset-top, 0px) + 14px) auto calc(env(safe-area-inset-bottom, 0px) + 14px);
+    border-radius: 12px;
+  }
+
+  html.is-field #train-ref .train-ref-card {
+    min-height: 100%;
+  }
+
+  html.is-field #train-ref .train-ref-wrap {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+  }
+
+  html.is-field #placards {
+    width: calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 28px);
+    max-width: calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 28px);
+    height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - var(--keyboard-inset, 0px) - 28px);
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - var(--keyboard-inset, 0px) - 28px);
+    margin: calc(env(safe-area-inset-top, 0px) + 14px) auto calc(env(safe-area-inset-bottom, 0px) + 14px);
+    border-radius: 12px;
+  }
+
+  html.is-field #placards .placard-card {
+    min-height: 100%;
+  }
+
+  html.is-field #placards .placard-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 2px 4px;
+    overflow: visible;
+  }
+
+  html.is-field #placards .placard-pick {
+    padding: 2px 1px;
+    gap: 2px;
+    font-size: 10px;
+  }
+
+  html.is-field #placards .placard-pick img,
+  html.is-field #placards.is-numbered .placard-pick img {
+    width: 36px;
+    height: 36px;
+  }
+
+  html.is-field #lib-dialog {
+    width: calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 28px);
+    max-width: calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 28px);
+    height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - var(--keyboard-inset, 0px) - 28px);
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - var(--keyboard-inset, 0px) - 28px);
+    margin: calc(env(safe-area-inset-top, 0px) + 14px) auto calc(env(safe-area-inset-bottom, 0px) + 14px);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  html.is-field #lib-dialog .lib-dialog-card {
+    height: 100%;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+  }
+
+  html.is-field #lib-dialog .dash-panel-title-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding-right: 0;
+  }
+
+  html.is-field #lib-dialog .dash-panel-title-row h2 {
+    padding-right: 36px;
+  }
+
+  html.is-field #lib-dialog .dash-title-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 6px;
+  }
+
+  html.is-field #lib-dialog .dash-title-actions .btn {
+    min-height: 40px;
+    white-space: normal;
+    line-height: 1.2;
+    padding: 6px 8px;
+  }
+
+  html.is-field #lib-dialog.is-phone-detail .dash-title-actions {
+    display: none;
+  }
+
+  html.is-field #lib-dialog .dash-lib {
+    flex: 1 1 auto;
+  }
+
+  html.is-field #lib-dialog .dash-lib-detail {
+    overflow: auto;
+  }
+
+  html.is-field #entry-legend-dialog {
+    width: calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 28px);
+    max-width: calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 28px);
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - var(--keyboard-inset, 0px) - 28px);
+    margin-top: calc(env(safe-area-inset-top, 0px) + 14px);
+    overflow: hidden;
+  }
+
+  html.is-field #entry-legend-dialog .acro-key-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html.is-field #placards.is-numbered .placard-grid {
+    display: flex;
+    flex-wrap: wrap;
+    overflow: visible;
+    max-height: none;
+  }
+
+  html.is-field #placards menu,
+  html.is-field #train-ref menu {
+    position: sticky;
+    bottom: 0;
+    z-index: 4;
+    margin: 12px 0 0;
+    padding: 10px 0 calc(10px + env(safe-area-inset-bottom, 0px));
+    background: var(--bg-elevated);
+    border-top: 1px solid var(--border);
+  }
+
+  html.is-field .guide-key dl {
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 8px 14px;
+    font-size: 15px;
+    line-height: 1.35;
+  }
+
+  html.is-field .guide-key dt,
+  html.is-field .symbol-key-how,
+  html.is-field .guide-lookup-note,
+  html.is-field .train-ref-meta {
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  html.is-field .symbol-key-tabs .chip {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+
+  html.is-field #train-ref .train-ref-tools {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  html.is-field #train-ref .train-ref-tools label,
+  html.is-field #train-ref .train-ref-search {
+    flex: none;
+    width: 100%;
+  }
+
+  html.is-field #train-ref .train-ref-tools :is(select, input) {
+    width: 100%;
+    min-height: 42px;
+    font-size: 16px;
+  }
+
+  html.is-field #train-ref .train-ref-table {
+    font-size: 16px;
+  }
+
+  html.is-field #train-ref .train-ref-table th,
+  html.is-field #train-ref .train-ref-table td {
+    padding: 8px 10px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  html.is-field #train-ref .train-ref-table[data-cols="2"] td:first-child {
+    width: 4.5rem;
+    white-space: nowrap;
+  }
+
+  html.is-field #train-ref .train-ref-table:not([data-cols="2"]) thead {
+    display: none;
+  }
+
+  html.is-field #train-ref .train-ref-table:not([data-cols="2"]),
+  html.is-field #train-ref .train-ref-table:not([data-cols="2"]) tbody,
+  html.is-field #train-ref .train-ref-table:not([data-cols="2"]) tr,
+  html.is-field #train-ref .train-ref-table:not([data-cols="2"]) td {
+    display: block;
+    width: auto;
+  }
+
+  html.is-field #train-ref .train-ref-table:not([data-cols="2"]) tr {
+    margin: 0 0 10px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+  }
+
+  html.is-field #train-ref .train-ref-table:not([data-cols="2"]) td {
+    border: 0;
+    padding: 2px 0;
+  }
+
+  html.is-field #train-ref .train-ref-table:not([data-cols="2"]) td:first-child {
+    font-size: 17px;
+    padding-bottom: 4px;
+  }
+
+  html.is-field #train-ref .train-ref-table:not([data-cols="2"]) td:not(:first-child)::before {
+    content: attr(data-label);
+    display: inline-block;
+    min-width: 4.2rem;
+    margin-right: 8px;
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+}
+
+html.is-field:has(dialog:modal),
+html.is-field:has(dialog:modal) body {
+  overflow: hidden;
+}
+
+/* Save Changes stays in reach while a long edit scrolls. */
+html.is-field .edit-dialog-head {
+  position: sticky;
+  top: -14px;
+  z-index: 5;
+  margin: -14px -16px 12px;
+  padding: 12px 16px 10px;
+  background: inherit;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Safari zooms the page when a menu under 16px is tapped, so the picker keeps 16px text and is drawn smaller. */
+html.is-field .text-size-picker select {
+  height: auto;
+  min-height: 0;
+  padding: 3px 24px 3px 8px;
+  font-size: 16px;
+  transform: scale(0.72);
+  transform-origin: left center;
+  margin-right: -26px;
+}
+
+html.is-field .text-size-picker > span {
+  font-size: 12px;
+}
+
+/* The symbol and train number decode gets its own line under Media, Symbol, Notes. */
+html.is-field .field-media .media-head {
+  flex-wrap: wrap;
+  height: auto;
+  min-height: 22px;
+  row-gap: 6px;
+}
+
+html.is-field .field-media .f-train-info {
+  flex: 1 1 100%;
+  order: 1;
+  white-space: normal;
+  line-height: 1.4;
+  padding: 4px 8px;
+}
+
+/* Long notes stay one line on the pad's day cards. */
+/* Phone: 2-up cards → even 2×4 under the 8-train cap. */
+@media (max-width: 700px) {
+  html.is-field .day-card-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+html.is-field .day-card-notes {
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+html.is-field .day-card {
+  padding: 11px 13px 12px;
+}
+
+html.is-field .day-card-main {
+  font-size: 16px;
+}
+
+html.is-field .day-card-lead {
+  font-size: 17px;
+}
+
+html.is-field .day-card-loc {
+  font-size: 15px;
+}
+
+html.is-field .time-fields > select,
+html.is-field .time-fields > .f-tz-flag {
+  grid-column: auto;
+  min-width: 0;
+}
+
+/* Activity: one card per change; tap it to read the details. */
+html.is-field #dash-pane-activity .table-wrap {
+  overflow: visible;
+  border: 0;
+  background: none;
+}
+
+html.is-field #dash-pane-activity .log-table,
+html.is-field #dash-pane-activity .log-table > tbody,
+html.is-field #dash-pane-activity .log-table > tbody > tr,
+html.is-field #dash-pane-activity .log-table > tbody > tr > td {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  white-space: normal;
+}
+
+html.is-field #dash-pane-activity .log-table > thead {
+  display: none;
+}
+
+html.is-field #dash-pane-activity .log-table > tbody > tr.act-card {
+  margin-bottom: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+html.is-field .act-card-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+html.is-field .act-card-action {
+  font-size: 15px;
+  font-weight: 650;
+}
+
+html.is-field .act-card-when {
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  align-self: center;
+}
+
+html.is-field .act-card-summary {
+  grid-column: 1 / -1;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+html.is-field .act-card-head::after {
+  content: "Details ▾";
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+html.is-field .act-card.is-open .act-card-head::after {
+  content: "Hide details ▴";
+}
+
+html.is-field .act-card.is-open .act-card-summary {
+  display: block;
+}
+
+html.is-field .act-card-body {
+  padding: 4px 14px 14px;
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+}
+
+html.is-field .act-card-body .act-detail {
+  padding-top: 10px;
+  font-size: 14px;
+}
+
+html.is-field .act-card-body .act-fields dd {
+  overflow-wrap: anywhere;
+}
+
+html.is-field .act-card-body .act-changes,
+html.is-field .act-card-body .act-changes tbody {
+  display: block;
+}
+
+html.is-field .act-card-body .act-changes thead {
+  display: none;
+}
+
+html.is-field .act-card-body .act-changes tr {
+  display: grid;
+  grid-template-columns: fit-content(45%) auto minmax(0, 1fr);
+  justify-content: start;
+  gap: 2px 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+html.is-field .act-card-body .act-changes tbody th {
+  grid-column: 1 / -1;
+  padding: 0;
+  border: 0;
+  background: none;
+  position: static;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+html.is-field .act-card-body .act-changes td {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+html.is-field .act-card-body :is(.act-detail, .act-raw) {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+html.is-field .act-card-body .act-raw pre {
+  white-space: pre-wrap;
+}
+
+html.is-field .act-card-edit {
+  margin-top: 10px;
+  min-height: 40px;
+}
+
+/* Offline status: header pill and the Offline panel on Debug. */
+.offline-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 3px;
+  padding: 1px 8px;
+  border: 1px solid var(--warn-border);
+  border-radius: 999px;
+  background: var(--warn-bg);
+  color: var(--ink);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 16px;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.offline-pill::before {
+  content: "";
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--warn-border);
+}
+
+.offline-pill[data-kind="ok"] {
+  border-color: var(--ok-border);
+  background: var(--ok-bg);
+  color: var(--ink);
+}
+
+.offline-pill[data-kind="ok"]::before {
+  background: var(--ok-border);
+}
+
+.offline-pill[data-kind="busy"] {
+  border-color: var(--accent);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.offline-pill[data-kind="busy"]::before {
+  background: var(--accent);
+  animation: offline-pulse 1s ease-in-out infinite alternate;
+}
+
+.offline-pill[data-kind="bad"] {
+  border-color: var(--error-border);
+  background: var(--error-bg);
+  color: var(--ink);
+}
+
+.offline-pill[data-kind="bad"]::before {
+  background: var(--error-border);
+}
+
+@keyframes offline-pulse {
+  to {
+    opacity: 0.25;
+  }
+}
+
+html.is-field .debug-grid {
+  flex: none;
+  grid-template-rows: none;
+}
+
+html.is-field .debug-grid .dash-panel {
+  max-height: none;
+  overflow: visible;
+}
+
+html.is-field .debug-grid .debug-offline {
+  grid-column: 1 / -1;
+}
+
+html.is-field #dash-pane-debug.is-active {
+  overflow: auto;
+}
+
+.offline-detail {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--warn-border);
+  border-radius: var(--radius);
+  background: var(--warn-bg);
+  color: var(--ink);
+  line-height: 1.45;
+}
+
+.offline-detail[data-kind="ok"] {
+  border-left-color: var(--ok-border);
+  background: var(--ok-bg);
+  color: var(--ink);
+}
+
+.offline-detail[data-kind="busy"] {
+  border-left-color: var(--accent);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.offline-detail[data-kind="bad"] {
+  border-left-color: var(--error-border);
+  background: var(--error-bg);
+  color: var(--ink);
+}
+
+@media (max-width: 700px) {
+  /* Main was 1fr (viewport-tall) with overflow visible, so padding-bottom
+     sat inside the short box and the fixed Tools rail covered the last cards.
+     Size rows to content; body still min-height: 100dvh for short pages. */
+  html.is-field body {
+    grid-template-columns: 0 minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    height: auto;
+    min-height: 100dvh;
+    scroll-padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
+  }
+
+  html.is-field main {
+    height: auto;
+    min-height: 0;
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px) !important;
+  }
+
+  html.is-field .spine {
+    display: none;
+  }
+
+  html.is-field input,
+  html.is-field select,
+  html.is-field textarea {
+    font-size: 16px;
+  }
+
+  html.is-field .masthead {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    gap: 8px;
+    align-items: center;
+    padding: calc(env(safe-area-inset-top) + 8px) 12px 10px;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-elevated);
+  }
+
+  html.is-field .brand {
+    gap: 8px;
+  }
+
+  html.is-field .brand img {
+    width: 34px;
+    height: 34px;
+  }
+
+  html.is-field .brand .kicker {
+    display: none;
+  }
+
+  html.is-field .brand h1 {
+    font-size: 18px;
+  }
+
+  html.is-field .header-tools {
+    flex: 1;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  html.is-field .theme-picker {
+    min-width: 0;
+  }
+
+  html.is-field .theme-picker > span {
+    display: none;
+  }
+
+  html.is-field .theme-picker select {
+    min-width: 0;
+    width: 72px;
+    max-width: 72px;
+    height: 28px;
+    min-height: 28px;
+    max-height: 28px;
+    padding: 2px 4px;
+    font-size: 12px;
+    line-height: 1.1;
+    border-radius: var(--control-radius, 6px);
+  }
+
+  html.is-field .tabs .tab {
+    position: relative;
+    padding: 7px 10px;
+    font-size: inherit;
+  }
+
+  html.is-field .tabs .tab .badge {
+    position: absolute;
+    top: -7px;
+    right: -4px;
+    margin: 0;
+    padding: 0 5px;
+    font-size: 10px;
+  }
+
+  html.is-field main {
+    padding: 12px 10px calc(env(safe-area-inset-bottom, 0px) + 72px);
+  }
+
+  html.is-field #view-log .filters input[type="date"] {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    min-height: 42px;
+    text-align: left;
+  }
+
+  html.is-field .session-bar {
+    gap: 10px;
+  }
+
+  html.is-field .session-meta {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    width: 100%;
+    gap: 8px 10px;
+    align-items: end;
+  }
+
+  html.is-field .session-more {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    justify-self: end;
+    min-height: 42px;
+    padding: 0 16px;
+  }
+
+  html.is-field .session-more.is-open,
+  html.is-field .session-more.has-note {
+    border-color: var(--ok-border);
+    background: var(--ok-bg);
+  }
+
+  html.is-field .session-extra {
+    display: none;
+  }
+
+  html.is-field .session-extra.is-open {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 10px;
+  }
+
+  html.is-field .session-extra .trip-field.autocomplete,
+  html.is-field .session-extra .trip-details-field {
+    grid-column: 1 / -1;
+  }
+
+  html.is-field .session-meta > * {
+    min-width: 0;
+  }
+
+  html.is-field .session-meta input {
+    width: 100%;
+    min-width: 0;
+  }
+
+  html.is-field .trip-field input[type="text"] {
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* Phone Session Actions: Spots · Add Card · Quick Add · Submit (Timer in Tools; Clear on each card). */
+  html.is-field .session-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  html.is-field .session-actions .gap-chip,
+  html.is-field .session-actions #btn-clear-all,
+  html.is-field .session-actions #btn-cancel-edit {
+    display: none !important;
+  }
+
+  html.is-field .session-actions .quick-spots {
+    min-width: 0;
+    display: flex;
+  }
+
+  html.is-field .session-actions .btn,
+  html.is-field .session-actions .quick-spots-btn,
+  html.is-field .entry-bottom-actions > .btn {
+    display: inline-flex !important;
+    flex: none !important;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+    min-height: 44px !important;
+    height: 44px !important;
+    max-height: 44px !important;
+    padding: 0 8px !important;
+    font-size: 15px !important;
+    font-weight: 400 !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+    border-radius: 6px !important;
+    box-sizing: border-box;
+    white-space: nowrap !important;
+  }
+
+  html.is-field .session-actions .quick-spots-btn > svg,
+  html.is-field .entry-bottom-actions .entry-bottom-spots > svg {
+    width: 14px !important;
+    height: 14px !important;
+    flex: none;
+  }
+
+  html.is-field :is(#view-entry, #edit-dialog) .train-row,
+  html.is-field :is(#view-entry, #edit-dialog) .train-row.has-notes {
+    /* Consist (3 boxes, 2 separators) and Cars (divider + 2 boxes, 1 separator) share one row; this split gives all 5 boxes one width. */
+    grid-template-columns: minmax(0, calc((100% - 75px) * 0.6 + 36px)) minmax(0, 1fr);
+    grid-template-areas:
+      "top top"
+      "rr rr"
+      "lead lead"
+      "time time"
+      "consist cars"
+      "sub sub"
+      "loc loc"
+      "types types"
+      "media media"
+      "heritage heritage";
+    column-gap: 10px;
+    row-gap: 14px;
+    padding: 12px;
+    --pad-control-h: 42px;
+  }
+
+  html.is-field :is(#view-entry, #edit-dialog) .train-row :is(.f-rr, .f-rr-custom, .f-sub, .f-sub-custom, .f-loc, .lead-fields) {
+    width: 100%;
+    max-width: none;
+  }
+
+  html.is-field :is(#view-entry, #edit-dialog) .train-row > :not(.row-top) :is(select, input, .seg, .chip) {
+    min-height: var(--pad-control-h);
+  }
+
+  html.is-field :is(#view-entry, #edit-dialog) .train-row .field-con input {
+    width: 12px;
+    height: 12px;
+    min-width: 12px;
+    min-height: 0;
+  }
+
+  html.is-field .lead-fields select {
+    width: 42%;
+    flex: 0 0 42%;
+  }
+
+  html.is-field .session-meta input[type="date"] {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    min-height: 42px;
+    text-align: left;
+  }
+
+  html.is-field :is(.type-group, .load-group, .media-group) {
+    gap: 6px;
+  }
+
+  html.is-field :is(.type-group, .load-group, .media-group, .media-pair) :is(.chip, .seg) {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  html.is-field :is(#view-entry, #edit-dialog) .field-dir {
+    align-self: stretch;
+    width: 100%;
+  }
+
+  /* Phone media-pair sizing is owned by the stacked Media / Symbol / Notes section (below). */
+  html.is-field :is(.media-group, .media-pair) .chip {
+    padding: 8px 10px;
+  }
+
+  html.is-field .media-group .media-sep {
+    margin: 0 2px;
+  }
+
+  html.is-field .sp-head {
+    flex-wrap: wrap;
+  }
+
+  html.is-field :is(#view-entry, #edit-dialog) .train-row :is(select, input[type="text"], .lead-fields, .loc-fields) {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  html.is-field :is(#view-entry, #edit-dialog) .consist,
+  html.is-field :is(#view-entry, #edit-dialog) .car-fields {
+    width: 100%;
+    min-width: 0;
+  }
+
+  html.is-field :is(#view-entry, #edit-dialog) .field-cars {
+    min-width: 0;
+    padding-left: 10px;
+    border-left: 1px solid var(--border);
+  }
+
+  html.is-field :is(#view-entry, #edit-dialog) .consist {
+    grid-template-columns: minmax(0, 1fr) 10px minmax(0, 1fr) 10px minmax(0, 1fr);
+    gap: 4px;
+  }
+
+  html.is-field :is(#view-entry, #edit-dialog) .car-fields {
+    grid-template-columns: minmax(0, 1fr) 10px minmax(0, 1fr);
+    gap: 4px;
+  }
+
+  html.is-field :is(#view-entry, #edit-dialog) :is(.consist, .car-fields) input {
+    width: 100%;
+    min-width: 0;
+  }
+
+  html.is-field .time-fields {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr) 8px minmax(0, 1fr) max-content max-content max-content;
+    column-gap: 6px;
+  }
+
+  html.is-field .time-fields input[type="number"] {
+    width: 100%;
+    height: var(--pad-control-h);
+    text-align: center;
+  }
+
+  html.is-field .time-fields .x {
+    height: var(--pad-control-h);
+  }
+
+  html.is-field :is(#view-entry, #edit-dialog) .train-row .time-fields .ampm-group .seg {
+    min-width: 36px;
+    height: auto;
+    min-height: 0;
+  }
+
+  html.is-field :is(#view-entry, #edit-dialog) .train-row .daynight-group {
+    height: var(--pad-control-h, 42px);
+    min-height: 0;
+    flex: none;
+    align-self: center;
+  }
+
+  html.is-field :is(#view-entry, #edit-dialog) .train-row .media-group .daynight-group .seg {
+    min-width: 28px;
+    width: auto;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    padding: 0 4px;
+  }
+  html.is-field .time-fields .f-now {
+    min-width: 44px;
+    height: var(--pad-control-h);
+  }
+
+  html.is-field .time-fields .f-now {
+    font-weight: 650;
+  }
+
+  html.is-field .media-row {
+    flex-wrap: wrap;
+  }
+
+  html.is-field dialog {
+    max-width: calc(100vw - 16px);
+  }
+
+  html.is-field #view-log .filters {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  html.is-field #view-log .filters-primary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    gap: 8px 10px;
+    align-items: end;
+  }
+
+  html.is-field #view-log .filters-primary > label.filter-date {
+    max-width: none;
+    flex: none;
+    width: auto;
+  }
+
+  html.is-field #view-log .filters label,
+  html.is-field #view-log .filters :is(input, select) {
+    width: 100%;
+    min-width: 0;
+  }
+
+  html.is-field #view-log .log-toolbar,
+  html.is-field #view-log .log-toolbar-actions {
+    justify-content: flex-start;
+  }
+
+  html.is-field #view-log .log-toolbar-actions {
+    flex-wrap: nowrap;
+    width: 100%;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  html.is-field #view-log .log-tool-group {
+    flex: none;
+    gap: 4px;
+    padding-left: 6px;
+    min-width: 0;
+  }
+
+  html.is-field #view-log .log-tool-group:first-child {
+    flex: 1 1 auto;
+  }
+
+  html.is-field #view-log .log-group-by {
+    width: 100%;
+    min-width: 0;
+    gap: 6px;
+  }
+
+  html.is-field #view-log .log-tool-label {
+    white-space: nowrap;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+  }
+
+  html.is-field #view-log .log-group-by select {
+    width: auto;
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 32px;
+    padding: 0 22px 0 8px;
+    font-size: 13px;
+  }
+
+  html.is-field #view-log .log-toolbar-actions .btn {
+    min-height: 32px;
+    padding: 4px 8px;
+    font-size: 13px;
+  }
+
+  html.is-field .masthead {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "brand daycount"
+      "tabs tabs";
+    row-gap: 8px;
+  }
+
+  html.is-field .brand {
+    grid-area: brand;
+  }
+
+  html.is-field .header-tools {
+    display: contents;
+  }
+
+  html.is-field .masthead .tabs {
+    grid-area: tabs;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    border: 0;
+    box-shadow: none;
+  }
+
+  html.is-field .masthead .tabs .tab {
+    white-space: nowrap;
+    text-align: center;
+    padding: 8px 6px;
+    font-size: 13px;
+    min-height: 40px;
+  }
+
+  html.is-field .theme-picker {
+    display: none;
+  }
+
+  html.is-field :is(#view-dashboard, #view-debug),
+  html.is-field #view-dashboard .dash-pane.is-active,
+  html.is-field #view-dashboard .dash-pane.is-active > :is(.dash-log-board, .dash-grid) {
+    flex: none;
+    overflow: visible;
+  }
+
+  html.is-field .dash-head {
+    flex-wrap: wrap;
+  }
+
+  html.is-field .dash-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    margin-left: 0;
+  }
+
+  html.is-field .dash-tabs > * {
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  html.is-field #view-log .table-wrap {
+    overflow: visible;
+    border: 0;
+    background: none;
+  }
+
+  html.is-field #view-log .log-table [data-col="actions"] .icon-btn {
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  html.is-field #view-log .log-table tr.trip-head .trip-head-summary {
+    display: block;
+    margin: 0 0 6px 16px;
+  }
+
+  html.is-field #view-log .log-table tr.trip-head:not(.is-closed) .trip-head-summary {
+    display: none;
+  }
+
+  html.is-field #view-log .log-table tr.trip-head .trip-head-dates {
+    display: block;
+    margin: 0 0 6px 16px;
+  }
+
+}
+
+html.is-field #dash-log-tools {
+  justify-content: flex-end;
+}
+
+@media (max-width: 700px) {
+  html.is-field .streak-row {
+    grid-template-columns: 1fr;
+  }
+
+  html.is-field #dash-compare .compare-grid,
+  html.is-field .periods-body {
+    overflow-x: auto;
+  }
+
+  html.is-field .compare-controls label,
+  html.is-field .compare-controls select {
+    flex: 1 1 140px;
+  }
+}
+
+/* iPhone and iPad Dashboard Trackside: keep the full Log KPI tiles; hide glance/tools/board. */
+html.is-field #dash-pane-log > :is(#dash-log-empty, #dash-log-glance, #dash-log-tools, .dash-log-board) {
+  display: none !important;
+}
+
+html.is-field #dash-pane-log > .dash-log-top {
+  display: flex !important;
+  flex-shrink: 0;
+}
+
+/* Same 4×2 Log KPI rail size as Mac / wide Log Stats. */
+html.is-field #dash-pane-log > .dash-log-top .dash-kpis.is-e4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+@media (max-width: 700px) {
+  html.is-field #dash-pane-log > .dash-log-top .dash-kpis.is-e4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.trackside {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 760px;
+}
+
+.trackside-scope {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.trackside-seg {
+  display: inline-flex;
+}
+
+.trackside-seg .seg {
+  min-width: 72px;
+  min-height: 40px;
+  font-size: 15px;
+}
+
+.trackside-seg .seg:first-child {
+  border-radius: 8px 0 0 8px;
+}
+
+.trackside-seg .seg:last-child {
+  border-radius: 0 8px 8px 0;
+  margin-left: -1px;
+}
+
+#trackside-pick {
+  flex: 0 1 11.5rem;
+  width: auto;
+  max-width: 12.5rem;
+  min-width: 0;
+  height: 32px;
+  padding: 0 8px;
+  font-size: 13px;
+}
+
+.trackside-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+.trackside-card {
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  min-width: 0;
+}
+
+.trackside-card h3 {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.trackside-head,
+.trackside-last {
+  grid-column: 1 / -1;
+}
+
+.trackside-count {
+  margin: 0;
+  font-size: 18px;
+  color: var(--muted);
+}
+
+.trackside-count b {
+  font-size: 40px;
+  line-height: 1;
+  font-weight: 700;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.trackside-sub {
+  margin: 6px 0 0;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.trackside-ago {
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.trackside-last-what {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 650;
+}
+
+.trackside-last-where {
+  margin: 4px 0 0;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.trackside-dirs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  text-align: center;
+}
+
+.trackside-dirs b {
+  display: block;
+  font-size: 24px;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.trackside-dirs span {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.trackside-dirs .is-zero b {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.trackside-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.trackside-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 10px;
+  font-size: 15px;
+}
+
+.trackside-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trackside-list b {
+  font-variant-numeric: tabular-nums;
+}
+
+.trackside-list i {
+  grid-column: 1 / -1;
+  display: block;
+  height: 4px;
+  margin-top: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+  opacity: 0.7;
+}
+
+.trackside-more,
+.trackside-extras {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.trackside-extras {
+  margin: 0;
+  color: var(--ink);
+}
+
+.trackside-empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 16px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--muted);
+  font-size: 15px;
+}
+
+/* iPhone: a second, full-width Submit under the train card. iPad: Clear, Quick Add, and Submit repeat under the card. */
+html.is-field .entry-bottom-actions {
+  display: flex;
+  margin: 10px 0 4px;
+}
+
+html.is-field #entry-form:not(:has(> #rows .train-row)) > .entry-bottom-actions,
+html.is-field #entry-form:not(:has(> #rows .train-row)) > .entry-pad-tools > .entry-bottom-actions {
+  display: none;
+}
+
+/* Phone: whole tools shell is empty when day-well is hidden and no card yet. */
+@media (max-width: 700px) {
+  html.is-field #entry-form:not(:has(> #rows .train-row)) > .entry-pad-tools {
+    display: none;
+  }
+}
+
+html.is-field .entry-bottom-actions > .btn {
+  flex: 1;
+  min-height: 48px;
+  font-size: 17px;
+}
+
+html.is-field .entry-bottom-extra {
+  display: none;
+}
+
+/* Phone keeps the full-width Submit under the card — not a second one on the refs row. */
+html.is-field .entry-refs-submit {
+  display: none !important;
+}
+
+
+/* Masthead day-count is iPad-only; phone keeps #day-count in the session bar. */
+html.is-field .masthead-day-count {
+  display: none;
+}
+
+/* Minutes since last train today — top-right of the logo row, above the tabs. */
+html.is-field .masthead-last-ago {
+  display: none;
+  grid-area: daycount;
+  align-self: center;
+  justify-self: end;
+  margin: 0;
+  min-width: 0;
+  max-width: 16rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  text-align: center;
+  color: var(--accent);
+}
+html.is-field .masthead-last-ago:not([hidden]) {
+  display: block;
+}
+
+html.is-field .entry-day-well {
+  display: none !important;
+}
+
+html.is-field .entry-timer-well {
+  display: contents;
+}
+
+@media (min-width: 701px) {
+  /* iPad only — phone stays on max-width: 700px rules. */
+  /* iPad portrait header: brand + day count on row 1, primary tabs full-width on row 2. */
+  html.is-field .masthead {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "brand daycount"
+      "tabs tabs";
+    align-items: center;
+    row-gap: 8px;
+    column-gap: 10px;
+  }
+
+  html.is-field .header-tools {
+    display: contents;
+  }
+
+  html.is-field .brand {
+    grid-area: brand;
+    min-width: 0;
+  }
+
+  html.is-field .theme-picker {
+    display: none;
+  }
+
+  /* Day count beside the logo on New Entry. */
+  html.is-field:has(#view-entry.is-active) .masthead-day-count {
+    display: block;
+    grid-area: daycount;
+    align-self: center;
+    justify-self: end;
+    margin: 0;
+    min-width: 0;
+    max-width: 14rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    text-align: right;
+  }
+
+  html.is-field .entry-aside > .day-count {
+    display: none;
+  }
+
+  html.is-field .masthead .tabs {
+    grid-area: tabs;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+    justify-self: stretch;
+  }
+
+  html.is-field .masthead .tabs .tab {
+    flex: none;
+    min-width: 0;
+    padding: 8px 6px;
+    font-size: 13px;
+    min-height: 40px;
+    text-align: center;
+    justify-content: center;
+    white-space: nowrap;
+  }
+
+  /* iPad: one session row — Date Trackside | Trip | From | To | Trip Details.
+     Fixed widths + flex-start so typing a trip name never shoves the row.
+     Timer lives in the Tools drawer; Spots / Submit sit under Guide…Library. */
+  html.is-field .session-bar {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: flex-end;
+    column-gap: 8px;
+    row-gap: 8px;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  html.is-field .session-meta,
+  html.is-field .session-extra {
+    display: contents;
+  }
+
+  html.is-field .session-more,
+  html.is-field .session-actions,
+  html.is-field .entry-aside {
+    display: none !important;
+  }
+
+  html.is-field .session-meta .date-field {
+    order: 1;
+    flex: 0 0 auto;
+    width: 8.75rem;
+    min-width: 8.75rem;
+    max-width: 8.75rem;
+  }
+
+  /* Locked width — suggest popover must not resize this (base CSS min-width: 220px). */
+  html.is-field .session-extra > .trip-field.autocomplete {
+    order: 2;
+    position: relative;
+    flex: 0 0 9.5rem;
+    width: 9.5rem;
+    min-width: 9.5rem;
+    max-width: 9.5rem;
+  }
+
+  html.is-field .session-extra > .trip-field:not(.autocomplete):not(.trip-details-field) {
+    order: 3;
+    flex: 0 0 auto;
+    width: 8.75rem;
+    min-width: 8.75rem;
+    max-width: 8.75rem;
+  }
+
+  /* From before To — DOM order already From then To; keep them paired. */
+  html.is-field .session-extra > .trip-field:not(.autocomplete):not(.trip-details-field) + .trip-field:not(.autocomplete):not(.trip-details-field) {
+    order: 4;
+  }
+
+  html.is-field .session-extra > .trip-details-field {
+    order: 5;
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: auto;
+    min-width: 0;
+  }
+
+  html.is-field .session-extra > .trip-details-field > span[aria-hidden] {
+    display: none;
+  }
+
+  html.is-field .session-meta input[type="date"],
+  html.is-field .session-extra .trip-field input[type="date"] {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    box-sizing: border-box;
+  }
+
+  html.is-field .session-extra .trip-field.autocomplete input[type="text"] {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    box-sizing: border-box;
+  }
+
+  html.is-field .session-extra > .trip-field.autocomplete .suggest {
+    left: 0;
+    right: auto;
+    width: 16rem;
+    min-width: 16rem;
+    max-width: min(16rem, 70vw);
+    box-sizing: border-box;
+  }
+
+  html.is-field .session-extra .trip-details-field #btn-trip-details {
+    flex: none;
+    width: auto;
+    max-width: 100%;
+    height: 42px;
+    min-height: 42px;
+    max-height: 42px;
+    padding: 0 10px;
+    white-space: nowrap;
+  }
+
+  html.is-field .edit-banner {
+    order: 6;
+    flex: 1 1 100%;
+  }
+
+  /* Under-card Spots / Quick Add / Submit — wider, centered (portrait only). */
+  html.is-field .entry-bottom-actions > .btn:not([hidden]) {
+    box-sizing: border-box;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 48px;
+    min-height: 48px;
+    max-height: 48px;
+    min-width: 9.5rem;
+    padding: 0 22px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    line-height: 1;
+    white-space: nowrap;
+    border-radius: var(--control-radius, 6px);
+  }
+
+  html.is-field .session-actions :is(.btn, .quick-spots-btn)[hidden],
+  html.is-field .entry-bottom-actions > .btn[hidden] {
+    display: none !important;
+  }
+
+  html.is-field .session-actions .quick-spots-btn svg,
+  html.is-field .entry-bottom-actions .entry-bottom-spots svg {
+    width: 14px;
+    height: 14px;
+    flex: none;
+  }
+
+  /* iPad order: session → card → Guide…Library → Spots/Quick Add/Submit → day log. */
+  html.is-field #entry-form > .session-bar {
+    order: 1;
+  }
+
+  html.is-field #entry-form > #rows {
+    order: 2;
+  }
+
+  html.is-field #entry-form > .entry-refs {
+    order: 3;
+  }
+
+  html.is-field #entry-form > .entry-pad-tools {
+    order: 4;
+  }
+
+  html.is-field #entry-form > #day-log {
+    order: 5;
+  }
+
+  /* Spots · Quick Add · Submit under the reference row (Guide…Library). */
+  html.is-field .entry-pad-tools {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    column-gap: 12px;
+    margin-top: 10px;
+    margin-bottom: 6px;
+    min-width: 0;
+    max-width: 100%;
+    flex: 0 0 auto;
+  }
+
+  html.is-field .entry-pad-tools > .entry-day-well {
+    display: flex !important;
+    flex: 1 1 auto;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    margin: 0;
+    padding: 6px 12px;
+    min-width: 0;
+    max-width: none;
+    border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+    border-radius: 8px;
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--surface-muted) 48%, var(--surface)) 0%,
+        color-mix(in srgb, var(--surface-muted) 18%, var(--surface)) 100%
+      );
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--surface) 70%, transparent);
+    box-sizing: border-box;
+  }
+
+  html.is-field .entry-pad-tools > .entry-day-well .day-count {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 650;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink);
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  html.is-field .entry-pad-tools > .entry-day-well .last-train {
+    margin: 0;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12.5px;
+    line-height: 1.3;
+    color: var(--muted);
+  }
+
+  html.is-field .entry-pad-tools > .entry-bottom-actions {
+    margin: 0 auto;
+    flex: 0 0 auto;
+    width: auto;
+    max-width: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  html.is-field .entry-bottom-extra {
+    display: inline-flex;
+  }
+
+  html.is-field .entry-bottom-extra[hidden],
+  html.is-field .entry-bottom-actions [data-press="btn-clear-all"] {
+    display: none !important;
+  }
+
+  /* Day count lives in the well on this row — not in the masthead. */
+  html.is-field:has(#view-entry.is-active) .masthead-day-count {
+    display: none !important;
+  }
+
+  /* Reference buttons below the train card (after #rows) + Submit on the right. */
+  html.is-field .entry-refs {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  html.is-field .entry-refs > [data-mac-only][hidden] {
+    display: inline-flex !important;
+  }
+
+  html.is-field .entry-refs > button:not(.entry-refs-submit) {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 36px;
+    min-height: 36px;
+    max-height: 36px;
+    padding: 0 6px;
+    gap: 4px;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: 0;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  html.is-field .entry-refs > button:not(.entry-refs-submit) span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  html.is-field .entry-refs > button:not(.entry-refs-submit) svg {
+    width: 13px;
+    height: 13px;
+    flex: none;
+  }
+
+  html.is-field .entry-refs > .entry-refs-submit {
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    height: 42px;
+    min-height: 42px;
+    max-height: 42px;
+    margin-left: 4px;
+    padding: 0 14px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    line-height: 1;
+    white-space: nowrap;
+    border-radius: var(--control-radius, 6px);
+  }
+
+  /* Trip Details (iPad): single flowing column matching the live form —
+     miles → who → packing → fill-ups → notes. No ghost grid areas. */
+  html.is-field #trip-details-dialog {
+    width: min(640px, calc(100vw - 40px));
+    max-width: min(640px, calc(100vw - 40px));
+    max-height: min(88vh, 900px);
+    overflow: hidden;
+  }
+
+  html.is-field #trip-details-dialog .trip-details-card {
+    display: flex;
+    flex-direction: column;
+    max-height: min(88vh, 900px);
+    overflow: hidden;
+    padding: 14px 16px 12px;
+    box-sizing: border-box;
+  }
+
+  html.is-field #trip-details-dialog .trip-details-top {
+    flex: none;
+    margin-bottom: 10px;
+    gap: 0;
+  }
+
+  html.is-field #trip-details-dialog .trip-details-top h2 {
+    font-size: 20px;
+    line-height: 1.15;
+  }
+
+  html.is-field #trip-details-dialog .trip-details-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-content: start;
+    padding-right: 2px;
+  }
+
+  html.is-field #trip-details-dialog .trip-miles-hero {
+    gap: 10px;
+    min-width: 0;
+  }
+
+  html.is-field #trip-details-dialog .trip-miles-num {
+    font-size: 36px;
+  }
+
+  html.is-field #trip-details-dialog .trip-rate-board {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  html.is-field #trip-details-dialog .trip-rate-figure {
+    padding: 8px 10px;
+  }
+
+  html.is-field #trip-details-dialog .trip-rate-figure b {
+    font-size: 16px;
+  }
+
+  html.is-field #trip-details-dialog .trip-miles-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 14px;
+  }
+
+  html.is-field #trip-details-dialog .trip-who {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 14px;
+  }
+
+  html.is-field #trip-details-dialog .trip-picks-manage {
+    margin: 0;
+    gap: 6px;
+  }
+
+  html.is-field #trip-details-dialog .trip-picks-manage-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  html.is-field #trip-details-dialog .trip-picks-manage-bar .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex: 0 0 auto;
+    min-width: 7.5rem;
+    min-height: 36px;
+  }
+
+  html.is-field #trip-details-dialog .trip-packing-head {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  html.is-field #trip-details-dialog .trip-packing-tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-left: auto;
+  }
+
+  html.is-field #trip-details-dialog .trip-packing-tools .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex: none;
+    min-height: 36px;
+    height: 36px;
+    max-height: 36px;
+  }
+
+  html.is-field #trip-details-dialog .trip-packing-groups {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  html.is-field #trip-details-dialog .trip-fuel {
+    min-width: 0;
+    gap: 8px;
+  }
+
+  html.is-field #trip-details-dialog .trip-fuel-entry {
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  html.is-field #trip-details-dialog .trip-fuel-card-top {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.8fr);
+  }
+
+  html.is-field #trip-details-dialog .trip-fuel-place-row {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.8fr);
+    gap: 8px;
+    align-items: end;
+  }
+
+  html.is-field #trip-details-dialog .trip-fuel-time-wrap {
+    align-items: stretch;
+  }
+
+  html.is-field #trip-details-dialog .trip-fuel-time-wrap .trip-fuel-time {
+    min-height: 36px;
+    height: 36px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--ink);
+    padding: 0 9px;
+  }
+
+  html.is-field #trip-details-dialog .trip-fuel-stamp {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 36px;
+    height: 36px;
+  }
+
+  html.is-field #trip-details-dialog .trip-fuel-card-nums {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  html.is-field #trip-details-dialog .trip-notes-field textarea {
+    min-height: 88px;
+  }
+
+  html.is-field #trip-details-dialog .trip-details-error {
+    flex: none;
+    margin: 8px 0 0;
+  }
+
+  html.is-field #trip-details-dialog .trip-details-card > menu {
+    flex: none;
+    margin: 10px 0 0;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    background: var(--bg-elevated);
+  }
+
+  /* Direction chips fill the row on iPad; label size matches Train Type chips. */
+  html.is-field :is(#view-entry, #edit-dialog) .dir-chips {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  html.is-field :is(#view-entry, #edit-dialog) .dir-chips .chip {
+    width: 100%;
+    justify-content: center;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  /* Lead mark + unit stay number-sized; Missed…Weather wrap under them inside the card. */
+  html.is-field :is(#view-entry, #edit-dialog) .train-row .lead-fields {
+    flex-wrap: wrap !important;
+    align-items: center;
+    height: auto !important;
+    min-height: var(--pad-control-h, 42px);
+    width: 100% !important;
+    max-width: 100% !important;
+    row-gap: 6px;
+  }
+
+  html.is-field :is(#view-entry, #edit-dialog) .train-row .lead-fields select,
+  html.is-field :is(#view-entry, #edit-dialog) .train-row .lead-fields .f-mark-custom {
+    flex: 0 0 6.25rem !important;
+    width: 6.25rem !important;
+    max-width: 6.25rem !important;
+  }
+
+  /* Field mode uses a bare .f-loco (no .num-wrap). Cap at ~4 digits beside the mark. */
+  html.is-field :is(#view-entry, #edit-dialog) .train-row .lead-fields .num-wrap,
+  html.is-field :is(#view-entry, #edit-dialog) .train-row .lead-fields > .f-loco {
+    flex: 0 0 4.75rem !important;
+    width: 4.75rem !important;
+    min-width: 4.75rem !important;
+    max-width: 4.75rem !important;
+  }
+
+  html.is-field :is(#view-entry, #edit-dialog) .train-row .lead-fields .num-wrap > .f-loco {
+    flex: none !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  html.is-field :is(#view-entry, #edit-dialog) .train-row .lead-fields .f-lead-status {
+    flex: 1 1 100% !important;
+    display: flex !important;
+    flex-flow: row wrap;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  html.is-field .day-log {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  html.is-field .day-log-head,
+  html.is-field .day-card-list,
+  html.is-field .day-table-wrap {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* Fixed 4 columns so a capped day (8) lands as an even 4×2. */
+  html.is-field .day-card-list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    overflow-x: hidden;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+
+  html.is-field .day-card {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  html.is-field #view-entry,
+  html.is-field #entry-form {
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* Railroad Library: larger list text — iPad had tiny desktop type in a wide pane. */
+  html.is-field #lib-dialog .dash-lib-list {
+    max-height: none;
+  }
+
+  html.is-field #lib-dialog .dash-lib-group-head {
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+
+  html.is-field #lib-dialog .dash-lib-row {
+    grid-template-columns: 5rem minmax(0, 1fr) auto;
+    column-gap: 10px;
+    padding: 11px 14px;
+  }
+
+  html.is-field #lib-dialog .dash-lib-mark {
+    font-size: 17px;
+    letter-spacing: 0.02em;
+  }
+
+  html.is-field #lib-dialog .dash-lib-name {
+    font-size: 16px;
+    line-height: 1.3;
+    white-space: normal;
+  }
+
+  html.is-field #lib-dialog .dash-lib-meta {
+    font-size: 14px;
+    line-height: 1.3;
+    white-space: normal;
+  }
+
+  html.is-field #lib-dialog .dash-lib-badge {
+    padding: 3px 8px;
+    font-size: 12px;
+  }
+
+  html.is-field #lib-dialog .dash-lib-count {
+    font-size: 13px;
+  }
+
+  html.is-field #lib-dialog .dash-lib-detail {
+    padding: 14px 16px;
+  }
+
+  html.is-field #lib-dialog .dash-lib-detail-mark {
+    font-size: 26px;
+  }
+
+  html.is-field #lib-dialog .dash-lib-detail-head h4,
+  html.is-field #lib-dialog .dash-lib-form h4 {
+    font-size: 18px;
+  }
+
+  html.is-field #lib-dialog .dash-lib-fields {
+    font-size: 16px;
+  }
+
+  html.is-field #lib-dialog .dash-lib-fields dd {
+    font-size: 17px;
+  }
+}
+
+html.is-field #view-log .filter-wipe .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  padding: 0;
+  font-size: 20px;
+}
+
+/* Phones use the number pad, not arrows. */
+.num-arrows {
+  display: none !important;
+}
+
+.num-wrap > input {
+  padding-right: 9px !important;
+}
+
+@media (max-width: 700px) {
+  html.is-field .trip-details-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+html.is-field .trip-details-grid :is(input, select, textarea) {
+  font-size: 16px;
+}
+
+/* Trip Details: keep control labels centered and visually matched. */
+html.is-field #trip-details-dialog :is(.btn, .trip-packing-chip, .trip-fuel-stamp, .trip-packing-section-all) {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-sizing: border-box;
+  font-size: 13px !important;
+  font-weight: 650 !important;
+  line-height: 1.2 !important;
+}
+html.is-field #trip-details-dialog :is(.trip-picks-manage-bar .btn, .trip-packing-tools .btn, .trip-fuel-stamp, .trip-fuel-entry-actions .btn, .trip-details-card > menu .btn) {
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  padding: 0 12px !important;
+}
+
+
+/* CON trade boxes stack behind the chip. The phone's 42px control height must not apply. */
+html.is-field :is(#view-entry, #edit-dialog) .train-row .type-group .type-con {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .train-row .type-group .field-con {
+  display: inline-flex;
+  flex: 0 0 auto;
+  flex-flow: column nowrap;
+  align-items: flex-start;
+  align-self: center;
+  width: max-content;
+  height: auto;
+  gap: 3px;
+}
+
+html.is-field :is(#view-entry, #edit-dialog) .train-row .type-group .field-con input[type="checkbox"] {
+  width: 12px;
+  height: 12px;
+  min-width: 12px;
+  max-height: 12px;
+  min-height: 0;
+  margin: 0;
+  flex: none;
+}
+
+html.is-field .dialog-x {
+  top: 8px;
+  right: 8px;
+  width: 44px;
+  height: 44px;
+  font-size: 22px;
+}
+
+html.is-field dialog .dialog-card > h2,
+html.is-field .type-filters-window .dash-panel-head,
+html.is-field #lib-dialog .dash-panel-title-row h2 {
+  padding-right: 56px;
+}
+
+/* PHONE: trip attendees + packing kit */
+@media (max-width: 700px) {
+  html.is-field #trip-details-dialog {
+    width: min(100vw - 16px, 420px);
+    max-width: min(100vw - 16px, 420px);
+    max-height: min(92vh, 820px);
+  }
+
+  html.is-field #trip-details-dialog .trip-details-card {
+    padding: 12px 12px 10px;
+  }
+
+  html.is-field #trip-details-dialog .trip-details-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  html.is-field #trip-details-dialog .trip-miles-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  html.is-field #trip-details-dialog .trip-rate-board {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  html.is-field #trip-details-dialog .trip-rate-figure {
+    padding: 6px 6px;
+  }
+
+  html.is-field #trip-details-dialog .trip-rate-figure b {
+    font-size: 14px;
+  }
+
+  html.is-field #trip-details-dialog .trip-fuel-card-top {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  html.is-field #trip-details-dialog .trip-fuel-place-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  html.is-field #trip-details-dialog .trip-fuel-time-wrap {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  html.is-field #trip-details-dialog .trip-fuel-time-wrap .trip-fuel-time,
+  html.is-field #trip-details-dialog .trip-fuel-stamp {
+    min-height: 42px;
+    height: 42px;
+    box-sizing: border-box;
+  }
+
+  html.is-field #trip-details-dialog .trip-fuel-time-wrap .trip-fuel-time {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--ink);
+    padding: 0 9px;
+    width: 100%;
+  }
+
+  html.is-field #trip-details-dialog .trip-fuel-card-nums {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  html.is-field #trip-details-dialog .trip-notes-field textarea {
+    min-height: 72px;
+  }
+
+  html.is-field #trip-details-dialog .trip-who {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  html.is-field #trip-details-dialog .trip-who .trip-details-col {
+    gap: 6px;
+    min-width: 0;
+  }
+
+  html.is-field #trip-details-dialog .trip-who input {
+    min-height: 42px;
+    font-size: 16px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  html.is-field #trip-details-dialog .trip-who .suggest {
+    z-index: 40;
+  }
+
+  html.is-field #trip-details-dialog .trip-picks-manage-bar {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+
+  html.is-field #trip-details-dialog .trip-picks-manage-bar .btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex: 1 1 0;
+    width: auto;
+    height: 42px !important;
+    min-height: 42px !important;
+    max-height: 42px !important;
+    padding: 0 12px !important;
+    font-size: 13px !important;
+    font-weight: 650 !important;
+  }
+
+  html.is-field #trip-details-dialog .trip-packing-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  html.is-field #trip-details-dialog .trip-packing-tools {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+
+  html.is-field #trip-details-dialog .trip-packing-tools .btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex: 1 1 0;
+    width: auto;
+    height: 42px !important;
+    min-height: 42px !important;
+    max-height: 42px !important;
+    padding: 0 12px !important;
+    font-size: 13px !important;
+    font-weight: 650 !important;
+  }
+
+  html.is-field #trip-details-dialog .trip-hotspots-block {
+    background: color-mix(in srgb, #000 28%, var(--surface-muted));
+    border-color: color-mix(in srgb, var(--border) 70%, #000);
+  }
+
+  html.is-field #trip-details-dialog .trip-hotspot-add {
+    min-height: 42px;
+    height: 42px;
+    max-height: 42px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  html.is-field #trip-details-dialog .trip-packing-groups {
+    gap: 8px;
+  }
+
+  html.is-field #trip-details-dialog .trip-packing-chip {
+    min-height: 36px;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  html.is-field #trip-details-dialog .trip-packing-section-all {
+    min-height: 36px;
+    height: 36px;
+    max-height: 36px;
+    padding: 0 12px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  html.is-field #trip-details-dialog .trip-packing-section-items {
+    grid-template-columns: 1fr;
+  }
+
+  html.is-field #trip-details-dialog .trip-packing-item {
+    min-height: 44px;
+    padding: 10px 12px;
+    font-size: 15px;
+  }
+
+  html.is-field #trip-details-dialog .trip-packing-kit-note {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  html.is-field #trip-details-dialog .trip-packing-kit-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "label del"
+      "group del";
+    gap: 4px 10px;
+    align-items: center;
+    min-height: 48px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  html.is-field #trip-details-dialog .trip-packing-kit-label {
+    grid-area: label;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    font-size: 15px;
+    line-height: 1.3;
+  }
+
+  html.is-field #trip-details-dialog .trip-packing-kit-row .trip-packing-group {
+    grid-area: group;
+    font-size: 12px;
+  }
+
+  html.is-field #trip-details-dialog .trip-packing-kit-del {
+    grid-area: del;
+    align-self: center;
+    width: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    font-size: 22px;
+    line-height: 1;
+  }
+
+  html.is-field #trip-details-dialog .trip-packing-kit-add {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  html.is-field #trip-details-dialog .trip-packing-kit-add input,
+  html.is-field #trip-details-dialog .trip-packing-kit-add select,
+  html.is-field #trip-details-dialog .trip-packing-kit-add .btn {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+  }
+
+  html.is-field #trip-details-dialog .trip-packing-kit-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  html.is-field #trip-details-dialog .trip-packing-kit-actions .btn {
+    width: 100%;
+    min-height: 42px;
+    justify-content: center;
+  }
+}
+
+/* Squared controls: buttons, chips, tabs, and pills match. */
+html.is-field {
+  --control-radius: 6px;
+}
+
+html.is-field :is(
+  .btn,
+  .chip,
+  .seg,
+  .tab,
+  .badge,
+  .pending-badge,
+  .offline-pill,
+  .trip-packing-chip,
+  .day-board .chip,
+  .quick-spots-btn,
+  .gap-peek,
+  .trip-details-btn,
+  .session-more,
+  .log-col-picker .btn,
+  .symbol-key-tabs .chip,
+  .page-foot .btn,
+  .text-size-picker select,
+  .theme-picker select
+) {
+  border-radius: var(--control-radius);
+}
+
+/* Status dots stay round; only the pill chrome is squared. */
+html.is-field .offline-pill::before {
+  border-radius: 50%;
+}
+
+/* Header sits in the same elevated well as the footer. */
+html.is-field .masthead {
+  border: 0 !important;
+  border-bottom: 1px solid var(--border) !important;
+  box-shadow: none !important;
+  background: var(--bg-elevated);
+}
+
+html.is-field .masthead .tabs {
+  gap: 6px;
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent;
+}
+
+/* Tab bottoms were flush and read as a separator above Date Trackside. */
+html.is-field .masthead .tabs .tab {
+  border-radius: var(--control-radius, 6px);
+}
+
+/* Date Trackside + Trip Details share one control height. */
+html.is-field .session-meta {
+  --pad-control-h: 42px;
+  align-items: end;
+}
+
+html.is-field .session-meta .date-field input[type="date"],
+html.is-field .session-meta .trip-details-btn,
+html.is-field .session-meta :is(input, .btn) {
+  box-sizing: border-box;
+  height: 42px !important;
+  min-height: 42px !important;
+  max-height: 42px !important;
+}
+
+html.is-field .session-meta .trip-details-btn {
+  align-self: end;
+  margin: 0;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* Compact Night/Paper control in the header well. */
+html.is-field .theme-picker {
+  min-width: 0;
+  gap: 0;
+}
+
+html.is-field .theme-picker > span {
+  display: none;
+}
+
+html.is-field .theme-picker select {
+  width: 72px;
+  max-width: 72px;
+  min-width: 0;
+  height: 28px;
+  min-height: 28px;
+  max-height: 28px;
+  padding: 2px 4px;
+  font-size: 12px;
+  line-height: 1.1;
+  border-radius: var(--control-radius, 6px);
+}
+
+/* Created by + Tablet/Phone view · Version on one line */
+html.is-field .page-foot .credit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  width: 100%;
+  max-width: none;
+}
+
+html.is-field .page-foot .credit-line {
+  margin: 0;
+}
+
+html.is-field .page-foot .foot-screen {
+  margin: 0;
+  display: inline;
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+/* FIELD PORTRAIT LOCK */
+@media (orientation: landscape) {
+  html.is-field.field-portrait-only body::before {
+    content: "Turn your device upright to use TRAIN LOG.";
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    display: grid;
+    place-items: center;
+    padding: 28px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 650;
+    line-height: 1.35;
+    color: var(--ink, #e8edf5);
+    background: var(--bg, #11161f);
+  }
+}
+
+/* Spots: one scrollbar only (card), even against the field dialog overflow-y:auto rule. */
+html.is-field #quick-spots-dialog {
+  overflow: hidden !important;
+}
+html.is-field #quick-spots-dialog .quick-spots-card {
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+html.is-field #quick-spots-dialog .quick-spots-list {
+  max-height: none;
+  overflow: visible;
+}
+
+
+/* —— Field Settings cards (Dashboard → Settings) —— */
+/* Mac uses container-type:size so the pane can CQ; that sizes the pane as if
+   empty (height 0). On field the cards then paint outside the box and the
+   fixed Tools rail covers the last ones — drop size containment here. */
+html.is-field #dash-pane-stations.is-active {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  height: auto !important;
+  min-height: 0;
+  flex: none;
+  overflow: visible !important;
+  container-type: normal;
+  container-name: none;
+}
+html.is-field #dash-settings-board {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-items: stretch;
+}
+html.is-field #dash-settings-board > .dash-board-card {
+  min-width: 0;
+  max-width: 100%;
+  height: auto !important;
+  min-height: 200px !important;
+  max-height: none !important;
+}
+
+/* Phone Settings: one full-width card per row (2-up was too smashed at 390). */
+@media (max-width: 700px) {
+  html.is-field #dash-settings-board {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px;
+  }
+
+  html.is-field #dash-settings-board > .dash-board-card {
+    grid-column: 1 / -1 !important;
+    height: auto !important;
+    min-height: 132px !important;
+    max-height: none !important;
+  }
+
+  html.is-field #dash-settings-board > .dash-board-card .dash-grip {
+    display: none !important;
+  }
+
+  html.is-field #dash-settings-board > .dash-board-card > .set-tile {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 6px;
+    height: auto;
+    min-height: 0;
+    box-sizing: border-box;
+    padding: 14px 14px 12px 66px !important;
+  }
+
+  html.is-field #dash-settings-board > .dash-board-card > .set-tile > .set-tile-icon {
+    position: absolute !important;
+    left: 14px;
+    top: 14px;
+    align-self: start;
+  }
+
+  html.is-field #dash-settings-board > .dash-board-card > .set-tile > .set-tile-glow {
+    display: none !important;
+  }
+
+  html.is-field #dash-settings-board > .dash-board-card > .set-tile > h3 {
+    margin: 0;
+    padding-right: 0 !important;
+    font-size: 16px !important;
+    line-height: 1.25 !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    flex: none;
+  }
+
+  html.is-field #dash-settings-board > .dash-board-card > .set-tile > .dash-ref-note,
+  html.is-field #dash-settings-board > .dash-board-card > .set-tile > .dash-ref-counts,
+  html.is-field #dash-settings-board > .dash-board-card > .set-tile > .set-attn {
+    margin: 0;
+  }
+
+  html.is-field #dash-settings-board > .dash-board-card > .set-tile > .dash-ref-note {
+    -webkit-line-clamp: 2 !important;
+    line-clamp: 2;
+    overflow: hidden;
+    font-size: 13px !important;
+    line-height: 1.35 !important;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  html.is-field #dash-settings-board > .dash-board-card > .set-tile > .dash-ref-counts:empty,
+  html.is-field #dash-settings-board > .dash-board-card > .set-tile > .set-attn:empty {
+    display: none !important;
+  }
+
+  html.is-field #dash-settings-board > .dash-board-card > .set-tile > .set-tile-action {
+    display: flex !important;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    margin-top: auto !important;
+    width: 100%;
+    min-width: 0;
+    flex: none;
+  }
+
+  html.is-field #dash-settings-board > .dash-board-card > .set-tile > .set-tile-action .btn {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 0;
+    height: 36px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+    padding: 0 14px !important;
+    font-size: 13px !important;
+    font-weight: 650 !important;
+    line-height: 1.1 !important;
+    white-space: nowrap;
+  }
+
+  html.is-field #dash-settings-board > .dash-board-card[data-set-card="backup"] > .set-tile > .set-tile-action .btn {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 8px !important;
+    font-size: 12px !important;
+  }
+
+  /* Full-screen manage pops: Pad Defaults, Subdivisions, Library */
+  html.is-field dialog.card-pop.is-fit:has(> .card-pop-body > .dash-board-card[data-set-card="paddefaults"]),
+  html.is-field dialog.card-pop:is(.is-fit, .is-large):has(> .card-pop-body > .dash-board-card:is(
+    [data-set-card="subdivisions"],
+    .dash-sub-card,
+    [data-set-card="library"],
+    .dash-lib-panel
+  )) {
+    width: calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 8px) !important;
+    max-width: none !important;
+    height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 8px) !important;
+    max-height: none !important;
+    margin: calc(env(safe-area-inset-top, 0px) + 4px) auto calc(env(safe-area-inset-bottom, 0px) + 4px) !important;
+    border-radius: 10px;
+  }
+
+  /* Already full-bleed on phone — Fill Window / Fit to Card is noise */
+  html.is-field dialog.card-pop:has(> .card-pop-body > .dash-board-card:is(
+    [data-set-card="paddefaults"],
+    [data-set-card="subdivisions"],
+    .dash-sub-card,
+    [data-set-card="library"],
+    .dash-lib-panel
+  )) [data-pop-size] {
+    display: none !important;
+  }
+
+  html.is-field dialog.card-pop:has(> .card-pop-body > .dash-board-card:is(
+    [data-set-card="subdivisions"],
+    .dash-sub-card,
+    [data-set-card="library"],
+    .dash-lib-panel
+  )) > .card-pop-body,
+  html.is-field dialog.card-pop:has(> .card-pop-body > .dash-board-card:is(
+    [data-set-card="subdivisions"],
+    .dash-sub-card,
+    [data-set-card="library"],
+    .dash-lib-panel
+  )) > .card-pop-body > .dash-board-card,
+  html.is-field dialog.card-pop:has(> .card-pop-body > .dash-board-card:is(
+    [data-set-card="subdivisions"],
+    .dash-sub-card,
+    [data-set-card="library"],
+    .dash-lib-panel
+  )) > .card-pop-body > .dash-board-card > .set-manage {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    max-height: 100% !important;
+  }
+
+  html.is-field dialog.card-pop .dash-board-card[data-set-card="paddefaults"] .dash-pad-defaults {
+    width: 100%;
+    max-width: none;
+  }
+
+  html.is-field dialog.card-pop .dash-board-card[data-set-card="paddefaults"] .dash-pad-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Subdivisions manage — stack tools, wrap table cells */
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="subdivisions"], .dash-sub-card) .dash-panel-title-row {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="subdivisions"], .dash-sub-card) .dash-title-actions {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+  }
+
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="subdivisions"], .dash-sub-card) .dash-title-actions > .btn,
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="subdivisions"], .dash-sub-card) .dash-title-actions .dash-sub-files {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 0;
+  }
+
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="subdivisions"], .dash-sub-card) .dash-title-actions .dash-sub-files > .btn {
+    width: 100%;
+  }
+
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="subdivisions"], .dash-sub-card) .dash-title-actions > #dash-station-stats {
+    flex: 1 1 100%;
+  }
+
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="subdivisions"], .dash-sub-card) .dash-title-actions > .btn,
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="subdivisions"], .dash-sub-card) .dash-title-actions .dash-sub-files > .btn {
+    height: 40px !important;
+    min-height: 40px !important;
+    justify-content: center;
+  }
+
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="subdivisions"], .dash-sub-card) .dash-sub-note {
+    display: none !important;
+  }
+
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="subdivisions"], .dash-sub-card) .dash-tools {
+    display: grid !important;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    width: 100%;
+  }
+
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="subdivisions"], .dash-sub-card) .dash-tools > * {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    min-height: 40px;
+    box-sizing: border-box;
+  }
+
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="subdivisions"], .dash-sub-card) .dash-table th,
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="subdivisions"], .dash-sub-card) .dash-table td {
+    white-space: normal;
+  }
+
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="subdivisions"], .dash-sub-card) .table-wrap {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Library manage — list above detail, filters wrap */
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="library"], .dash-lib-panel) .dash-panel-title-row {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="library"], .dash-lib-panel) .dash-panel-head > .dash-ref-note {
+    display: none !important;
+  }
+
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="library"], .dash-lib-panel) .dash-title-actions {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+  }
+
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="library"], .dash-lib-panel) .dash-title-actions > .btn {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 0;
+    height: 40px !important;
+    min-height: 40px !important;
+    justify-content: center;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    font-size: 13px !important;
+  }
+
+  /* Add More full width; Restore | Import; Add (primary) full width */
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="library"], .dash-lib-panel) .dash-title-actions > #dash-lib-extra,
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="library"], .dash-lib-panel) .dash-title-actions > #dash-lib-add {
+    flex: 1 1 100%;
+  }
+
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="library"], .dash-lib-panel) .dash-lib {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px;
+    min-height: 0;
+    flex: 1 1 auto;
+  }
+
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="library"], .dash-lib-panel) .dash-lib-left,
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="library"], .dash-lib-panel) .dash-lib-detail {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="library"], .dash-lib-panel) .dash-lib-list {
+    max-height: none;
+    flex: 1 1 auto;
+    min-height: 180px;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="library"], .dash-lib-panel) .dash-lib-tools {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+  }
+
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="library"], .dash-lib-panel) .dash-lib-tools > .lib-search,
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="library"], .dash-lib-panel) .dash-lib-tools > #dash-lib-state,
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="library"], .dash-lib-panel) .dash-lib-tools > .lib-state {
+    grid-column: 1 / -1;
+    width: 100% !important;
+  }
+
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="library"], .dash-lib-panel) .dash-lib-tools > * {
+    min-width: 0 !important;
+    max-width: none !important;
+    min-height: 40px;
+    box-sizing: border-box;
+  }
+
+  html.is-field dialog.card-pop .dash-board-card:is([data-set-card="library"], .dash-lib-panel) .dash-lib-tt-filter-label {
+    grid-column: 1 / -1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+
+/* ===== iPhone polish restore (from last phone.css pass) =====
+   Sections (call these by name when guiding):
+   1. Masthead Tabs
+   2. Session Bar
+   3. Session Actions
+   4. Train Card
+   5. Media Row
+   6. Entry Bottom Actions
+   7. Entry Refs
+   8. Day Log
+   9. Tools Drawer (wells already current — do not revert to old 2×2)
+*/
+@media (max-width: 700px) {
+  /* --- 1. Masthead Tabs --- */
+  html.is-field .masthead .tabs {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    width: 100%;
+  }
+  html.is-field .masthead .tabs .tab,
+  html.is-field .masthead .tabs a.tab {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100%;
+    min-height: 42px !important;
+    height: auto !important;
+    padding: 10px 4px !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+    border-radius: 6px !important;
+    white-space: normal !important;
+  }
+  html.is-field .masthead .tabs .tab > span:not(.ui-ico):not(.emoji-icon):not(.icon-wash):not(.badge):not(.pending-badge),
+  html.is-field .masthead .tabs a.tab > span:not(.ui-ico):not(.emoji-icon):not(.icon-wash):not(.badge):not(.pending-badge) {
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    line-height: 1.2 !important;
+    text-transform: none !important;
+    white-space: normal !important;
+  }
+
+  /* --- 3. Session Actions (top Spots · Quick Add · Submit) --- */
+  html.is-field .session-actions .btn > span:not(.ui-ico):not(.emoji-icon):not(.icon-wash),
+  html.is-field .session-actions .quick-spots-btn > span:not(.ui-ico):not(.emoji-icon):not(.icon-wash) {
+    font-size: 15px !important;
+    font-weight: 400 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    line-height: 1.2 !important;
+  }
+
+  /* --- 5. Media / Symbol / Notes: three separate full-width sections (iPhone only) --- */
+  html.is-field :is(#view-entry, #edit-dialog) .media-row {
+    display: flex !important;
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    width: 100%;
+    min-width: 0;
+  }
+  html.is-field :is(#view-entry, #edit-dialog) .media-row > .media-sep {
+    display: none !important;
+  }
+  html.is-field :is(#view-entry, #edit-dialog) .media-row > .media-group,
+  html.is-field :is(#view-entry, #edit-dialog) .media-row > .media-pair {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center;
+    gap: 6px;
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    position: relative;
+    z-index: 0;
+  }
+  /* Media section: Photo · Video (+ stacked day/night) */
+  html.is-field :is(#view-entry, #edit-dialog) .media-row > .media-group .daynight-group:not([hidden]) {
+    display: flex !important;
+    flex: 0 0 auto !important;
+    flex-direction: column !important;
+    align-self: center;
+    justify-content: center;
+    gap: 2px;
+    width: auto !important;
+    height: var(--pad-control-h, 42px) !important;
+    min-height: 0 !important;
+  }
+  html.is-field :is(#view-entry, #edit-dialog) .media-row > .media-group .daynight-group .seg {
+    display: inline-flex !important;
+    flex: 1 1 0 !important;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px !important;
+    width: auto !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    padding: 0 4px !important;
+    font-size: 12px !important;
+    font-weight: 650 !important;
+    border-radius: 6px !important;
+  }
+  html.is-field :is(#view-entry, #edit-dialog) .media-row > .media-group .daynight-group .seg :is(.sun-icon, .moon-icon) {
+    width: 12px;
+    height: 12px;
+  }
+  html.is-field :is(#view-entry, #edit-dialog) .media-row > .media-group > .chip {
+    display: inline-flex !important;
+    flex: 1 1 0 !important;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 42px !important;
+    padding: 10px !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    border-radius: 6px !important;
+  }
+  /* Symbol / Notes section toggles fill their own row when closed */
+  html.is-field :is(#view-entry, #edit-dialog) .media-row > .media-pair > .chip {
+    display: inline-flex !important;
+    flex: 1 1 auto !important;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 42px !important;
+    padding: 10px 12px !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    border-radius: 6px !important;
+  }
+  html.is-field :is(#view-entry, #edit-dialog) .media-row > .media-pair:has(.field-symbol:not([hidden])) > .chip,
+  html.is-field :is(#view-entry, #edit-dialog) .media-row > .media-pair:has(.field-notes:not([hidden])) > .chip {
+    flex: 0 0 auto !important;
+  }
+  /* Symbol input stays on the Symbol section row — never under Notes */
+  html.is-field :is(#view-entry, #edit-dialog) .media-row > .media-pair .field-symbol {
+    display: inline-flex !important;
+    flex: 1 1 auto !important;
+    align-items: center;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    position: relative;
+    z-index: 1;
+  }
+  html.is-field :is(#view-entry, #edit-dialog) .media-row > .media-pair .field-symbol[hidden] {
+    display: none !important;
+  }
+  html.is-field :is(#view-entry, #edit-dialog) .media-row > .media-pair .field-symbol .f-symbol {
+    width: 100% !important;
+    max-width: calc(13ch + 16px) !important;
+    min-width: 0 !important;
+    min-height: 42px !important;
+    height: 42px !important;
+    box-sizing: border-box;
+    font-size: 16px !important;
+  }
+  html.is-field :is(#view-entry, #edit-dialog) .media-row > .media-pair:has(.field-notes:not([hidden])) {
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
+  }
+  html.is-field :is(#view-entry, #edit-dialog) .media-row > .media-pair .field-notes {
+    display: flex !important;
+    flex: 1 1 0 !important;
+    align-items: stretch;
+    align-self: stretch;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: relative;
+    z-index: 1;
+  }
+  html.is-field :is(#view-entry, #edit-dialog) .media-row > .media-pair .field-notes[hidden] {
+    display: none !important;
+  }
+  html.is-field :is(#view-entry, #edit-dialog) .media-row > .media-pair .field-notes .f-notes {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    min-height: 42px !important;
+    height: 42px !important;
+    max-height: 42px !important;
+    margin: 0 !important;
+    padding: 10px 12px !important;
+    line-height: 1.2 !important;
+    box-sizing: border-box !important;
+    font-size: 16px !important;
+    resize: none !important;
+    overflow: hidden !important;
+  }
+  html.is-field :is(#view-entry, #edit-dialog) .media-row > .media-pair .seen-before-hint {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    min-width: 0;
+  }
+
+  /* --- 6. Entry Bottom Actions: same Spots · Quick Add · Submit under the card --- */
+  html.is-field .entry-pad-tools {
+    display: flex !important;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin-top: 8px;
+    margin-bottom: 4px;
+  }
+  html.is-field .entry-pad-tools > .entry-day-well {
+    display: none !important;
+  }
+  html.is-field .entry-pad-tools > .entry-bottom-actions,
+  html.is-field .entry-bottom-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    width: 100%;
+    margin: 0;
+  }
+  html.is-field .entry-bottom-extra:not([data-press="btn-clear-all"]) {
+    display: inline-flex !important;
+  }
+  html.is-field .entry-bottom-actions > .btn[data-press="btn-clear-all"],
+  html.is-field .entry-bottom-actions > .btn[hidden],
+  html.is-field #btn-clear-all {
+    display: none !important;
+  }
+  /* Button look shared with Session Actions (rules above in this phone block). */
+  html.is-field .entry-bottom-actions > .btn > span:not(.ui-ico):not(.emoji-icon):not(.icon-wash) {
+    font-size: 15px !important;
+    font-weight: 400 !important;
+    text-transform: none !important;
+    line-height: 1.2 !important;
+  }
+
+  /* --- 7. Entry Refs: Guide · Placards · Marks · Legend · Subdivisions · Library --- */
+  html.is-field .entry-refs {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    width: 100%;
+  }
+  html.is-field .entry-refs > [data-mac-only][hidden] {
+    display: none !important;
+  }
+  html.is-field .entry-refs > button:not(.entry-refs-submit) {
+    display: inline-flex !important;
+    flex: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100%;
+    min-width: 0;
+    min-height: 42px !important;
+    height: auto !important;
+    padding: 10px 6px !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    line-height: 1.2 !important;
+    text-transform: none !important;
+    border-radius: 6px !important;
+    box-sizing: border-box;
+  }
+  html.is-field .entry-refs > button > span:not(.ui-ico):not(.emoji-icon):not(.icon-wash) {
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    clip: auto !important;
+    clip-path: none !important;
+    font-size: 15px !important;
+    font-weight: 400 !important;
+    line-height: 1.2 !important;
+    text-transform: none !important;
+    white-space: normal !important;
+  }
+  html.is-field .entry-refs-submit {
+    display: none !important;
+  }
+}

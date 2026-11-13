@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Settings — Trip Details Picks placements</title>
+  <style>
+    :root {
+      --bg: #10161e; --ink: #e8eef6; --muted: #93a1b3; --border: #334155;
+      --accent: #c81e2a; --surface: #1a222d; --surface2: #151c26; --ok: #3d8a58;
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      background: var(--bg); color: var(--ink);
+      font: 14px/1.4 "Avenir Next", "Segoe UI", system-ui, sans-serif;
+    }
+    button { font: inherit; color: inherit; cursor: pointer; }
+    .shell { display: grid; grid-template-columns: 300px minmax(0, 1fr); min-height: 100vh; }
+    .rail {
+      position: sticky; top: 0; align-self: start; height: 100vh;
+      padding: 22px 16px; border-right: 1px solid var(--border);
+      background: #0d131b; overflow: auto;
+    }
+    .rail h1 { margin: 0 0 6px; font-size: 18px; letter-spacing: -0.02em; }
+    .rail .note { margin: 0 0 14px; color: var(--muted); font-size: 13px; }
+    .opt {
+      display: block; width: 100%; margin: 0 0 8px; padding: 10px 12px;
+      text-align: left; border: 1px solid var(--border); border-radius: 10px; background: transparent;
+    }
+    .opt strong { display: block; font-size: 14px; }
+    .opt span { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; line-height: 1.35; }
+    .opt.is-on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
+    .opt.is-on span { color: var(--ink); }
+    .pick { margin-top: 14px; padding: 10px 12px; border-radius: 8px; border: 1px dashed var(--border); color: var(--muted); font-size: 12px; }
+    .pick b { color: var(--ink); }
+    .stage { padding: 22px 22px 48px; overflow: auto; }
+    .mock { display: none; }
+    .mock.is-on { display: block; }
+    .intro h2 { margin: 0 0 6px; font-size: 22px; letter-spacing: -0.03em; }
+    .intro p { margin: 0 0 16px; max-width: 70ch; color: var(--muted); }
+
+    /* Fake Settings chrome */
+    .dash {
+      border: 1px solid var(--border); border-radius: 12px; background: var(--surface2);
+      overflow: hidden; min-height: 520px;
+    }
+    .dash-head {
+      display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+      border-bottom: 1px solid var(--border); background: #121820;
+    }
+    .dash-head h3 { margin: 0; font-size: 15px; }
+    .tabs { display: flex; gap: 6px; margin-left: auto; }
+    .tab {
+      padding: 6px 10px; border-radius: 999px; border: 1px solid var(--border);
+      background: transparent; font-size: 12px; color: var(--muted);
+    }
+    .tab.on { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 650; }
+    .pane {
+      display: grid; grid-template-columns: 180px minmax(0, 1fr); min-height: 460px;
+    }
+    .nav {
+      padding: 12px 10px; border-right: 1px solid var(--border); background: #0f151d;
+    }
+    .nav-lab {
+      margin: 10px 8px 6px; font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    .nav-lab:first-child { margin-top: 0; }
+    .nav button {
+      display: block; width: 100%; text-align: left; padding: 8px 10px; margin: 0 0 4px;
+      border: 1px solid transparent; border-radius: 8px; background: transparent; font-size: 13px; font-weight: 600;
+    }
+    .nav button.on { background: var(--surface); border-color: var(--border); }
+    .work { padding: 16px; }
+    .work h4 { margin: 0 0 6px; font-size: 18px; }
+    .work .blurb { margin: 0 0 14px; color: var(--muted); font-size: 13px; max-width: 60ch; }
+    .tools { display: flex; gap: 8px; margin-bottom: 12px; }
+    .btn {
+      height: 36px; padding: 0 12px; border-radius: 6px; border: 1px solid var(--border);
+      background: transparent; font-size: 13px; font-weight: 600;
+    }
+    .btn.primary { background: var(--accent); border-color: #a81822; color: #fff; }
+    .cols { display: grid; grid-template-columns: repeat(2, minmax(0, 280px)); gap: 16px; }
+    .box {
+      border: 1px solid var(--border); border-radius: 10px; background: var(--surface); padding: 10px;
+    }
+    .box h5 { margin: 0 0 8px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    .row {
+      display: grid; grid-template-columns: 14px 1fr auto; gap: 8px; align-items: center;
+      padding: 6px 4px; border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+      font-size: 13px;
+    }
+    .row:first-of-type { border-top: 0; }
+    .add {
+      display: flex; gap: 6px; margin-top: 8px;
+    }
+    .add input {
+      flex: 1; height: 36px; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--bg); color: var(--ink); padding: 0 10px;
+    }
+    .badge {
+      display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 999px;
+      background: color-mix(in srgb, var(--accent) 20%, transparent); color: #ffb4b4;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .embed {
+      margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--border);
+    }
+    .embed-head {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px;
+    }
+    .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .chip {
+      height: 28px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--border);
+      background: transparent; font-size: 12px; color: var(--muted);
+    }
+    .chip.on { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ink); }
+    .dlg {
+      max-width: 420px; margin-top: 12px; padding: 14px; border-radius: 12px;
+      border: 1px solid var(--border); background: var(--surface);
+    }
+    .dlg label { display: block; margin: 0 0 10px; font-size: 12px; color: var(--muted); }
+    .dlg input, .dlg select {
+      display: block; width: 100%; margin-top: 4px; height: 36px; border-radius: 6px;
+      border: 1px solid var(--border); background: var(--bg); color: var(--ink); padding: 0 10px;
+    }
+    .callout {
+      margin: 14px 0 0; padding: 10px 12px; border-radius: 8px;
+      border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border));
+      background: color-mix(in srgb, var(--accent) 10%, transparent);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="rail">
+      <h1>Trip Details Picks</h1>
+      <p class="note">Where should Attendees &amp; Vehicles live in Dashboard → Settings? Click each option. This is a mock only.</p>
+      <button type="button" class="opt is-on" data-opt="a"><strong>A · Own sidebar item</strong><span>Current: Station Book / Pad Lists / … / Trip Details Picks</span></button>
+      <button type="button" class="opt" data-opt="b"><strong>B · Inside Pad Lists</strong><span>One “Pad Lists” page with tabs: Railroads · Types · Trip Picks</span></button>
+      <button type="button" class="opt" data-opt="c"><strong>C · Under Trip Details dialog</strong><span>Remove from Settings; Manage lists… from the pad Trip Details window</span></button>
+      <button type="button" class="opt" data-opt="d"><strong>D · Fold into Guides / Reference</strong><span>Not recommended — wrong shelf — shown for contrast</span></button>
+      <button type="button" class="opt" data-opt="e"><strong>E · Sub-block on Railroads</strong><span>Keep Railroads nav; Trip Picks as a panel below the marks list</span></button>
+      <p class="pick">Your pick tonight: <b id="pick">A</b></p>
+    </aside>
+    <main class="stage">
+      <section class="mock is-on" id="mock-a">
+        <div class="intro">
+          <h2>A · Own sidebar item (today)</h2>
+          <p>Clear and findable. Costs a nav slot for a small editor (two short lists).</p>
+        </div>
+        <div class="dash">
+          <div class="dash-head"><h3>Dashboard</h3><div class="tabs"><span class="tab">Log Stats</span><span class="tab on">Settings</span></div></div>
+          <div class="pane">
+            <nav class="nav">
+              <p class="nav-lab">Station Book</p>
+              <button type="button">Subdivisions</button>
+              <p class="nav-lab">Pad Lists</p>
+              <button type="button">Railroads</button>
+              <button type="button">Train Types</button>
+              <button type="button">Railroad Library</button>
+              <button type="button" class="on">Trip Details Picks</button>
+              <p class="nav-lab">Reference</p>
+              <button type="button">Guides</button>
+            </nav>
+            <div class="work">
+              <div class="tools"><button type="button" class="btn">Restore Defaults</button></div>
+              <h4>Trip Details Picks</h4>
+              <p class="blurb">Attendees and vehicles for Trip Details dropdowns. Drag to reorder.</p>
+              <div class="cols">
+                <div class="box"><h5>Attendees</h5><div class="row"><span>⋮</span><span>Michael</span><button type="button" class="btn">×</button></div><div class="row"><span>⋮</span><span>Chris</span><button type="button" class="btn">×</button></div><div class="add"><input placeholder="Add attendee" /><button type="button" class="btn primary">Add</button></div></div>
+                <div class="box"><h5>Vehicles</h5><div class="row"><span>⋮</span><span>White Taco</span><button type="button" class="btn">×</button></div><div class="row"><span>⋮</span><span>Jeep</span><button type="button" class="btn">×</button></div><div class="add"><input placeholder="Add vehicle" /><button type="button" class="btn primary">Add</button></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mock" id="mock-b">
+        <div class="intro">
+          <h2>B · Inside Pad Lists</h2>
+          <p>Sidebar loses “Trip Details Picks.” One Pad Lists workspace with a segmented control. Same editor, less nav clutter.</p>
+        </div>
+        <div class="dash">
+          <div class="dash-head"><h3>Dashboard</h3><div class="tabs"><span class="tab">Log Stats</span><span class="tab on">Settings</span></div></div>
+          <div class="pane">
+            <nav class="nav">
+              <p class="nav-lab">Station Book</p>
+              <button type="button">Subdivisions</button>
+              <p class="nav-lab">Pad Lists</p>
+              <button type="button" class="on">Pad Lists</button>
+              <button type="button">Railroad Library</button>
+              <p class="nav-lab">Reference</p>
+              <button type="button">Guides</button>
+            </nav>
+            <div class="work">
+              <h4>Pad Lists <span class="badge">proposed</span></h4>
+              <p class="blurb">Everything the pad menus use — marks, types, and trip dropdowns.</p>
+              <div class="chip-row">
+                <button type="button" class="chip">Railroads</button>
+                <button type="button" class="chip">Train Types</button>
+                <button type="button" class="chip on">Trip Picks</button>
+              </div>
+              <div class="cols">
+                <div class="box"><h5>Attendees</h5><div class="row"><span>⋮</span><span>Michael</span><button type="button" class="btn">×</button></div><div class="add"><input placeholder="Add attendee" /><button type="button" class="btn primary">Add</button></div></div>
+                <div class="box"><h5>Vehicles</h5><div class="row"><span>⋮</span><span>White Taco</span><button type="button" class="btn">×</button></div><div class="add"><input placeholder="Add vehicle" /><button type="button" class="btn primary">Add</button></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="callout">Best balance if you want Settings leaner without hiding the lists.</p>
+      </section>
+
+      <section class="mock" id="mock-c">
+        <div class="intro">
+          <h2>C · Under Trip Details dialog (pad)</h2>
+          <p>Remove from Settings entirely. Manage Attendees/Vehicles from the same dialog that uses them. Settings stays railroad/station focused.</p>
+        </div>
+        <div class="dash" style="min-height:auto">
+          <div class="dash-head"><h3>New Entry · Trip chip</h3></div>
+          <div class="work">
+            <button type="button" class="btn primary">Trip · Spots Demo</button>
+            <div class="dlg">
+              <p class="blurb" style="margin-top:0">Trip Details</p>
+              <label>Trip Name<input value="Spots Demo" /></label>
+              <label>Vehicle
+                <select><option>White Taco</option><option>Jeep</option></select>
+              </label>
+              <label>Attendees
+                <select><option>Michael</option><option>Chris</option></select>
+              </label>
+              <div class="tools" style="margin:12px 0 0">
+                <button type="button" class="btn">Manage Lists…</button>
+                <button type="button" class="btn primary">Save</button>
+              </div>
+              <div class="embed">
+                <div class="embed-head"><strong>Trip Details Picks</strong><button type="button" class="btn">Restore Defaults</button></div>
+                <div class="cols">
+                  <div class="box"><h5>Attendees</h5><div class="row"><span>⋮</span><span>Michael</span><button type="button" class="btn">×</button></div></div>
+                  <div class="box"><h5>Vehicles</h5><div class="row"><span>⋮</span><span>White Taco</span><button type="button" class="btn">×</button></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="callout">Strong if you think of picks as trip UX, not catalog admin.</p>
+      </section>
+
+      <section class="mock" id="mock-d">
+        <div class="intro">
+          <h2>D · Fold into Guides / Reference</h2>
+          <p>Shown only so you can reject it. Guides are lookup tools; picks are editable pad lists. Mixing them muddies the shelf.</p>
+        </div>
+        <div class="dash">
+          <div class="dash-head"><h3>Dashboard</h3><div class="tabs"><span class="tab on">Settings</span></div></div>
+          <div class="pane">
+            <nav class="nav">
+              <p class="nav-lab">Reference</p>
+              <button type="button" class="on">Guides</button>
+            </nav>
+            <div class="work">
+              <h4>Guides</h4>
+              <p class="blurb">…plates… plus a sixth plate “Trip Picks” — feels wrong next to Placards / Marks.</p>
+              <div class="box" style="max-width:360px">
+                <h5>Trip Picks plate</h5>
+                <p class="blurb" style="margin:0">Editable lists, not a reference. Odd neighbor for AAR Marks.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mock" id="mock-e">
+        <div class="intro">
+          <h2>E · Sub-block on Railroads</h2>
+          <p>No extra nav item. Open Railroads and scroll to Trip Picks under the mark list. Cheap, but easy to miss.</p>
+        </div>
+        <div class="dash">
+          <div class="dash-head"><h3>Dashboard</h3><div class="tabs"><span class="tab on">Settings</span></div></div>
+          <div class="pane">
+            <nav class="nav">
+              <p class="nav-lab">Pad Lists</p>
+              <button type="button" class="on">Railroads</button>
+              <button type="button">Train Types</button>
+              <button type="button">Railroad Library</button>
+              <p class="nav-lab">Reference</p>
+              <button type="button">Guides</button>
+            </nav>
+            <div class="work">
+              <h4>Railroads</h4>
+              <p class="blurb">Mark · Stands for · Class…</p>
+              <div class="box" style="max-width:360px;margin-bottom:16px"><h5>Class I</h5><div class="row"><span>⋮</span><span>BNSF · Burlington Northern…</span><button type="button" class="btn">×</button></div></div>
+              <div class="embed">
+                <div class="embed-head"><h4 style="margin:0;font-size:16px">Trip Details Picks</h4><button type="button" class="btn">Restore Defaults</button></div>
+                <p class="blurb">Attendees &amp; vehicles for Trip Details.</p>
+                <div class="cols">
+                  <div class="box"><h5>Attendees</h5><div class="row"><span>⋮</span><span>Michael</span><button type="button" class="btn">×</button></div></div>
+                  <div class="box"><h5>Vehicles</h5><div class="row"><span>⋮</span><span>White Taco</span><button type="button" class="btn">×</button></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script>
+    const pick = document.getElementById("pick");
+    document.querySelectorAll(".opt").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        document.querySelectorAll(".opt").forEach(function (b) { b.classList.toggle("is-on", b === btn); });
+        document.querySelectorAll(".mock").forEach(function (m) { m.classList.toggle("is-on", m.id === "mock-" + btn.dataset.opt); });
+        pick.textContent = btn.dataset.opt.toUpperCase();
+      });
+    });
+  </script>
+</body>
+</html>

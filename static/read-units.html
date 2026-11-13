@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en" class="app-shell">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <title>Read Units (test)</title>
+  <link rel="icon" href="icon.png" />
+  <link rel="stylesheet" href="styles.css?v=319" />
+  <script>
+    (function () {
+      var map = { light: "paper", dark: "night" };
+      var allowed = {
+        paper: 1, linen: 1, sage: 1, fog: 1, sand: 1, frost: 1,
+        night: 1, slate: 1, ember: 1, pine: 1, ink: 1, coal: 1
+      };
+      var saved = null;
+      try { saved = localStorage.getItem("rr-theme"); } catch (e) {}
+      var theme = map[saved] || saved;
+      if (!allowed[theme]) {
+        theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "night" : "paper";
+      }
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <script>
+    (function () {
+      var saved = "";
+      try { saved = localStorage.getItem("rr-read-view") || ""; } catch (e) {}
+      try {
+        if (localStorage.getItem("rr-read-view-default") !== "board") {
+          saved = "board";
+          localStorage.setItem("rr-read-view", "board");
+          localStorage.setItem("rr-read-view-default", "board");
+        }
+      } catch (e) {}
+      if (saved !== "tracks" && saved !== "board") saved = "board";
+      document.documentElement.setAttribute("data-read-view", saved);
+    })();
+  </script>
+  <style>
+    html.app-shell,
+    html.app-shell body {
+      height: auto;
+      min-height: 100%;
+      overflow: auto;
+      display: block;
+      -webkit-overflow-scrolling: touch;
+    }
+    html.app-shell main { overflow: visible; display: block; }
+    .read-page {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: calc(14px + env(safe-area-inset-top, 0px)) 16px calc(28px + env(safe-area-inset-bottom, 0px));
+    }
+    .read-top {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 8px 12px;
+    }
+    .read-back { margin: 0; }
+    .read-view-menu { position: relative; justify-self: end; }
+    .read-view-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 36px;
+      padding: 4px 10px 4px 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--ink);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .read-view-btn svg { color: var(--muted); }
+    .read-view-pop {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 168px;
+      margin: 0;
+      padding: 6px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--bg-elevated, var(--surface));
+      box-shadow: 0 12px 32px color-mix(in srgb, #000 28%, transparent);
+    }
+    .read-view-pop[hidden] { display: none; }
+    .read-view-pop button {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      min-height: 40px;
+      padding: 6px 10px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--ink);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 650;
+      text-align: left;
+      cursor: pointer;
+    }
+    .read-view-pop button.is-on {
+      background: color-mix(in srgb, var(--accent) 16%, transparent);
+    }
+    #read-status { grid-column: 1 / -1; }
+    .read-page h1 { font-size: 22px; margin: 0; min-width: 0; letter-spacing: -0.02em; }
+    .read-page p { color: var(--muted); margin: 0; }
+    #read-status { flex: 1 1 220px; min-height: 1.3em; color: var(--ink); font-size: 13px; }
+    .read-keys { font-size: 12px; }
+    .read-board { display: flex; align-items: flex-end; gap: 8px; margin: 10px 0; }
+    .read-road {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin-left: auto;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .read-road select {
+      min-width: 8.5rem;
+      min-height: 44px;
+      padding: 0 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--ink);
+      font: inherit;
+      font-size: 16px;
+      font-weight: 650;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+    .read-cards { display: flex; flex-wrap: wrap; gap: 6px; flex: 0 1 auto; min-width: 0; }
+    .read-card-tab, .read-places button {
+      flex: none;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.2;
+      cursor: pointer;
+    }
+    .read-card-tab {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      min-height: 44px;
+      padding: 0 16px;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    .read-card-tab:has(.read-card-x) { padding: 0 4px 0 14px; }
+    .read-card-open, .read-card-x {
+      border: 0;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .read-card-open { padding: 0; }
+    .read-card-x {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1;
+    }
+    .read-card-tab.is-on, .read-places button.is-on {
+      color: var(--ink);
+      border-color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 14%, transparent);
+    }
+    .read-card-tab.has-clip { box-shadow: inset 0 -2px 0 var(--accent); }
+    .read-card-tab.is-sent { opacity: 0.7; }
+    .read-card-next { margin-left: 0; }
+    .read-saved { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0 0 10px; padding: 0; }
+    .read-saved li {
+      padding: 3px 8px;
+      border: 1px solid var(--ok-border, var(--border));
+      border-radius: 999px;
+      background: var(--ok-bg, transparent);
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 650;
+    }
+    .read-places { display: flex; gap: 6px; margin: 0 0 10px; }
+    .read-places kbd {
+      margin-left: 6px;
+      font-family: inherit;
+      font-size: 10px;
+      font-weight: 650;
+      color: var(--muted);
+    }
+    .read-shot { display: none; }
+    .read-shot.is-on {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(260px, 0.85fr);
+      grid-template-areas: "title title" "tools tools" "stage units";
+      gap: 8px 14px;
+      align-items: start;
+    }
+    .read-shot.is-on:not(:has(.read-clip:not([hidden]))) {
+      grid-template-areas: "title title" "tools tools" "units units";
+    }
+    .read-place-head { grid-area: title; display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+    .read-place-head h2 { margin: 0; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+    .read-place-head p { font-size: 12px; }
+    .read-pick { grid-area: tools; margin: 0; }
+    .read-clip { grid-area: stage; margin: 0; }
+    .read-list { grid-area: units; margin: 0; }
+    @media (max-width: 800px) {
+      .read-shot.is-on, .read-shot.is-on:not(:has(.read-clip:not([hidden]))) {
+        grid-template-columns: 1fr;
+        grid-template-areas: "title" "tools" "stage" "units";
+      }
+    }
+    .read-actions, .read-pick { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+    .read-page .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+      padding: 5px 10px;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.2;
+      border-width: 1px;
+      white-space: nowrap;
+    }
+    .read-actions .btn:disabled { opacity: 0.45; }
+
+    .read-clip-actions {
+      display: grid;
+      gap: 8px;
+    }
+    .read-playbar,
+    .read-speed,
+    .read-toolbar {
+      display: grid;
+      gap: 8px;
+      align-items: stretch;
+    }
+    .read-playbar { grid-template-columns: 1fr 1.35fr 1fr; }
+    .read-speed { grid-template-columns: auto 1fr 1fr 1fr; }
+    .read-toolbar { grid-template-columns: 1fr 1fr 1.4fr 1.15fr; }
+    .read-clip-actions > .read-keep {
+      flex-direction: row;
+      justify-content: center;
+      min-height: 44px;
+      gap: 8px;
+    }
+    .read-speed-label {
+      display: flex;
+      align-items: center;
+      padding-right: 4px;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .read-clip-actions .btn {
+      flex-direction: column;
+      gap: 3px;
+      width: 100%;
+      box-sizing: border-box;
+      min-height: 52px;
+      padding: 6px 4px;
+      font-size: 13px;
+      line-height: 1.1;
+      white-space: nowrap;
+    }
+    .read-speed .btn {
+      flex-direction: row;
+      min-height: 48px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .read-speed .btn.is-on,
+    .read-act[data-rate].is-on {
+      background: var(--ink);
+      color: var(--on-ink);
+      border-color: var(--ink);
+      box-shadow: none;
+    }
+    .read-clip-actions .read-ico[hidden] { display: none; }
+    @media (min-width: 701px) {
+      .read-pick {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: stretch;
+        gap: 8px;
+      }
+      .read-pick .btn {
+        width: auto;
+        min-height: 64px;
+        flex-direction: column;
+        gap: 4px;
+        padding: 8px 6px;
+        font-size: 14px;
+        line-height: 1.15;
+        white-space: normal;
+      }
+      .read-pick .btn svg { display: block; width: 22px; height: 22px; }
+      .read-pick .read-act-long { display: none; }
+      .read-pick .read-act-short { display: block; }
+    }
+    .read-pick input { display: none; }
+    #read-camera { margin: 12px 0; }
+    .read-stage { position: relative; }
+    #read-live { width: 100%; max-height: 360px; background: #000; border-radius: 8px; }
+    .read-timer {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      margin: 0;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      font-size: 20px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.04em;
+    }
+    .read-timer.is-on::before {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      margin-right: 8px;
+      border-radius: 50%;
+      background: #e23b3b;
+      vertical-align: 1px;
+    }
+    .read-act-add.is-on,
+    .read-act-add.is-on:hover {
+      background: var(--ok-bg);
+      border-color: var(--ok-border);
+      color: var(--ink);
+    }
+    #read-capture { position: absolute; width: 1px; height: 1px; opacity: 0; }
+    #read-status { min-height: 1.4em; color: var(--ink); }
+    .read-clip {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+      padding: 10px;
+      background: color-mix(in srgb, var(--bg) 68%, #000);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    #read-lineup {
+      position: sticky;
+      bottom: 8px;
+      z-index: 5;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 12px;
+      margin-top: 14px;
+      padding: 10px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 24px color-mix(in srgb, var(--ink) 14%, transparent);
+    }
+    #read-lineup h2 { margin: 0; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }
+    .read-pick { margin: 0; }
+    .read-clip { width: 100%; max-width: none; min-width: 0; }
+    .read-clip[hidden] { display: none !important; }
+    .read-clip-stage {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      border-radius: 8px;
+      overflow: hidden;
+      contain: paint;
+      touch-action: none;
+      transform: translateZ(0);
+    }
+    .read-view { position: absolute; inset: 0; width: 100%; height: 100%; transform-origin: 0 0; z-index: 0; }
+    .read-dim, .read-crop { z-index: 1; }
+    .read-clip video { width: 100%; height: 100%; object-fit: fill; display: block; pointer-events: none; }
+    .read-clip-actions { display: grid; gap: 8px; }
+    .read-clip-actions .btn { flex: 1 1 auto; width: 100%; min-height: 52px; }
+    .read-dim { position: absolute; background: rgba(0, 0, 0, 0.55); pointer-events: none; }
+    .read-dim-top { left: 0; right: 0; top: 0; }
+    .read-dim-bottom { left: 0; right: 0; bottom: 0; }
+    .read-dim-left { left: 0; }
+    .read-dim-right { right: 0; }
+    .read-crop {
+      position: absolute;
+      border: 1px solid #fff;
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.55);
+      cursor: move;
+      touch-action: none;
+    }
+    .read-crop-handle {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: #fff;
+      border: 0;
+      border-radius: 2px;
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45);
+      touch-action: none;
+    }
+    .read-crop-handle[data-handle="nw"] { left: 2px; top: 2px; }
+    .read-crop-handle[data-handle="ne"] { right: 2px; top: 2px; }
+    .read-crop-handle[data-handle="sw"] { left: 2px; bottom: 2px; }
+    .read-crop-handle[data-handle="se"] { right: 2px; bottom: 2px; }
+    .read-clip-note { margin: 6px 0 0; font-size: 13px; }
+    .read-scrub { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+    .read-scrub-range {
+      flex: 1;
+      min-width: 0;
+      width: 100%;
+      height: 28px;
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      border: 0;
+      accent-color: var(--ink);
+    }
+    .read-clip-time {
+      flex: none;
+      margin: 0;
+      min-width: 5.6rem;
+      text-align: right;
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      color: var(--muted);
+    }
+    .read-list { list-style: none; padding: 0; }
+    .read-row { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 8px; padding: 7px 0; border-top: 1px solid var(--border); }
+    .read-row:first-child { border-top: 0; padding-top: 0; }
+    .read-row img { width: 64px; height: 44px; object-fit: cover; background: #111; border-radius: 6px; }
+    .read-row > div { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: flex-end; min-width: 0; }
+    .read-edit { display: flex; flex-wrap: nowrap; gap: 6px; align-items: flex-end; min-width: 0; }
+    .read-row .read-actions { display: flex; gap: 4px; margin: 0; }
+    .read-note { flex: 1 1 100%; margin: 0; font-size: 12px; }
+    .read-field { display: flex; flex-direction: column; gap: 2px; flex: none; }
+    .read-field span { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    .read-edit input { min-height: 32px; font-size: 16px; font-weight: 600; letter-spacing: 0.02em; width: 100%; }
+    .read-add { align-self: flex-end; }
+    .read-mark { width: 4.6rem; }
+    .read-number { width: 5.6rem; }
+    .read-note { margin: 0; font-size: 12px; }
+    .read-row:not(:has(img)) { grid-template-columns: minmax(0, 1fr); }
+    .read-consist-label { font-size: 18px; font-weight: 700; margin: 0; }
+    #read-lineup[hidden] { display: none !important; }
+    #read-lineup ol { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; padding: 0; margin: 0; flex: 1; }
+    #read-lineup li { display: flex; gap: 6px; align-items: baseline; padding: 3px 8px; border: 1px solid var(--border); border-radius: 999px; font-size: 13px; }
+    #read-camera {
+      position: sticky;
+      top: 8px;
+      z-index: 6;
+      margin: 0 0 10px;
+      padding: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    #read-lineup .read-where { color: var(--muted); }
+
+    .read-act-short { display: none; }
+    .read-pick .btn { gap: 6px; }
+    .read-pick .btn svg { display: block; flex: none; }
+    .read-burn {
+      position: absolute;
+      left: 8px;
+      bottom: 8px;
+      z-index: 2;
+      margin: 0;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.55);
+      color: #e7c15a;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      pointer-events: none;
+    }
+    .read-rec {
+      display: none;
+      position: absolute;
+      left: 50%;
+      bottom: 12px;
+      z-index: 3;
+      width: 58px;
+      height: 58px;
+      margin: 0;
+      padding: 0;
+      transform: translateX(-50%);
+      border: 3px solid #fff;
+      border-radius: 50%;
+      background: transparent;
+    }
+    .read-rec i {
+      display: block;
+      width: 40px;
+      height: 40px;
+      margin: 0 auto;
+      border-radius: 50%;
+      background: #e23b3b;
+    }
+    .read-film {
+      position: relative;
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      min-height: 52px;
+      touch-action: none;
+      user-select: none;
+      cursor: ew-resize;
+    }
+    .read-frame {
+      flex: 1 1 0;
+      min-width: 0;
+      height: 48px;
+      padding: 0;
+      border: 0;
+      border-radius: 3px;
+      background: #0c1218 center / cover no-repeat;
+      outline: 1px solid #243140;
+    }
+    .read-playhead {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      margin-left: -1px;
+      background: #fff;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .read-timeline { display: none; }
+    .read-lane {
+      display: grid;
+      grid-template-columns: 96px minmax(0, 1fr);
+      align-items: center;
+      gap: 8px;
+      margin: 4px 0;
+    }
+    .read-lane-name {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      font-weight: 750;
+      text-align: left;
+      padding: 8px 0;
+      cursor: pointer;
+    }
+    .read-lane.is-on .read-lane-name { color: var(--ink); }
+    .read-track {
+      position: relative;
+      height: 42px;
+      background: color-mix(in srgb, var(--ink) 8%, transparent);
+      border-radius: 8px;
+      overflow: hidden;
+      touch-action: none;
+      cursor: ew-resize;
+    }
+    .read-clipbar {
+      position: absolute;
+      top: 7px;
+      bottom: 7px;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      border-radius: 6px;
+      background: color-mix(in srgb, var(--accent) 42%, var(--surface));
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 750;
+      pointer-events: none;
+    }
+    .read-clipbar.is-empty {
+      right: auto;
+      width: 34%;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .read-lane[data-lane="mid"] .read-clipbar:not(.is-empty) {
+      background: color-mix(in srgb, var(--focus, #60a5fa) 40%, var(--surface));
+    }
+    .read-lane[data-lane="rear"] .read-clipbar:not(.is-empty) {
+      background: color-mix(in srgb, #e7c15a 38%, var(--surface));
+    }
+    .read-track .read-playhead { top: 0; bottom: 0; }
+
+    html[data-read-view="monitor"] .read-scrub-range,
+    html[data-read-view="intake"] .read-scrub-range,
+    html[data-read-view="board"] .read-scrub-range,
+    html[data-read-view="tracks"] .read-scrub-range {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+    }
+    html[data-read-view="tracks"] .read-places,
+    html[data-read-view="tracks"] .read-film { display: none; }
+    html[data-read-view="tracks"] .read-timeline { display: block; }
+    html[data-read-view="tracks"] .read-shot.is-on,
+    html[data-read-view="tracks"] .read-shot.is-on:not(:has(.read-clip:not([hidden]))) {
+      grid-template-columns: 1fr;
+      grid-template-areas: "title" "tools" "stage" "lanes" "units";
+    }
+    html[data-read-view="tracks"] .read-timeline { grid-area: lanes; }
+    html[data-read-view="intake"] .read-shot.is-on:has(.read-clip:not([hidden])) .read-pick .read-act-record { display: none; }
+    html[data-read-view="intake"] .read-film { min-height: 84px; }
+    html[data-read-view="intake"] .read-frame { height: 44px; opacity: 0.55; }
+    html[data-read-view="intake"] .read-frame.is-mid {
+      height: 76px;
+      opacity: 1;
+      outline: 2px solid #fff;
+    }
+    html[data-read-view="board"] .read-places {
+      display: flex;
+      flex-direction: row;
+      gap: 0;
+      margin: 0 0 12px;
+      padding: 3px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: color-mix(in srgb, var(--ink) 6%, transparent);
+      overflow: hidden;
+    }
+    html[data-read-view="board"] .read-places button {
+      flex: 1 1 0;
+      width: auto;
+      min-height: 34px;
+      border: 0;
+      border-radius: 9px;
+      padding: 6px 4px;
+      font-size: 13px;
+      font-weight: 650;
+    }
+    html[data-read-view="board"] .read-places kbd { display: none; }
+    html[data-read-view="board"] .read-shot.is-on,
+    html[data-read-view="board"] .read-shot.is-on:not(:has(.read-clip:not([hidden]))) {
+      grid-template-columns: 1fr;
+      grid-template-areas: "title" "tools" "stage" "units";
+    }
+    html[data-read-view="board"] .read-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+      gap: 8px;
+    }
+    html[data-read-view="board"] .read-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin: 0;
+      padding: 0 0 8px;
+      border: 1px solid var(--border);
+      border-top: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+    html[data-read-view="board"] .read-row img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 10;
+      border-radius: 0;
+    }
+    html[data-read-view="board"] .read-edit { padding: 0 8px; flex-wrap: wrap; }
+    html[data-read-view="board"] .read-note,
+    html[data-read-view="board"] .read-row .read-actions { padding: 0 8px; }
+    html[data-read-view="board"] .read-mark,
+    html[data-read-view="board"] .read-number { width: auto; flex: 1 1 5rem; }
+
+    @media (min-width: 701px) {
+      html[data-read-view="intake"] .read-shot.is-on {
+        grid-template-columns: minmax(0, 1.45fr) minmax(240px, 0.8fr);
+        grid-template-areas: "title title" "stage units" "tools units";
+      }
+    }
+    @media (max-width: 700px) {
+      .read-board { flex-wrap: wrap; align-items: flex-end; }
+      .read-cards { flex: 1 1 100%; overflow: visible; }
+      .read-road { flex: 0 0 auto; margin-left: 0; }
+      .read-road select { width: 10.5rem; }
+      .read-card-next { width: auto; min-height: 44px; }
+      .read-places { flex-direction: column; overflow: visible; }
+      .read-places button { width: 100%; min-height: 44px; }
+      .read-pick {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: stretch;
+        gap: 6px;
+      }
+      .read-pick .btn {
+        width: auto;
+        min-height: 52px;
+        flex-direction: column;
+        gap: 3px;
+        padding: 6px 4px;
+        font-size: 12px;
+        line-height: 1.15;
+        white-space: normal;
+      }
+      .read-pick .btn svg { display: block; }
+      .read-act-long { display: none; }
+      .read-act-short { display: block; }
+      .read-edit { flex-wrap: wrap; width: 100%; }
+      .read-mark, .read-number { flex: 1 1 7.5rem; width: auto; min-width: 0; }
+      .read-edit .read-act-add { flex: 1 1 100%; min-height: 44px; }
+      .read-row { grid-template-columns: 1fr; }
+      .read-row img { width: 100%; height: auto; aspect-ratio: 16 / 10; }
+      .read-row .read-actions { width: 100%; flex-wrap: wrap; }
+      .read-row .read-actions .btn { flex: 1 1 calc(50% - 4px); min-height: 44px; }
+      #read-lineup .read-actions, #read-camera .read-actions { flex-direction: column; align-items: stretch; }
+      #read-lineup .read-actions .btn, #read-camera .read-actions .btn { width: 100%; min-height: 44px; }
+      .read-lane { grid-template-columns: 1fr; gap: 2px; }
+      html[data-read-view="board"] .read-list { grid-template-columns: 1fr; }
+      html[data-read-view="intake"] .read-shot.is-on,
+      html[data-read-view="intake"] .read-shot.is-on:not(:has(.read-clip:not([hidden]))) {
+        grid-template-columns: 1fr;
+        grid-template-areas: "title" "stage" "tools" "units";
+      }
+      html[data-read-view="intake"] .read-frame.is-mid { height: 64px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="read-page">
+    <div class="read-top">
+      <p class="read-back"><a class="btn" id="read-back" href="/#entry">Back to Log</a></p>
+      <h1>Read Units</h1>
+      <div class="read-view-menu">
+        <button type="button" id="read-view-btn" class="read-view-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="read-view-pop">
+          <span id="read-view-current">Storyboard</span>
+          <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg>
+        </button>
+        <div id="read-view-pop" class="read-view-pop" role="menu" hidden>
+          <button type="button" role="menuitemradio" data-view="tracks" aria-checked="false">Tracks</button>
+          <button type="button" role="menuitemradio" data-view="board" aria-checked="false">Storyboard</button>
+        </div>
+      </div>
+      <p id="read-status" aria-live="polite">Open this page once on Wi-Fi before you go trackside, so the reader is saved on the phone.</p>
+    </div>
+    <div class="read-board">
+      <div class="read-cards" id="read-cards" role="tablist" aria-label="Trains"></div>
+      <label class="read-road">Railroad
+        <select id="read-road" aria-label="Railroad for the marks on this train" title="Fills the mark on every unit of this train. Type a different mark on a pool-power unit and it stays."></select>
+      </label>
+      <button type="button" id="read-next" class="read-card-tab read-card-next" title="Park this train and open a blank card (N)">Next train</button>
+    </div>
+    <ol id="read-saved" class="read-saved" hidden></ol>
+    <div class="read-timeline" id="read-timeline">
+      <div class="read-lane" data-lane="head">
+        <button type="button" class="read-lane-name" data-show="head">Head end</button>
+        <div class="read-track"><div class="read-clipbar is-empty">No clip</div><div class="read-playhead" hidden></div></div>
+      </div>
+      <div class="read-lane" data-lane="mid">
+        <button type="button" class="read-lane-name" data-show="mid">Mid-train</button>
+        <div class="read-track"><div class="read-clipbar is-empty">No clip</div><div class="read-playhead" hidden></div></div>
+      </div>
+      <div class="read-lane" data-lane="rear">
+        <button type="button" class="read-lane-name" data-show="rear">Rear DP</button>
+        <div class="read-track"><div class="read-clipbar is-empty">No clip</div><div class="read-playhead" hidden></div></div>
+      </div>
+    </div>
+    <div class="read-places" role="tablist" aria-label="Where on the train">
+      <button type="button" class="is-on" data-show="head">Head end <kbd>1</kbd></button>
+      <button type="button" data-show="mid">Mid-train <kbd>2</kbd></button>
+      <button type="button" data-show="rear">Rear DP <kbd>3</kbd></button>
+    </div>
+    <section class="read-shot is-on" data-place="head">
+      <div class="read-place-head"><h2>Head end</h2><p>Lead and the units coupled to it.</p></div>
+      <div class="read-pick">
+        <button type="button" class="btn read-act read-act-record" aria-label="Record a video" data-record="head">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/></svg>
+          <span class="read-act-long">Record a video</span>
+          <span class="read-act-short">Record</span>
+        </button>
+        <label class="btn read-act read-act-choose" aria-label="Choose a video or photo">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6" fill="currentColor" stroke="none"/><path d="M3 16l5-4 4 3 3-2 6 5"/></svg>
+          <span class="read-act-long">Choose a video or photo</span>
+          <span class="read-act-short">Choose</span>
+          <input type="file" accept="video/*,image/*" multiple />
+        </label>
+        <button type="button" class="btn read-act read-act-unit" aria-label="Add a unit" data-add="head">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          <span class="read-act-long">Add a unit</span>
+          <span class="read-act-short">Add unit</span>
+        </button>
+      </div>
+      <div class="read-clip" data-clip="head" hidden>
+        <div class="read-clip-stage">
+          <div class="read-view">
+            <video playsinline muted loop></video>
+          </div>
+          <div class="read-dim read-dim-top"></div>
+          <div class="read-dim read-dim-left"></div>
+          <div class="read-dim read-dim-right"></div>
+          <div class="read-dim read-dim-bottom"></div>
+          <div class="read-crop" data-crop>
+            <span class="read-crop-handle" data-handle="nw"></span>
+            <span class="read-crop-handle" data-handle="ne"></span>
+            <span class="read-crop-handle" data-handle="sw"></span>
+            <span class="read-crop-handle" data-handle="se"></span>
+          </div>
+        </div>
+        <div class="read-scrub">
+          <input type="range" class="read-scrub-range" min="0" max="1000" value="0" step="1" aria-label="Video position" />
+          <span class="read-clip-time" data-time>0:00 / 0:00</span>
+        </div>
+        <p class="read-clip-note">Drag the box onto the numbers. Snapshot reads that moment. Save this crop keeps the picture and reads the number. S snapshots. N starts the next train.</p>
+        <div class="read-actions read-clip-actions">
+          <div class="read-playbar">
+            <button type="button" class="btn read-act" data-step="-1" aria-label="Previous frame"><svg class="read-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6L8 12l6.5 6"/></svg><span>−1</span></button>
+            <button type="button" class="btn read-act read-act-play" data-play="head" aria-label="Play"><svg class="read-ico read-ico-play" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg><svg class="read-ico read-ico-pause" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" hidden><path d="M7 5h3.4v14H7zM13.6 5H17v14h-3.4z" fill="currentColor"/></svg><span class="read-play-label">Play</span></button>
+            <button type="button" class="btn read-act" data-step="1" aria-label="Next frame"><svg class="read-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 6L16 12l-6.5 6"/></svg><span>+1</span></button>
+          </div>
+          <div class="read-speed" role="group" aria-label="Playback speed">
+            <span class="read-speed-label">Speed</span>
+            <button type="button" class="btn read-act is-on" data-rate="1" aria-pressed="true" title="Full speed">1×</button>
+            <button type="button" class="btn read-act" data-rate="0.5" aria-pressed="false" title="Half speed">½</button>
+            <button type="button" class="btn read-act" data-rate="0.25" aria-pressed="false" title="Quarter speed">¼</button>
+          </div>
+          <div class="read-toolbar">
+            <button type="button" class="btn read-act" data-zoom="out" aria-label="Zoom out"><svg class="read-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="5.5"/><path d="M15 15.2L20 20M8 10.5h5"/></svg><span>Out</span></button>
+            <button type="button" class="btn read-act" data-zoom="in" aria-label="Zoom in"><svg class="read-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="5.5"/><path d="M15 15.2L20 20M10.5 8v5M8 10.5h5"/></svg><span>In</span></button>
+            <button type="button" class="btn read-act" data-snap="head" aria-label="Snapshot"><svg class="read-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5h3.2L9 6h6l1.8 2.5H20V19H4z"/><circle cx="12" cy="13.2" r="3"/></svg><span class="read-snap-label">Snapshot</span></button>
+            <button type="button" class="btn read-act read-act-read" data-read-crop="head" aria-label="Read this area"><svg class="read-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4H4v4M16 4h4v4M20 16v4h-4M4 16v4h4"/></svg><span>Read</span></button>
+          </div>
+          <button type="button" class="btn read-act read-keep" data-keep="head" aria-label="Save this crop"><svg class="read-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M8 13.2l2.2 2.2L16 9.6"/></svg><span>Save this crop</span></button>
+        </div>
+      </div>
+      <ul class="read-list" id="read-list-head"></ul>
+    </section>
+    <section class="read-shot" data-place="mid">
+      <div class="read-place-head"><h2>Mid-train</h2><p>Power in the body of the train.</p></div>
+      <div class="read-pick">
+        <button type="button" class="btn read-act read-act-record" aria-label="Record a video" data-record="mid">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/></svg>
+          <span class="read-act-long">Record a video</span>
+          <span class="read-act-short">Record</span>
+        </button>
+        <label class="btn read-act read-act-choose" aria-label="Choose a video or photo">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6" fill="currentColor" stroke="none"/><path d="M3 16l5-4 4 3 3-2 6 5"/></svg>
+          <span class="read-act-long">Choose a video or photo</span>
+          <span class="read-act-short">Choose</span>
+          <input type="file" accept="video/*,image/*" multiple />
+        </label>
+        <button type="button" class="btn read-act read-act-unit" aria-label="Add a unit" data-add="mid">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          <span class="read-act-long">Add a unit</span>
+          <span class="read-act-short">Add unit</span>
+        </button>
+      </div>
+      <div class="read-clip" data-clip="mid" hidden>
+        <div class="read-clip-stage">
+          <div class="read-view">
+            <video playsinline muted loop></video>
+          </div>
+          <div class="read-dim read-dim-top"></div>
+          <div class="read-dim read-dim-left"></div>
+          <div class="read-dim read-dim-right"></div>
+          <div class="read-dim read-dim-bottom"></div>
+          <div class="read-crop" data-crop>
+            <span class="read-crop-handle" data-handle="nw"></span>
+            <span class="read-crop-handle" data-handle="ne"></span>
+            <span class="read-crop-handle" data-handle="sw"></span>
+            <span class="read-crop-handle" data-handle="se"></span>
+          </div>
+        </div>
+        <div class="read-scrub">
+          <input type="range" class="read-scrub-range" min="0" max="1000" value="0" step="1" aria-label="Video position" />
+          <span class="read-clip-time" data-time>0:00 / 0:00</span>
+        </div>
+        <p class="read-clip-note">Drag the box onto the numbers. Snapshot reads that moment. Save this crop keeps the picture and reads the number. S snapshots. N starts the next train.</p>
+        <div class="read-actions read-clip-actions">
+          <div class="read-playbar">
+            <button type="button" class="btn read-act" data-step="-1" aria-label="Previous frame"><svg class="read-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6L8 12l6.5 6"/></svg><span>−1</span></button>
+            <button type="button" class="btn read-act read-act-play" data-play="mid" aria-label="Play"><svg class="read-ico read-ico-play" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg><svg class="read-ico read-ico-pause" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" hidden><path d="M7 5h3.4v14H7zM13.6 5H17v14h-3.4z" fill="currentColor"/></svg><span class="read-play-label">Play</span></button>
+            <button type="button" class="btn read-act" data-step="1" aria-label="Next frame"><svg class="read-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 6L16 12l-6.5 6"/></svg><span>+1</span></button>
+          </div>
+          <div class="read-speed" role="group" aria-label="Playback speed">
+            <span class="read-speed-label">Speed</span>
+            <button type="button" class="btn read-act is-on" data-rate="1" aria-pressed="true" title="Full speed">1×</button>
+            <button type="button" class="btn read-act" data-rate="0.5" aria-pressed="false" title="Half speed">½</button>
+            <button type="button" class="btn read-act" data-rate="0.25" aria-pressed="false" title="Quarter speed">¼</button>
+          </div>
+          <div class="read-toolbar">
+            <button type="button" class="btn read-act" data-zoom="out" aria-label="Zoom out"><svg class="read-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="5.5"/><path d="M15 15.2L20 20M8 10.5h5"/></svg><span>Out</span></button>
+            <button type="button" class="btn read-act" data-zoom="in" aria-label="Zoom in"><svg class="read-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="5.5"/><path d="M15 15.2L20 20M10.5 8v5M8 10.5h5"/></svg><span>In</span></button>
+            <button type="button" class="btn read-act" data-snap="mid" aria-label="Snapshot"><svg class="read-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5h3.2L9 6h6l1.8 2.5H20V19H4z"/><circle cx="12" cy="13.2" r="3"/></svg><span class="read-snap-label">Snapshot</span></button>
+            <button type="button" class="btn read-act read-act-read" data-read-crop="mid" aria-label="Read this area"><svg class="read-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4H4v4M16 4h4v4M20 16v4h-4M4 16v4h4"/></svg><span>Read</span></button>
+          </div>
+          <button type="button" class="btn read-act read-keep" data-keep="mid" aria-label="Save this crop"><svg class="read-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M8 13.2l2.2 2.2L16 9.6"/></svg><span>Save this crop</span></button>
+        </div>
+      </div>
+      <ul class="read-list" id="read-list-mid"></ul>
+    </section>
+    <section class="read-shot" data-place="rear">
+      <div class="read-place-head"><h2>Rear DP</h2><p>Distributed power at the rear.</p></div>
+      <div class="read-pick">
+        <button type="button" class="btn read-act read-act-record" aria-label="Record a video" data-record="rear">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/></svg>
+          <span class="read-act-long">Record a video</span>
+          <span class="read-act-short">Record</span>
+        </button>
+        <label class="btn read-act read-act-choose" aria-label="Choose a video or photo">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6" fill="currentColor" stroke="none"/><path d="M3 16l5-4 4 3 3-2 6 5"/></svg>
+          <span class="read-act-long">Choose a video or photo</span>
+          <span class="read-act-short">Choose</span>
+          <input type="file" accept="video/*,image/*" multiple />
+        </label>
+        <button type="button" class="btn read-act read-act-unit" aria-label="Add a unit" data-add="rear">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          <span class="read-act-long">Add a unit</span>
+          <span class="read-act-short">Add unit</span>
+        </button>
+      </div>
+      <div class="read-clip" data-clip="rear" hidden>
+        <div class="read-clip-stage">
+          <div class="read-view">
+            <video playsinline muted loop></video>
+          </div>
+          <div class="read-dim read-dim-top"></div>
+          <div class="read-dim read-dim-left"></div>
+          <div class="read-dim read-dim-right"></div>
+          <div class="read-dim read-dim-bottom"></div>
+          <div class="read-crop" data-crop>
+            <span class="read-crop-handle" data-handle="nw"></span>
+            <span class="read-crop-handle" data-handle="ne"></span>
+            <span class="read-crop-handle" data-handle="sw"></span>
+            <span class="read-crop-handle" data-handle="se"></span>
+          </div>
+        </div>
+        <div class="read-scrub">
+          <input type="range" class="read-scrub-range" min="0" max="1000" value="0" step="1" aria-label="Video position" />
+          <span class="read-clip-time" data-time>0:00 / 0:00</span>
+        </div>
+        <p class="read-clip-note">Drag the box onto the numbers. Snapshot reads that moment. Save this crop keeps the picture and reads the number. S snapshots. N starts the next train.</p>
+        <div class="read-actions read-clip-actions">
+          <div class="read-playbar">
+            <button type="button" class="btn read-act" data-step="-1" aria-label="Previous frame"><svg class="read-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6L8 12l6.5 6"/></svg><span>−1</span></button>
+            <button type="button" class="btn read-act read-act-play" data-play="rear" aria-label="Play"><svg class="read-ico read-ico-play" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg><svg class="read-ico read-ico-pause" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" hidden><path d="M7 5h3.4v14H7zM13.6 5H17v14h-3.4z" fill="currentColor"/></svg><span class="read-play-label">Play</span></button>
+            <button type="button" class="btn read-act" data-step="1" aria-label="Next frame"><svg class="read-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 6L16 12l-6.5 6"/></svg><span>+1</span></button>
+          </div>
+          <div class="read-speed" role="group" aria-label="Playback speed">
+            <span class="read-speed-label">Speed</span>
+            <button type="button" class="btn read-act is-on" data-rate="1" aria-pressed="true" title="Full speed">1×</button>
+            <button type="button" class="btn read-act" data-rate="0.5" aria-pressed="false" title="Half speed">½</button>
+            <button type="button" class="btn read-act" data-rate="0.25" aria-pressed="false" title="Quarter speed">¼</button>
+          </div>
+          <div class="read-toolbar">
+            <button type="button" class="btn read-act" data-zoom="out" aria-label="Zoom out"><svg class="read-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="5.5"/><path d="M15 15.2L20 20M8 10.5h5"/></svg><span>Out</span></button>
+            <button type="button" class="btn read-act" data-zoom="in" aria-label="Zoom in"><svg class="read-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="5.5"/><path d="M15 15.2L20 20M10.5 8v5M8 10.5h5"/></svg><span>In</span></button>
+            <button type="button" class="btn read-act" data-snap="rear" aria-label="Snapshot"><svg class="read-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5h3.2L9 6h6l1.8 2.5H20V19H4z"/><circle cx="12" cy="13.2" r="3"/></svg><span class="read-snap-label">Snapshot</span></button>
+            <button type="button" class="btn read-act read-act-read" data-read-crop="rear" aria-label="Read this area"><svg class="read-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4H4v4M16 4h4v4M20 16v4h-4M4 16v4h4"/></svg><span>Read</span></button>
+          </div>
+          <button type="button" class="btn read-act read-keep" data-keep="rear" aria-label="Save this crop"><svg class="read-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M8 13.2l2.2 2.2L16 9.6"/></svg><span>Save this crop</span></button>
+        </div>
+      </div>
+      <ul class="read-list" id="read-list-rear"></ul>
+    </section>
+    <section id="read-lineup" hidden>
+      <p class="read-consist-label" id="read-consist-label"></p>
+      <h2>On this train</h2>
+      <ol id="read-lineup-list"></ol>
+      <div class="read-actions">
+        <button type="button" class="btn read-act read-act-quick" id="read-quick">Add to Quick Add</button>
+        <button type="button" class="btn read-act read-act-fill" id="read-copy">Fill the open entry</button>
+      </div>
+    </section>
+    <div id="read-camera" hidden>
+      <div class="read-stage">
+        <video id="read-live" playsinline autoplay muted></video>
+        <p id="read-timer" class="read-timer">0:00 / 0:45</p>
+      </div>
+      <div class="read-actions">
+        <button type="button" class="btn" id="read-start">Start</button>
+        <button type="button" class="btn" id="read-stop" disabled>Stop</button>
+        <button type="button" class="btn" id="read-cancel">Cancel</button>
+      </div>
+    </div>
+    <input id="read-capture" type="file" accept="video/*" capture="environment" tabindex="-1" aria-hidden="true" />
+    <video id="read-video" playsinline muted hidden></video>
+  </main>
+  <script src="ocr/tesseract.min.js"></script>
+  <script src="read-units.js?v=33"></script>
+</body>
+</html>
